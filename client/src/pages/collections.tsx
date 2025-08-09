@@ -16,6 +16,7 @@ import { type CollectionWithCount, type Item } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Copy, Layers, Plus, Upload } from "lucide-react";
 import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Collections() {
   const { collectionId } = useParams<{ collectionId?: string }>();
@@ -178,11 +179,11 @@ export default function Collections() {
 
   // Main content
   const mainContent = (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
       {activeCollection ? (
         <>
           {/* Main FlexList Header */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button onClick={() => setShowAddItem(true)} size="lg" className="bg-blue-600 hover:bg-blue-700">
@@ -206,15 +207,16 @@ export default function Collections() {
                   <Copy className="w-4 h-4 mr-2" />
                   Import from List
                 </Button>
+                <ThemeToggle />
               </div>
             </div>
           </div>
 
           {/* List Title and Description */}
-          <div className="bg-white border-b border-gray-200 px-6 py-3">
-            <h2 className="text-xl font-semibold text-gray-800">{activeCollection.name}</h2>
+          <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{activeCollection.name}</h2>
             {activeCollection.description && (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 {activeCollection.description}
               </p>
             )}
