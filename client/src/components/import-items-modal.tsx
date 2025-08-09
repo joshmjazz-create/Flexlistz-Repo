@@ -208,12 +208,13 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} className="text-gray-900 dark:text-gray-100">
             Cancel
           </Button>
           <Button
             onClick={handleImport}
             disabled={selectedItems.size === 0 || importItemsMutation.isPending}
+            className="text-gray-900 dark:text-gray-100"
           >
             {importItemsMutation.isPending ? 'Importing...' : `Import ${selectedItems.size} Items`}
           </Button>

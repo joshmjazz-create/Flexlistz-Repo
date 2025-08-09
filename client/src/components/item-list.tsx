@@ -180,7 +180,7 @@ export default function ItemList({
                     variant={viewMode === 'compact' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onViewModeChange('compact')}
-                    className="px-3 py-1"
+                    className="px-3 py-1 text-gray-900 dark:text-gray-100"
                   >
                     <List className="w-4 h-4 mr-1" />
                     Compact
@@ -189,7 +189,7 @@ export default function ItemList({
                     variant={viewMode === 'detailed' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onViewModeChange('detailed')}
-                    className="px-3 py-1"
+                    className="px-3 py-1 text-gray-900 dark:text-gray-100"
                   >
                     <Grid3X3 className="w-4 h-4 mr-1" />
                     Detailed
@@ -204,7 +204,7 @@ export default function ItemList({
                     variant={sortOrder === 'asc' || sortOrder === 'desc' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    className="px-3 py-1"
+                    className="px-3 py-1 text-gray-900 dark:text-gray-100"
                   >
                     {sortOrder === 'asc' ? <ArrowDownAZ className="w-4 h-4 mr-1" /> : <ArrowUpAZ className="w-4 h-4 mr-1" />}
                     A-Z
@@ -213,7 +213,7 @@ export default function ItemList({
                     variant={sortOrder === 'last-modified' || sortOrder === 'first-modified' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => onSortOrderChange(sortOrder === 'last-modified' ? 'first-modified' : 'last-modified')}
-                    className="px-3 py-1"
+                    className="px-3 py-1 text-gray-900 dark:text-gray-100"
                   >
                     <Clock className="w-4 h-4 mr-1" />
                     Last Modified
@@ -224,7 +224,7 @@ export default function ItemList({
                       variant={sortOrder === 'filter-order' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => onSortOrderChange('filter-order')}
-                      className="px-3 py-1"
+                      className="px-3 py-1 text-gray-900 dark:text-gray-100"
                     >
                       <Filter className="w-4 h-4 mr-1" />
                       Filter Order

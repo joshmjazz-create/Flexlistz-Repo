@@ -324,12 +324,14 @@ Summertime`}
                 type="button"
                 variant="outline"
                 onClick={handleClose}
+                className="text-gray-900 dark:text-gray-100"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={bulkImportMutation.isPending || previewItems.length === 0}
+                className="text-gray-900 dark:text-gray-100"
               >
                 {bulkImportMutation.isPending 
                   ? `Importing ${previewItems.length - duplicates.length} items...` 

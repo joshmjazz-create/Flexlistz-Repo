@@ -111,12 +111,14 @@ export default function AddCollectionModal({ isOpen, onClose }: AddCollectionMod
                 type="button"
                 variant="outline"
                 onClick={onClose}
+                className="text-gray-900 dark:text-gray-100"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={createCollectionMutation.isPending}
+                className="text-gray-900 dark:text-gray-100"
               >
                 {createCollectionMutation.isPending ? "Creating..." : "Create List"}
               </Button>

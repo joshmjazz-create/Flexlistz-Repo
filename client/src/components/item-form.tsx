@@ -183,6 +183,7 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
             variant="outline"
             size="sm"
             onClick={addExtraTag}
+            className="text-gray-900 dark:text-gray-100"
           >
             <Plus className="w-4 h-4 mr-1" />
             Add Tag
@@ -238,10 +239,10 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
 
       {/* Form Actions */}
       <div className="flex gap-2 pt-4">
-        <Button type="submit" disabled={isSubmitting || !formData.title.trim()}>
+        <Button type="submit" disabled={isSubmitting || !formData.title.trim()} className="text-gray-900 dark:text-gray-100">
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} className="text-gray-900 dark:text-gray-100">
           Cancel
         </Button>
       </div>

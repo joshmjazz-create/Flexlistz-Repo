@@ -180,7 +180,7 @@ export default function Collections() {
         <Button
           variant="outline"
           onClick={() => setShowAddCollection(true)}
-          className="w-full mt-4 border-dashed border-2 hover:border-primary-300 hover:text-primary-600 dark:border-gray-600 dark:hover:border-primary-400 dark:hover:text-primary-400 dark:text-gray-300"
+          className="w-full mt-4 border-dashed border-2 text-gray-900 dark:text-gray-100 hover:border-primary-300 hover:text-primary-600 dark:border-gray-600 dark:hover:border-primary-400 dark:hover:text-primary-400"
         >
           <Plus className="w-4 h-4 mr-2" />
           New List
@@ -206,7 +206,7 @@ export default function Collections() {
                 <Button 
                   variant="outline" 
                   onClick={() => setShowBulkImport(true)}
-                  className="text-gray-600 hover:text-primary-600"
+                  className="text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400"
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   Import
@@ -214,7 +214,7 @@ export default function Collections() {
                 <Button 
                   variant="outline" 
                   onClick={() => setShowImportItems(true)}
-                  className="text-gray-600 hover:text-primary-600"
+                  className="text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400"
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Import from List
@@ -277,7 +277,7 @@ export default function Collections() {
             <p className="text-gray-500 dark:text-gray-400 mb-6">
               Select a list from the sidebar
             </p>
-            <Button onClick={() => setShowAddCollection(true)}>
+            <Button onClick={() => setShowAddCollection(true)} className="text-gray-900 dark:text-gray-100">
               <Plus className="w-4 h-4 mr-2" />
               Create a List
             </Button>
