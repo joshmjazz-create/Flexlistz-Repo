@@ -113,7 +113,6 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
               field="key"
               value={formData.key}
               onChange={(value) => updateField('key', value)}
-              placeholder="e.g., Eb, G minor"
             />
           </div>
 
@@ -123,7 +122,6 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
               field="composer"
               value={formData.composer}
               onChange={(value) => updateField('composer', value)}
-              placeholder="Enter composer name"
             />
           </div>
 
@@ -133,7 +131,6 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
               field="style"
               value={formData.style}
               onChange={(value) => updateField('style', value)}
-              placeholder="e.g., Ballad, Jazz Standard"
             />
           </div>
 
