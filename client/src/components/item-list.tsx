@@ -103,9 +103,9 @@ export default function ItemList({
     <div className="flex-1 overflow-y-auto">
       {/* Controls Bar */}
       {(onViewModeChange || onSortOrderChange) && (
-        <div className="bg-white border-b border-gray-200 px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="space-y-3">
               {onViewModeChange && (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium text-gray-700">View</span>
