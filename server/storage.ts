@@ -58,7 +58,7 @@ export class DatabaseStorage implements IStorage {
           style: "Ballad",
           notes: "Beautiful jazz standard, great for practicing chord voicings. Known for its rich harmony and flowing melody.",
           knowledgeLevel: "knows" as const,
-          youtubeId: "x-64CaD8GXw",
+          youtubeId: "DkC9bCuahC8",
           startSeconds: 0,
           extraTags: [
             { key: "Tempo", value: "Slow" },
@@ -92,7 +92,7 @@ export class DatabaseStorage implements IStorage {
           style: "Jazz Standard",
           notes: "Sophisticated harmonic movement through multiple key centers. A masterpiece of songwriting with challenging chord changes.",
           knowledgeLevel: "does-not-know" as const,
-          spotifyUri: "spotify:track:4jlcBjfMU59rSqJXGqGPx1",
+          spotifyUri: "spotify:track:4IVLhmrJ00V9HOJ2Dd6Kbf",
           extraTags: [
             { key: "Difficulty", value: "Advanced" },
             { key: "Era", value: "1930s" },
