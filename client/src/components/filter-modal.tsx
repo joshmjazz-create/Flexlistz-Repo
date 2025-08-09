@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -8,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface FilterModalProps {
   open: boolean;
@@ -24,6 +26,7 @@ export default function FilterModal({
   activeFilters,
   onFiltersChange,
 }: FilterModalProps) {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const { data: availableTags = {} } = useQuery<Record<string, string[]>>({
     queryKey: ["/api/collections", collectionId, "tags"],
     enabled: !!collectionId && open,
@@ -68,6 +71,16 @@ export default function FilterModal({
     onOpenChange(false);
   };
 
+  const toggleSection = (tagKey: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(tagKey)) {
+      newExpanded.delete(tagKey);
+    } else {
+      newExpanded.add(tagKey);
+    }
+    setExpandedSections(newExpanded);
+  };
+
   // Count items for each tag value
   const getTagCount = (key: string, value: string) => {
     // This would ideally come from the API, but for now we'll show placeholder counts
@@ -86,34 +99,46 @@ export default function FilterModal({
             .filter(([tagKey]) => tagKey.toLowerCase() !== 'title')
             .map(([tagKey, values]) => (
             <div key={tagKey}>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                {tagKey}
-              </h3>
-              <div className="space-y-2">
-                {values.map((value) => (
-                  <div key={value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${tagKey}-${value}`}
-                      checked={
-                        activeFilters[tagKey] 
-                          ? Array.isArray(activeFilters[tagKey]) 
-                            ? (activeFilters[tagKey] as string[]).includes(value)
-                            : activeFilters[tagKey] === value
-                          : false
-                      }
-                      onCheckedChange={(checked) =>
-                        handleFilterChange(tagKey, value, checked as boolean)
-                      }
-                    />
-                    <Label 
-                      htmlFor={`${tagKey}-${value}`}
-                      className="text-sm text-gray-700 cursor-pointer flex-1"
-                    >
-                      {value} <span className="text-gray-400">({getTagCount(tagKey, value)})</span>
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => toggleSection(tagKey)}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3 hover:text-gray-900 transition-colors"
+              >
+                <span>{tagKey}</span>
+                {expandedSections.has(tagKey) ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+              </button>
+              
+              {expandedSections.has(tagKey) && (
+                <div className="space-y-2 ml-4 mb-4">
+                  {values.map((value) => (
+                    <div key={value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`${tagKey}-${value}`}
+                        checked={
+                          activeFilters[tagKey] 
+                            ? Array.isArray(activeFilters[tagKey]) 
+                              ? (activeFilters[tagKey] as string[]).includes(value)
+                              : activeFilters[tagKey] === value
+                            : false
+                        }
+                        onCheckedChange={(checked) =>
+                          handleFilterChange(tagKey, value, checked as boolean)
+                        }
+                      />
+                      <Label 
+                        htmlFor={`${tagKey}-${value}`}
+                        className="text-sm text-gray-700 cursor-pointer flex-1"
+                      >
+                        {value} <span className="text-gray-400">({getTagCount(tagKey, value)})</span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
