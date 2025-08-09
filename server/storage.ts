@@ -161,8 +161,33 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
+  private itemsCache = new Map<string, { data: Item[], timestamp: number }>();
+  
   async getItems(collectionId: string): Promise<Item[]> {
-    return await db.select().from(items).where(eq(items.collectionId, collectionId));
+    // Check cache first
+    const cacheKey = `items_${collectionId}`;
+    const cached = this.itemsCache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.cacheExpiryMs) {
+      return cached.data;
+    }
+    
+    const result = await db.select().from(items).where(eq(items.collectionId, collectionId));
+    
+    // Cache the result
+    this.itemsCache.set(cacheKey, { data: result, timestamp: now });
+    
+    return result;
+  }
+
+  // Clear items cache when items are modified
+  private clearItemsCache(collectionId?: string): void {
+    if (collectionId) {
+      this.itemsCache.delete(`items_${collectionId}`);
+    } else {
+      this.itemsCache.clear();
+    }
   }
 
   async getItem(id: string): Promise<Item | undefined> {
@@ -190,8 +215,9 @@ export class DatabaseStorage implements IStorage {
       await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
     }
     
-    // Clear cache since field values may have changed
+    // Clear caches since values may have changed
     this.clearFieldValuesCache();
+    this.clearItemsCache(item.collectionId);
     
     return item;
   }
@@ -243,20 +269,32 @@ export class DatabaseStorage implements IStorage {
         await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
       }
       
-      // Clear cache since field values may have changed
+      // Clear caches since values may have changed  
       this.clearFieldValuesCache();
+      this.clearItemsCache(updated.collectionId);
     }
     
     return updated || undefined;
   }
 
   async deleteItem(id: string): Promise<boolean> {
+    // Get item first to clear cache for the right collection
+    const item = await this.getItem(id);
+    
     // Delete tag relationships
     await db.delete(itemTags).where(eq(itemTags.itemId, id));
     
     // Delete the item
     const result = await db.delete(items).where(eq(items.id, id));
-    return (result.rowCount ?? 0) > 0;
+    const success = (result.rowCount ?? 0) > 0;
+    
+    if (success && item) {
+      // Clear caches
+      this.clearFieldValuesCache();
+      this.clearItemsCache(item.collectionId);
+    }
+    
+    return success;
   }
 
   async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
@@ -311,8 +349,22 @@ export class DatabaseStorage implements IStorage {
       
       if (filterPairs.length > 0) {
         // Use the AND logic with normalized tag matching
-        return await db
-          .select()
+        const result = await db
+          .select({
+            id: items.id,
+            collectionId: items.collectionId,
+            title: items.title,
+            key: items.key,
+            composer: items.composer,
+            style: items.style,
+            notes: items.notes,
+            youtubeId: items.youtubeId,
+            spotifyUri: items.spotifyUri,
+            startSeconds: items.startSeconds,
+            knowledgeLevel: items.knowledgeLevel,
+            createdAt: items.createdAt,
+            updatedAt: items.updatedAt,
+          })
           .from(items)
           .innerJoin(itemTags, eq(itemTags.itemId, items.id))
           .innerJoin(tags, eq(tags.id, itemTags.tagId))
@@ -327,6 +379,8 @@ export class DatabaseStorage implements IStorage {
           )
           .groupBy(items.id)
           .having(sql`COUNT(DISTINCT LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value}))) = ${filterPairs.length}`);
+        
+        return result;
       }
     }
 
