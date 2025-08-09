@@ -33,7 +33,9 @@ export default function AddItemModal({ isOpen, onClose, collectionId }: AddItemM
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
       queryClient.invalidateQueries({ queryKey: [`/api/collections/${collectionId}/items`] });
       // Invalidate field-values queries so autocomplete gets updated immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values/key"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values/composer"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values/style"] });
       onClose();
       toast({
         title: "Success",
