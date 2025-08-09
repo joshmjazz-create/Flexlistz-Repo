@@ -17,6 +17,7 @@ export const items = pgTable("items", {
   composer: text("composer"),
   style: text("style"),
   notes: text("notes"),
+  leadSheetUrl: text("lead_sheet_url"),
   youtubeId: text("youtube_id"),
   spotifyUri: text("spotify_uri"),
   startSeconds: integer("start_seconds"),

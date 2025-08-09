@@ -19,6 +19,7 @@ interface FormData {
   composer: string;
   style: string;
   notes: string;
+  leadSheetUrl: string;
   mediaUrl: string;
   knowledgeLevel: string;
   extraTags: ExtraTag[];
@@ -39,6 +40,7 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
     composer: initial?.composer || "",
     style: initial?.style || "",
     notes: initial?.notes || "",
+    leadSheetUrl: initial?.leadSheetUrl || "",
     mediaUrl: initial?.mediaUrl || "",
     knowledgeLevel: initial?.knowledgeLevel || "does-not-know",
     extraTags: initial?.extraTags || [],
@@ -140,6 +142,16 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
               field="style"
               value={formData.style}
               onChange={(value) => updateField('style', value)}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="leadSheetUrl">Lead Sheet (Image URL)</Label>
+            <Input
+              id="leadSheetUrl"
+              value={formData.leadSheetUrl}
+              onChange={(e) => updateField('leadSheetUrl', e.target.value)}
+              placeholder="URL to lead sheet image"
             />
           </div>
 

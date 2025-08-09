@@ -67,6 +67,7 @@ export default function AddItemModal({ isOpen, onClose, collectionId }: AddItemM
       composer: formData.composer.trim() || null,
       style: formData.style.trim() || null,
       notes: formData.notes.trim() || null,
+      leadSheetUrl: formData.leadSheetUrl.trim() || null,
       extraTags: formData.extraTags.filter((tag: any) => tag.key.trim() && tag.value.trim()),
       knowledgeLevel: formData.knowledgeLevel || 'does-not-know',
       ...mediaData,

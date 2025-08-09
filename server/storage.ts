@@ -58,6 +58,7 @@ export class DatabaseStorage implements IStorage {
           style: "Ballad",
           notes: "Beautiful jazz standard, great for practicing chord voicings. Known for its rich harmony and flowing melody.",
           knowledgeLevel: "knows" as const,
+          leadSheetUrl: "https://i.imgur.com/2OkK8Zx.png",
           youtubeId: "DkC9bCuahC8",
           startSeconds: 0,
           extraTags: [
@@ -75,6 +76,7 @@ export class DatabaseStorage implements IStorage {
           style: "Jazz Standard", 
           notes: "Perfect for beginners learning jazz progressions. Features the classic ii-V-I progression throughout.",
           knowledgeLevel: "kind-of-knows" as const,
+          leadSheetUrl: "https://i.imgur.com/dGkL4vP.png",
           youtubeId: "r-Z8KuwI7Gc",
           startSeconds: 0,
           extraTags: [
@@ -112,6 +114,7 @@ export class DatabaseStorage implements IStorage {
           composer: itemData.composer,
           style: itemData.style,
           notes: itemData.notes || "",
+          leadSheetUrl: itemData.leadSheetUrl || null,
           knowledgeLevel: itemData.knowledgeLevel,
           youtubeId: itemData.youtubeId || null,
           spotifyUri: itemData.spotifyUri || null,
@@ -383,6 +386,7 @@ export class DatabaseStorage implements IStorage {
             composer: items.composer,
             style: items.style,
             notes: items.notes,
+            leadSheetUrl: items.leadSheetUrl,
             youtubeId: items.youtubeId,
             spotifyUri: items.spotifyUri,
             startSeconds: items.startSeconds,

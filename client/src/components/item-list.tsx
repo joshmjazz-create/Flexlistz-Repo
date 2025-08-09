@@ -6,6 +6,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
 import { YouTubePlayer, SpotifyEmbed } from "./media-player";
+import LeadSheetViewer from "./lead-sheet-viewer";
 
 interface ItemListProps {
   items: Item[];
@@ -283,6 +284,19 @@ export default function ItemList({
                               </Badge>
                             ))}
                         </div>
+
+                        {/* Lead Sheet Section */}
+                        {item.leadSheetUrl && (
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Lead Sheet:</span>
+                            </div>
+                            <LeadSheetViewer 
+                              imageUrl={item.leadSheetUrl} 
+                              title={item.title}
+                            />
+                          </div>
+                        )}
 
                         {/* Media Section */}
                         {(item.youtubeId || item.spotifyUri) && (

@@ -79,6 +79,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
       composer: formData.composer.trim() || null,
       style: formData.style.trim() || null,
       notes: formData.notes.trim() || null,
+      leadSheetUrl: formData.leadSheetUrl.trim() || null,
       extraTags: formData.extraTags.filter((tag: any) => tag.key.trim() && tag.value.trim()),
       knowledgeLevel: formData.knowledgeLevel || item.knowledgeLevel || 'does-not-know',
       ...mediaData,
@@ -133,6 +134,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     composer: item.composer || "",
     style: item.style || "",
     notes: item.notes || "",
+    leadSheetUrl: item.leadSheetUrl || "",
     mediaUrl: getCurrentMediaUrl(),
     knowledgeLevel: item.knowledgeLevel || "does-not-know",
     extraTags: [], // TODO: Load existing extra tags when this feature is fully implemented
