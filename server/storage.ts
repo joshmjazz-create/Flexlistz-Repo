@@ -189,6 +189,16 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
+  async updateItemKnowledgeLevel(id: string, knowledgeLevel: string): Promise<Item | null> {
+    const result = await db.update(items).set({ 
+      knowledgeLevel: knowledgeLevel as "does-not-know" | "kind-of-knows" | "knows" 
+    }).where(eq(items.id, id));
+    if ((result.rowCount ?? 0) === 0) return null;
+    
+    const [updated] = await db.select().from(items).where(eq(items.id, id));
+    return updated || null;
+  }
+
   async updateItem(id: string, updateData: Partial<InsertItem>): Promise<Item | undefined> {
     // Extract extra tags and remove from update data
     const { extraTags, ...itemFields } = updateData as any;
@@ -237,40 +247,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
-    let query = db.select().from(items).where(eq(items.collectionId, collectionId));
+    // Build base conditions
+    const baseConditions = [eq(items.collectionId, collectionId)];
     
     // Apply search query if provided
     if (searchQuery && searchQuery.trim()) {
       const searchTerm = `%${searchQuery.toLowerCase()}%`;
-      query = query.where(
-        and(
-          eq(items.collectionId, collectionId),
-          sql`(
-            LOWER(${items.title}) LIKE ${searchTerm} OR
-            LOWER(${items.key}) LIKE ${searchTerm} OR
-            LOWER(${items.composer}) LIKE ${searchTerm} OR
-            LOWER(${items.style}) LIKE ${searchTerm} OR
-            LOWER(${items.notes}) LIKE ${searchTerm}
-          )`
-        )
+      baseConditions.push(
+        sql`(
+          LOWER(${items.title}) LIKE ${searchTerm} OR
+          LOWER(${items.key}) LIKE ${searchTerm} OR
+          LOWER(${items.composer}) LIKE ${searchTerm} OR
+          LOWER(${items.style}) LIKE ${searchTerm} OR
+          LOWER(${items.notes}) LIKE ${searchTerm}
+        )`
       );
     }
 
-    // Separate knowledge level filters from tag filters
-    const { "Color": knowledgeLevels, ...tagFilters } = filters;
+    // Separate knowledge level filters from tag filters  
+    const { "Color": knowledgeLevels, "Knowledge Level": legacyKnowledgeLevels, ...tagFilters } = filters;
+    const actualKnowledgeLevels = knowledgeLevels || legacyKnowledgeLevels;
     
     // Apply knowledge level filtering
-    if (knowledgeLevels) {
-      const levelValues = Array.isArray(knowledgeLevels) ? knowledgeLevels : [knowledgeLevels];
-      const currentConditions = query.toSQL();
-      query = query.where(
-        and(
-          eq(items.collectionId, collectionId),
-          sql`${items.knowledgeLevel} IN (${sql.join(
-            levelValues.map(level => sql`${level}`),
-            sql`, `
-          )})`
-        )
+    if (actualKnowledgeLevels) {
+      const levelValues = Array.isArray(actualKnowledgeLevels) ? actualKnowledgeLevels : [actualKnowledgeLevels];
+      baseConditions.push(
+        sql`${items.knowledgeLevel} IN (${sql.join(
+          levelValues.map(level => sql`${level}`),
+          sql`, `
+        )})`
       );
     }
 
@@ -293,12 +298,14 @@ export class DatabaseStorage implements IStorage {
       
       if (filterPairs.length > 0) {
         // Use the AND logic with normalized tag matching
-        query = query
+        return await db
+          .select()
+          .from(items)
           .innerJoin(itemTags, eq(itemTags.itemId, items.id))
           .innerJoin(tags, eq(tags.id, itemTags.tagId))
           .where(
             and(
-              eq(items.collectionId, collectionId),
+              ...baseConditions,
               sql`LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value})) IN (${sql.join(
                 filterPairs.map(pair => sql`${pair}`),
                 sql`, `
@@ -310,7 +317,8 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    return await query;
+    // No tag filters, just apply base conditions
+    return await db.select().from(items).where(and(...baseConditions));
   }
 
   async getAvailableTags(collectionId: string): Promise<Record<string, string[]>> {

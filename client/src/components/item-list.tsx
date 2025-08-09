@@ -64,8 +64,44 @@ export default function ItemList({
     mutationFn: async ({ id, knowledgeLevel }: { id: string; knowledgeLevel: string }) => {
       await apiRequest("PUT", `/api/items/${id}`, { knowledgeLevel });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+    onMutate: async ({ id, knowledgeLevel }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['/api/collections'] });
+      
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData(['/api/collections']);
+      
+      // Optimistically update the cache
+      queryClient.setQueryData(['/api/collections'], (old: any) => {
+        if (!old) return old;
+        return old.map((collection: any) => ({
+          ...collection,
+          items: collection.items?.map((item: any) => 
+            item.id === id ? { ...item, knowledgeLevel } : item
+          )
+        }));
+      });
+      
+      // Also update items query if it exists
+      const itemsQueryKey = ['/api/collections', items[0]?.collectionId, 'items'];
+      queryClient.setQueryData(itemsQueryKey, (old: any) => {
+        if (!old) return old;
+        return old.map((item: any) => 
+          item.id === id ? { ...item, knowledgeLevel } : item
+        );
+      });
+      
+      return { previousData };
+    },
+    onError: (err, variables, context) => {
+      // Revert optimistic update on error
+      if (context?.previousData) {
+        queryClient.setQueryData(['/api/collections'], context.previousData);
+      }
+    },
+    onSettled: () => {
+      // Refetch to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['/api/collections'] });
     },
   });
 
