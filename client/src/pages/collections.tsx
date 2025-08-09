@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import ResponsiveLayout from "@/components/responsive-layout";
 import CollectionList from "@/components/collection-list";
@@ -20,6 +20,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Collections() {
   const { collectionId } = useParams<{ collectionId?: string }>();
+  const [, setLocation] = useLocation();
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCollection, setShowAddCollection] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -145,7 +146,12 @@ export default function Collections() {
               <img src={logoImage} alt="FlexList" className="w-8 h-8 object-contain opacity-100" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
+              <h1 
+                className="text-xl font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setLocation('/')}
+              >
+                FlexList
+              </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Smart List Manager</p>
             </div>
           </div>

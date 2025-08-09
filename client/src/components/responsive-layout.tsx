@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Menu, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useLocation } from "wouter";
 import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 
 interface ResponsiveLayoutProps {
@@ -11,6 +12,7 @@ interface ResponsiveLayoutProps {
 
 export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
@@ -54,7 +56,12 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
               <div className="w-6 h-6 flex items-center justify-center">
                 <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain opacity-100" />
               </div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
+              <h1 
+                className="text-lg font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                onClick={() => setLocation('/')}
+              >
+                FlexList
+              </h1>
             </div>
             <ThemeToggle />
           </div>
