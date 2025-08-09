@@ -1,10 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
+import { YouTubePlayer, SpotifyEmbed } from "./media-player";
 
 interface ItemListProps {
   items: Item[];
@@ -232,6 +233,44 @@ export default function ItemList({
                             {value}
                           </Badge>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Media Section */}
+                    {(item.youtubeId || item.spotifyUri) && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-sm font-medium text-gray-700">Media:</span>
+                          {item.youtubeId && (
+                            <Badge variant="secondary" className="bg-red-100 text-red-800 border-0">
+                              <Youtube className="w-3 h-3 mr-1" />
+                              YouTube
+                            </Badge>
+                          )}
+                          {item.spotifyUri && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-0">
+                              <Music className="w-3 h-3 mr-1" />
+                              Spotify
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {/* YouTube Player */}
+                        {item.youtubeId && (
+                          <div className="mb-3">
+                            <YouTubePlayer 
+                              videoId={item.youtubeId} 
+                              startSeconds={item.startSeconds || undefined} 
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Spotify Player */}
+                        {item.spotifyUri && (
+                          <div className="mb-3">
+                            <SpotifyEmbed spotifyUri={item.spotifyUri} />
+                          </div>
+                        )}
                       </div>
                     )}
 

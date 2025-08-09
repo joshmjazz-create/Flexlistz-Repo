@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, json, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, json, primaryKey, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,6 +15,9 @@ export const items = pgTable("items", {
   title: text("title").notNull(),
   notes: text("notes"),
   tags: json("tags").$type<Record<string, string>>().default({}),
+  youtubeId: text("youtube_id"),
+  spotifyUri: text("spotify_uri"),
+  startSeconds: integer("start_seconds"),
 });
 
 export const tags = pgTable("tags", {

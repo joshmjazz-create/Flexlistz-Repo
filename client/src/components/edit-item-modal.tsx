@@ -24,9 +24,11 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertItemSchema, type Item } from "@shared/schema";
 import { AutocompleteTagInput } from "./autocomplete-tag-input";
+import { parseMediaLink } from "@/utils/parseMediaLink";
 
 const formSchema = insertItemSchema.extend({
   tags: z.record(z.string()).optional(),
+  mediaUrl: z.string().optional(),
 });
 
 interface EditItemModalProps {
@@ -55,6 +57,7 @@ export default function EditItemModal({ open, onOpenChange, item }: EditItemModa
         notes: item.notes || "",
         tags: item.tags || {},
         collectionId: item.collectionId,
+        mediaUrl: "", // Keep empty for editing
       });
     }
   }, [item, open, form]);
@@ -82,7 +85,21 @@ export default function EditItemModal({ open, onOpenChange, item }: EditItemModa
   });
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    updateItemMutation.mutate(data);
+    // Parse media URL if provided, otherwise preserve existing media data
+    const mediaData = data.mediaUrl ? parseMediaLink(data.mediaUrl) : {
+      youtubeId: item.youtubeId,
+      spotifyUri: item.spotifyUri,
+      startSeconds: item.startSeconds,
+    };
+    
+    const { mediaUrl, ...submitData } = data;
+    
+    updateItemMutation.mutate({
+      ...submitData,
+      youtubeId: mediaData.youtubeId || null,
+      spotifyUri: mediaData.spotifyUri || null,
+      startSeconds: mediaData.startSeconds || null,
+    });
   };
 
   const currentTags = form.watch("tags") || {};
@@ -126,6 +143,24 @@ export default function EditItemModal({ open, onOpenChange, item }: EditItemModa
                     <Textarea
                       placeholder="Add any additional notes or comments"
                       rows={3}
+                      {...field}
+                      value={field.value || ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="mediaUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Media URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Paste YouTube or Spotify link here"
                       {...field}
                       value={field.value || ""}
                     />
