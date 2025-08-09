@@ -54,29 +54,7 @@ export default function ItemList({
     }
   };
 
-  const getKnowledgeLabel = (knowledgeLevel: string | undefined) => {
-    switch (knowledgeLevel) {
-      case 'knows':
-        return 'Knows';
-      case 'kind-of-knows':
-        return 'Kind of';
-      case 'does-not-know':
-      default:
-        return 'Learning';
-    }
-  };
 
-  const getNextKnowledgeLevel = (current: string | undefined) => {
-    switch (current) {
-      case 'does-not-know':
-        return 'kind-of-knows';
-      case 'kind-of-knows':
-        return 'knows';
-      case 'knows':
-      default:
-        return 'does-not-know';
-    }
-  };
 
   const updateKnowledgeMutation = useMutation({
     mutationFn: async ({ id, knowledgeLevel }: { id: string; knowledgeLevel: string }) => {
@@ -98,10 +76,7 @@ export default function ItemList({
     },
   });
 
-  const handleKnowledgeToggle = (itemId: string, currentLevel: string | undefined) => {
-    const nextLevel = getNextKnowledgeLevel(currentLevel);
-    updateKnowledgeMutation.mutate({ id: itemId, knowledgeLevel: nextLevel });
-  };
+
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -245,15 +220,48 @@ export default function ItemList({
             {items.map((item, index) => (
               <div 
                 key={item.id} 
-                className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow cursor-pointer ${getKnowledgeClasses(item.knowledgeLevel)}`}
-                onClick={() => handleKnowledgeToggle(item.id, item.knowledgeLevel)}
+                className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow ${getKnowledgeClasses(item.knowledgeLevel)}`}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">
-                    {item.title}
-                  </h3>
-                  <div className="text-xs text-gray-500 ml-2">
-                    {getKnowledgeLabel(item.knowledgeLevel)}
+                  <div 
+                    className="flex-1 cursor-pointer"
+                    onClick={() => onViewModeChange && onViewModeChange('detailed')}
+                  >
+                    <h3 className="text-sm font-medium text-gray-900 truncate">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <div className="flex space-x-1 ml-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'does-not-know' });
+                      }}
+                      className={`w-4 h-4 rounded border-2 ${
+                        item.knowledgeLevel === 'does-not-know' ? 'border-gray-600' : 'border-gray-300'
+                      } bg-red-200 hover:border-gray-500 transition-colors`}
+                      title="Learning"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'kind-of-knows' });
+                      }}
+                      className={`w-4 h-4 rounded border-2 ${
+                        item.knowledgeLevel === 'kind-of-knows' ? 'border-gray-600' : 'border-gray-300'
+                      } bg-orange-200 hover:border-gray-500 transition-colors`}
+                      title="Kind of Knows"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'knows' });
+                      }}
+                      className={`w-4 h-4 rounded border-2 ${
+                        item.knowledgeLevel === 'knows' ? 'border-gray-600' : 'border-gray-300'
+                      } bg-green-200 hover:border-gray-500 transition-colors`}
+                      title="Knows"
+                    />
                   </div>
                 </div>
               </div>
