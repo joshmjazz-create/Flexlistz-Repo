@@ -51,7 +51,7 @@ export default function ItemList({
       case 'knows':
         return 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20';
       case 'kind-of-knows':
-        return 'border-orange-200 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20';
+        return 'border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20';
       case 'does-not-know':
       default:
         return 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20';
@@ -281,7 +281,7 @@ export default function ItemList({
                           }}
                           className={`w-4 h-4 rounded border-2 ${
                             item.knowledgeLevel === 'kind-of-knows' ? 'border-gray-600' : 'border-gray-300'
-                          } bg-orange-200 hover:border-gray-500 transition-colors`}
+                          } bg-amber-200 hover:border-gray-500 transition-colors`}
                           title="Kind of Knows"
                         />
                         <button
