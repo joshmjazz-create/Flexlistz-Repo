@@ -68,11 +68,9 @@ export default function AutocompleteInput({
     setHasBeenEdited(false); // Reset after selection
   };
 
-  // Only show dropdown if:
-  // 1. User has started editing (hasBeenEdited is true)
-  // 2. There's text in the input field
-  // 3. There are matching filtered values
-  const showDropdown = hasBeenEdited && inputValue.trim().length > 0 && filteredValues.length > 0;
+  // Only show dropdown if all conditions are met
+  const shouldShowDropdown = hasBeenEdited && inputValue.trim().length > 0 && filteredValues.length > 0;
+  const showDropdown = open && shouldShowDropdown;
 
   return (
     <div className="relative">
@@ -80,19 +78,17 @@ export default function AutocompleteInput({
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={() => {
-          if (hasBeenEdited && showDropdown) {
-            setOpen(true);
-          }
+          // Don't automatically open on focus - wait for editing
         }}
         onBlur={() => setTimeout(() => setOpen(false), 200)} // Delay to allow selection
         placeholder={placeholder}
         className={className}
       />
-      {showDropdown && (
+      {shouldShowDropdown && (
         <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
       )}
       
-      {open && showDropdown && (
+      {showDropdown && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
           {filteredValues.length === 0 ? (
             <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
