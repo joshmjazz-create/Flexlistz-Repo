@@ -36,7 +36,78 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   constructor() {
-    // No seeding - start with empty database
+    this.seedData();
+  }
+
+  private async seedData() {
+    // Check if we already have collections
+    const existingCollections = await db.select().from(collections).limit(1);
+    if (existingCollections.length === 0) {
+      // Create the "Songs I Know" collection
+      const [collection] = await db.insert(collections).values({
+        name: "Songs I Know",
+        description: "My personal collection of songs I can play",
+      }).returning();
+
+      // Add sample items with fixed fields and extra tags
+      const sampleItems = [
+        {
+          title: "Misty",
+          key: "Eb",
+          composer: "Erroll Garner", 
+          style: "Ballad",
+          notes: "Beautiful jazz standard, great for practicing chord voicings",
+          extraTags: [
+            { key: "Tempo", value: "Slow" },
+            { key: "Difficulty", value: "Intermediate" },
+            { key: "Era", value: "1940s" }
+          ]
+        },
+        {
+          title: "Autumn Leaves",
+          key: "G minor",
+          composer: "Joseph Kosma",
+          style: "Jazz Standard", 
+          notes: "Perfect for beginners learning jazz progressions",
+          extraTags: [
+            { key: "Difficulty", value: "Beginner" }
+          ]
+        },
+        {
+          title: "Blue Moon",
+          key: "C",
+          composer: "Richard Rodgers",
+          style: "Ballad",
+          notes: "Classic standard with simple chord progression",
+          extraTags: []
+        }
+      ];
+
+      for (const itemData of sampleItems) {
+        const [item] = await db.insert(items).values({
+          collectionId: collection.id,
+          title: itemData.title,
+          key: itemData.key,
+          composer: itemData.composer,
+          style: itemData.style,
+          notes: itemData.notes || "",
+        }).returning();
+
+        // Build unified tag list from fixed fields + extra tags
+        const allTags = buildTagsFromItem(itemData);
+        
+        // Create tags in the tags table and link them in batch
+        if (allTags.length > 0) {
+          const tagIds = await this.upsertTagsBatch(allTags);
+          const tagRelationships = tagIds.map(tagId => ({
+            itemId: item.id,
+            tagId,
+          }));
+          
+          await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
+        }
+      }
+    }
   }
 
   async getCollections(): Promise<CollectionWithCount[]> {
