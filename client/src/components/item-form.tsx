@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Plus, X, Upload, Image } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ObjectUploader } from "./ObjectUploader";
+import { apiRequest } from "@/lib/queryClient";
 import AutocompleteInput from "./autocomplete-input";
 
 interface ExtraTag {
@@ -45,6 +47,42 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
     knowledgeLevel: initial?.knowledgeLevel || "does-not-know",
     extraTags: initial?.extraTags || [],
   });
+
+  const queryClient = useQueryClient();
+
+  // Handle lead sheet upload
+  const handleGetUploadParameters = async () => {
+    const response = await fetch("/api/objects/upload", {
+      method: "POST",
+    });
+    const data = await response.json();
+    return {
+      method: "PUT" as const,
+      url: data.uploadURL,
+    };
+  };
+
+  const handleUploadComplete = async (result: any) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadedFile = result.successful[0];
+      const uploadURL = uploadedFile.uploadURL;
+      
+      // Normalize the URL to get the object path
+      const response = await fetch("/api/lead-sheets", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ leadSheetURL: uploadURL }),
+      });
+      const data = await response.json();
+      
+      // Update the form data with the normalized object path
+      const newFormData = { ...formData, leadSheetUrl: data.objectPath };
+      setFormData(newFormData);
+      onChange?.(newFormData);
+    }
+  };
 
   // Fetch available tag keys for autocomplete
   const { data: tagKeys = [] } = useQuery<string[]>({
@@ -146,13 +184,39 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
           </div>
 
           <div>
-            <Label htmlFor="leadSheetUrl">Lead Sheet (Image URL)</Label>
-            <Input
-              id="leadSheetUrl"
-              value={formData.leadSheetUrl}
-              onChange={(e) => updateField('leadSheetUrl', e.target.value)}
-              placeholder="URL to lead sheet image"
-            />
+            <Label>Lead Sheet (Upload Image)</Label>
+            <div className="space-y-2">
+              {formData.leadSheetUrl && (
+                <div className="flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/20 rounded border">
+                  <Image className="w-4 h-4 text-green-600" />
+                  <span className="text-sm text-green-700 dark:text-green-300">Lead sheet uploaded</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => updateField('leadSheetUrl', '')}
+                    className="ml-auto text-red-600 hover:text-red-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <ObjectUploader
+                maxNumberOfFiles={1}
+                maxFileSize={10485760}
+                onGetUploadParameters={handleGetUploadParameters}
+                onComplete={handleUploadComplete}
+                buttonClassName="w-full"
+              >
+                <div className="flex items-center gap-2">
+                  <Upload className="w-4 h-4" />
+                  <span>{formData.leadSheetUrl ? 'Replace Lead Sheet' : 'Upload Lead Sheet'}</span>
+                </div>
+              </ObjectUploader>
+              <p className="text-xs text-gray-500">
+                Upload a .png or .jpg image of the lead sheet
+              </p>
+            </div>
           </div>
 
           <div>
