@@ -23,19 +23,37 @@ export default function AutocompleteInput({
   const [inputFocused, setInputFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Predefined list of musical keys
+  const musicalKeys = [
+    'A', 'A minor', 'B', 'B minor', 'Bb', 'Bb minor', 'C', 'C minor',
+    'D', 'D minor', 'Db', 'Db minor', 'E', 'E minor', 'Eb', 'Eb minor',
+    'F', 'F minor', 'G', 'G minor', 'Gb', 'Gb minor'
+  ];
+
   // Fetch field values for autocomplete
   const { data: fieldValues = [] } = useQuery<string[]>({
     queryKey: [`/api/field-values/${field}`],
   });
 
-  // Filter values based on current input - only show matches when there's input
-  const filteredValues = value.trim()
-    ? fieldValues.filter(val =>
-        val.toLowerCase().includes(value.toLowerCase())
-      )
-    : []; // Show nothing when input is empty
+  // Combine all available values - for key field, always include musical keys
+  const allValues = field === 'key' 
+    ? Array.from(new Set([...musicalKeys, ...fieldValues])) // Remove duplicates
+    : fieldValues;
 
-  // Show dropdown when focused and has matches
+  // Filter values based on current input - for keys, always show all when empty
+  const filteredValues = field === 'key'
+    ? value.trim()
+      ? allValues.filter(val =>
+          val.toLowerCase().includes(value.toLowerCase())
+        )
+      : allValues // Show all keys when input is empty
+    : value.trim()
+      ? allValues.filter(val =>
+          val.toLowerCase().includes(value.toLowerCase())
+        )
+      : []; // Show nothing when input is empty for other fields
+
+  // Show dropdown when focused and has values to show
   const showDropdown = inputFocused && isOpen && filteredValues.length > 0;
 
   // Close dropdown when clicking outside
@@ -55,8 +73,10 @@ export default function AutocompleteInput({
 
   const handleInputChange = (newValue: string) => {
     onChange(newValue);
-    // Open dropdown when user starts typing, close when empty
-    if (newValue.trim()) {
+    // For key field, always keep open. For other fields, open when typing, close when empty
+    if (field === 'key') {
+      setIsOpen(true);
+    } else if (newValue.trim()) {
       setIsOpen(true);
     } else {
       setIsOpen(false);
@@ -65,8 +85,8 @@ export default function AutocompleteInput({
 
   const handleFocus = () => {
     setInputFocused(true);
-    // Only open if there's already text to filter on
-    if (value.trim()) {
+    // For key field, always open. For other fields, only open if there's text
+    if (field === 'key' || value.trim()) {
       setIsOpen(true);
     }
   };
