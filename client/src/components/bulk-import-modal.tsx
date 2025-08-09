@@ -155,10 +155,13 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       })
       .filter(line => line.length > 0);
 
-    if (items.length === 0) {
+    // Filter out duplicates automatically
+    const uniqueItems = items.filter(item => !duplicates.map(d => d.toLowerCase()).includes(item.toLowerCase()));
+
+    if (uniqueItems.length === 0) {
       toast({
         title: "Error",
-        description: "Please enter at least one item",
+        description: duplicates.length > 0 ? "All items are duplicates - nothing to import" : "Please enter at least one item",
         variant: "destructive",
       });
       return;
@@ -173,17 +176,15 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       return;
     }
 
-    // Check for duplicates before importing
+    // Show info about duplicates being skipped
     if (duplicates.length > 0) {
       toast({
-        title: "Error",
-        description: `Cannot import: ${duplicates.length} duplicate item(s) found. Remove duplicates and try again.`,
-        variant: "destructive",
+        title: "Import Started",
+        description: `Importing ${uniqueItems.length} items. Skipped ${duplicates.length} duplicate(s).`,
       });
-      return;
     }
 
-    bulkImportMutation.mutate(items);
+    bulkImportMutation.mutate(uniqueItems);
   };
 
   const handleClose = () => {
@@ -295,7 +296,7 @@ Summertime`}
                           </Badge>
                         )}
                       </div>
-                      <p className="text-xs">Remove these items from your list to continue.</p>
+                      <p className="text-xs">These duplicates will be automatically skipped during import.</p>
                     </div>
                   </div>
                 )}
@@ -328,12 +329,12 @@ Summertime`}
               </Button>
               <Button
                 type="submit"
-                disabled={bulkImportMutation.isPending || previewItems.length === 0 || duplicates.length > 0}
+                disabled={bulkImportMutation.isPending || previewItems.length === 0}
               >
                 {bulkImportMutation.isPending 
-                  ? `Importing ${previewItems.length} items...` 
+                  ? `Importing ${previewItems.length - duplicates.length} items...` 
                   : duplicates.length > 0
-                  ? `Remove Duplicates First`
+                  ? `Remove Duplicates (${previewItems.length - duplicates.length} items)`
                   : `Import ${previewItems.length} Items`
                 }
               </Button>
