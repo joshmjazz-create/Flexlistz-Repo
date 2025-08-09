@@ -267,16 +267,16 @@ export default function ItemList({
                         {/* Fixed Fields as Tags */}
                         <div className="flex flex-wrap gap-2 mb-4">
                           {[
-                            { key: "Key", value: item.key },
-                            { key: "Composer", value: item.composer },
-                            { key: "Style", value: item.style },
+                            { key: "Key", value: item.key, colorClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200" },
+                            { key: "Composer", value: item.composer, colorClass: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200" },
+                            { key: "Style", value: item.style, colorClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200" },
                           ]
                             .filter(tag => tag.value?.trim())
-                            .map(({ key, value }, tagIndex) => (
+                            .map(({ key, value, colorClass }) => (
                               <Badge
                                 key={`${key}-${value}`}
                                 variant="secondary"
-                                className={`${tagColors[tagIndex % tagColors.length]} border-0`}
+                                className={`${colorClass} border-0`}
                               >
                                 <span className="text-gray-600 dark:text-gray-400 mr-1">{key}:</span>
                                 {value}
@@ -290,13 +290,13 @@ export default function ItemList({
                             <div className="flex items-center gap-2 mb-3">
                               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Media:</span>
                               {item.youtubeId && (
-                                <Badge variant="secondary" className="bg-red-100 text-red-800 border-0">
+                                <Badge variant="secondary" className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-0">
                                   <Youtube className="w-3 h-3 mr-1" />
                                   YouTube
                                 </Badge>
                               )}
                               {item.spotifyUri && (
-                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-0">
+                                <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-0">
                                   <Music className="w-3 h-3 mr-1" />
                                   Spotify
                                 </Badge>
