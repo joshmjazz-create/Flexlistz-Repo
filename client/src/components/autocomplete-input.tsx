@@ -19,9 +19,9 @@ export default function AutocompleteInput({
   placeholder,
   className,
 }: AutocompleteInputProps) {
-  const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
   const [hasBeenEdited, setHasBeenEdited] = useState(false);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   // Fetch field values for autocomplete
   const { data: fieldValues = [] } = useQuery<string[]>({
@@ -38,13 +38,14 @@ export default function AutocompleteInput({
   // Update input value when prop value changes
   useEffect(() => {
     setInputValue(value);
-    setHasBeenEdited(false); // Reset edit state when value changes from outside
+    setHasBeenEdited(false);
+    setIsDropdownVisible(false);
   }, [value]);
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     onChange(newValue);
-    setHasBeenEdited(true); // Mark as edited when user types
+    setHasBeenEdited(true);
     
     // Calculate filtered values for the new input
     const newFilteredValues = newValue.trim() 
@@ -53,38 +54,35 @@ export default function AutocompleteInput({
         )
       : [];
     
-    // Show dropdown if there are matching results
-    if (newValue.trim().length > 0 && newFilteredValues.length > 0) {
-      setOpen(true);
-    } else {
-      setOpen(false);
-    }
+    // Show dropdown if there are matching results and user has edited
+    setIsDropdownVisible(newValue.trim().length > 0 && newFilteredValues.length > 0);
   };
 
   const handleSelect = (selectedValue: string) => {
     setInputValue(selectedValue);
     onChange(selectedValue);
-    setOpen(false);
-    setHasBeenEdited(false); // Reset after selection
+    setIsDropdownVisible(false);
+    setHasBeenEdited(false);
   };
 
-  // Only show dropdown if all conditions are met
-  const shouldShowDropdown = hasBeenEdited && inputValue.trim().length > 0 && filteredValues.length > 0;
-  const showDropdown = open && shouldShowDropdown;
+  const handleBlur = () => {
+    // Delay hiding the dropdown to allow for clicks
+    setTimeout(() => setIsDropdownVisible(false), 150);
+  };
+
+  // Only show dropdown if user has edited and there are matches
+  const showDropdown = hasBeenEdited && isDropdownVisible && inputValue.trim().length > 0 && filteredValues.length > 0;
 
   return (
     <div className="relative">
       <Input
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
-        onFocus={() => {
-          // Don't automatically open on focus - wait for editing
-        }}
-        onBlur={() => setTimeout(() => setOpen(false), 200)} // Delay to allow selection
+        onBlur={handleBlur}
         placeholder={placeholder}
         className={className}
       />
-      {shouldShowDropdown && (
+      {showDropdown && (
         <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
       )}
       
