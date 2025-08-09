@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from './ui/input';
 import { Check, ChevronDown } from 'lucide-react';
@@ -20,16 +20,17 @@ export default function AutocompleteInput({
   className,
 }: AutocompleteInputProps) {
   const [inputValue, setInputValue] = useState(value);
-  const [hasBeenEdited, setHasBeenEdited] = useState(false);
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [hasUserInput, setHasUserInput] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch field values for autocomplete
   const { data: fieldValues = [] } = useQuery<string[]>({
     queryKey: [`/api/field-values/${field}`],
   });
 
-  // Filter values based on input - only show items that contain the typed text
-  const filteredValues = inputValue.trim() 
+  // Filter values based on current input
+  const filteredValues = hasUserInput && inputValue.trim()
     ? fieldValues.filter(val =>
         val.toLowerCase().includes(inputValue.toLowerCase())
       )
@@ -38,81 +39,76 @@ export default function AutocompleteInput({
   // Update input value when prop value changes
   useEffect(() => {
     setInputValue(value);
-    setHasBeenEdited(false);
-    setIsDropdownVisible(false);
+    setHasUserInput(false);
+    setShowDropdown(false);
   }, [value]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     onChange(newValue);
-    setHasBeenEdited(true);
+    setHasUserInput(true);
     
-    // Calculate filtered values for the new input
-    const newFilteredValues = newValue.trim() 
-      ? fieldValues.filter(val =>
-          val.toLowerCase().includes(newValue.toLowerCase())
-        )
-      : [];
-    
-    // Show dropdown if there are matching results and user has edited
-    const shouldShow = newValue.trim().length > 0 && newFilteredValues.length > 0;
-    setIsDropdownVisible(shouldShow);
+    // Show dropdown if there are matching results
+    if (newValue.trim()) {
+      const matches = fieldValues.filter(val =>
+        val.toLowerCase().includes(newValue.toLowerCase())
+      );
+      setShowDropdown(matches.length > 0);
+    } else {
+      setShowDropdown(false);
+    }
   };
 
   const handleSelect = (selectedValue: string) => {
     setInputValue(selectedValue);
     onChange(selectedValue);
-    setIsDropdownVisible(false);
-    setHasBeenEdited(false);
+    setShowDropdown(false);
+    setHasUserInput(false);
   };
 
-  const handleBlur = (e: React.FocusEvent) => {
-    // Don't hide dropdown if user clicks on dropdown items
-    // The onMouseDown on dropdown prevents the blur from firing
-  };
-
-  // Only show dropdown if user has edited and there are matches
-  const showDropdown = hasBeenEdited && isDropdownVisible && inputValue.trim().length > 0 && filteredValues.length > 0;
+  const shouldShowDropdown = showDropdown && hasUserInput && filteredValues.length > 0;
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <Input
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
-        onBlur={handleBlur}
         placeholder={placeholder}
         className={className}
       />
-      {showDropdown && (
+      {shouldShowDropdown && (
         <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
       )}
       
-      {showDropdown && (
-        <div 
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
-          onMouseDown={(e) => e.preventDefault()} // Prevent input blur when clicking dropdown
-        >
-          {filteredValues.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
-              No matches found
+      {shouldShowDropdown && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {filteredValues.slice(0, 10).map((fieldValue) => (
+            <div
+              key={fieldValue}
+              className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+              onClick={() => handleSelect(fieldValue)}
+            >
+              <Check
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  value === fieldValue ? "opacity-100" : "opacity-0"
+                )}
+              />
+              {fieldValue}
             </div>
-          ) : (
-            filteredValues.slice(0, 10).map((fieldValue) => (
-              <div
-                key={fieldValue}
-                className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => handleSelect(fieldValue)}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === fieldValue ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {fieldValue}
-              </div>
-            ))
-          )}
+          ))}
         </div>
       )}
     </div>
