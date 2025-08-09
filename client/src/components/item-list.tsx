@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, Filter, Youtube, Music, Clock } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownAZ, Filter, Youtube, Music, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -206,8 +206,8 @@ export default function ItemList({
                     onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
                     className="px-3 py-1"
                   >
-                    <ArrowUpAZ className="w-4 h-4 mr-1" />
-                    {sortOrder === 'desc' ? 'Z-A' : 'A-Z'}
+                    {sortOrder === 'desc' ? <ArrowDownAZ className="w-4 h-4 mr-1" /> : <ArrowUpAZ className="w-4 h-4 mr-1" />}
+                    A-Z
                   </Button>
                   <Button
                     variant={sortOrder === 'last-modified' || sortOrder === 'first-modified' ? 'default' : 'outline'}
@@ -216,7 +216,8 @@ export default function ItemList({
                     className="px-3 py-1"
                   >
                     <Clock className="w-4 h-4 mr-1" />
-                    {sortOrder === 'first-modified' ? 'First Modified' : 'Last Modified'}
+                    Last Modified
+                    {sortOrder === 'first-modified' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
                   </Button>
                   {hasActiveFilters && (
                     <Button
