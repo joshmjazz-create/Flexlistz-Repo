@@ -124,13 +124,13 @@ export default function Collections() {
           </div>
           <h1 className="text-xl font-semibold text-gray-900">FlexList</h1>
         </div>
-        <p className="text-sm text-gray-500 mt-1">Smart Collection Manager</p>
+        <p className="text-sm text-gray-500 mt-1">Smart List Manager</p>
       </div>
 
       <div className="flex-1 p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
-            Collections
+            Lists
           </h2>
           <Button
             variant="ghost"
@@ -153,7 +153,7 @@ export default function Collections() {
           className="w-full mt-4 border-dashed border-2 hover:border-primary-300 hover:text-primary-600"
         >
           <Plus className="w-4 h-4 mr-2" />
-          New Collection
+          New List
         </Button>
       </div>
     </>
