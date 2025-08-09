@@ -39,6 +39,9 @@ export default function Collections() {
     queryKey: ["/api/collections"],
   });
 
+  // Debug logging to see what data we're getting
+  console.log("Collections data:", collections);
+
   const activeCollection = collections.find(c => c.id === collectionId);
 
   const { data: items = [] } = useQuery<Item[]>({

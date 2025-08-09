@@ -48,6 +48,7 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: 0, // Force fresh data fetch
+      gcTime: 0, // Force cache invalidation (v5 property name)
       retry: false,
     },
     mutations: {
@@ -55,3 +56,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Clear any existing cache on startup
+queryClient.clear();
