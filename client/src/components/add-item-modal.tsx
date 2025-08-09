@@ -128,7 +128,7 @@ export default function AddItemModal({ isOpen, onClose, collectionId }: AddItemM
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialog open={showConfirmDialog} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Save Changes?</AlertDialogTitle>
