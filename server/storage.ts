@@ -46,7 +46,7 @@ export class DatabaseStorage implements IStorage {
       // Create the "Sample" collection
       const [collection] = await db.insert(collections).values({
         name: "Sample",
-        description: "Example collection with jazz standards",
+        description: "Sample list with jazz standards",
       }).returning();
 
       // Add sample items with fixed fields and extra tags
