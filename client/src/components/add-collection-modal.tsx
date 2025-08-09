@@ -23,11 +23,11 @@ import { useToast } from "@/hooks/use-toast";
 import { insertCollectionSchema } from "@shared/schema";
 
 interface AddCollectionModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function AddCollectionModal({ open, onOpenChange }: AddCollectionModalProps) {
+export default function AddCollectionModal({ isOpen, onClose }: AddCollectionModalProps) {
   const { toast } = useToast();
 
   const form = useForm({
@@ -47,15 +47,15 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
       toast({
         title: "Success",
-        description: "Collection created successfully",
+        description: "List created successfully",
       });
-      onOpenChange(false);
+      onClose();
       form.reset();
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to create collection",
+        description: "Failed to create list",
         variant: "destructive",
       });
     },
@@ -66,10 +66,10 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create New Collection</DialogTitle>
+          <DialogTitle>Create New List</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -79,9 +79,9 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Collection Name *</FormLabel>
+                  <FormLabel>List Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter collection name" {...field} />
+                    <Input placeholder="Enter list name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -96,7 +96,7 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
                   <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe what this collection is for"
+                      placeholder="Describe what this list is for"
                       rows={3}
                       {...field}
                     />
@@ -110,7 +110,7 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={onClose}
               >
                 Cancel
               </Button>
@@ -118,7 +118,7 @@ export default function AddCollectionModal({ open, onOpenChange }: AddCollection
                 type="submit"
                 disabled={createCollectionMutation.isPending}
               >
-                {createCollectionMutation.isPending ? "Creating..." : "Create Collection"}
+                {createCollectionMutation.isPending ? "Creating..." : "Create List"}
               </Button>
             </div>
           </form>
