@@ -28,14 +28,16 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 - **Primary Storage**: Drizzle ORM configured for PostgreSQL (using Neon Database)
-- **Development Storage**: In-memory storage with file-based persistence to data.json
+- **Tag Cataloging**: Persistent tag storage with `tags` and `item_tags` tables for autocomplete functionality
 - **Schema Management**: Drizzle migrations with schema definitions in TypeScript
-- **Data Models**: Collections and Items with flexible JSON tags for metadata
+- **Data Models**: Collections, Items, Tags, and ItemTags with normalized tag relationships
 
 ### Database Schema
 - **Collections Table**: ID, name, description
-- **Items Table**: ID, collection ID (foreign key), title, notes, tags (JSON object)
-- **Flexible Tagging**: JSON field allows arbitrary key-value pairs for metadata (Style, Key, Composer, etc.)
+- **Items Table**: ID, collection ID (foreign key), title, notes, tags (JSON object for compatibility)
+- **Tags Table**: ID, key, value - normalized storage for unique tag key-value pairs
+- **ItemTags Table**: itemId, tagId - many-to-many relationship linking items to tags
+- **Tag Cataloging**: Persistent storage enables autocomplete for previously used keys and values
 
 ### API Structure
 - **Collections Endpoints**: CRUD operations for managing collections
@@ -49,6 +51,9 @@ Preferred communication style: Simple, everyday language.
   - POST /api/items - Create new item
   - PUT /api/items/:id - Update item
   - DELETE /api/items/:id - Delete item
+- **Tag Cataloging Endpoints**: Autocomplete support for tag input
+  - GET /api/tags/keys - Get all unique tag keys for autocomplete
+  - GET /api/tags/values/:key - Get all values for a specific tag key
 - **Filtering**: Query parameters for tag-based filtering and text search
 
 ### Development & Build Tools
@@ -60,9 +65,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Features
 - **Flexible Tagging System**: Items can have arbitrary key-value tag pairs
+- **Persistent Tag Cataloging**: Autocomplete for tag keys and values from previously used tags
 - **Advanced Filtering**: Filter by tags, search by text, combine multiple filters
 - **Real-time Updates**: Optimistic updates with query invalidation
-- **Responsive Design**: Mobile-friendly interface with proper breakpoints
+- **Responsive Design**: Mobile-friendly interface with collapsible sidebar
+- **Bulk Import**: Paste plain-text lists to quickly populate collections
 - **Type Safety**: End-to-end TypeScript with shared schemas between client and server
 
 ## External Dependencies

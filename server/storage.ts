@@ -1,7 +1,7 @@
-import { type Collection, type InsertCollection, type Item, type InsertItem, type CollectionWithCount } from "@shared/schema";
-import { randomUUID } from "crypto";
-import fs from "fs";
-import path from "path";
+import { type Collection, type InsertCollection, type Item, type InsertItem, type CollectionWithCount, type Tag, type InsertTag } from "@shared/schema";
+import { collections, items, tags, itemTags } from "@shared/schema";
+import { db } from "./db";
+import { eq, sql, and } from "drizzle-orm";
 
 export interface IStorage {
   // Collections
@@ -21,237 +21,227 @@ export interface IStorage {
   // Filtering
   filterItems(collectionId: string, filters: Record<string, string>, searchQuery?: string): Promise<Item[]>;
   getAvailableTags(collectionId: string): Promise<Record<string, string[]>>;
+  
+  // Tag cataloging
+  getTagKeys(): Promise<string[]>;
+  getTagValues(key: string): Promise<string[]>;
+  upsertTag(key: string, value: string): Promise<Tag>;
 }
 
-export class MemStorage implements IStorage {
-  private collections: Map<string, Collection>;
-  private items: Map<string, Item>;
-  private dataFile: string;
-
+export class DatabaseStorage implements IStorage {
   constructor() {
-    this.collections = new Map();
-    this.items = new Map();
-    this.dataFile = path.join(process.cwd(), "data.json");
-    this.loadData();
     this.seedData();
   }
 
-  private async loadData() {
-    try {
-      if (fs.existsSync(this.dataFile)) {
-        const data = JSON.parse(fs.readFileSync(this.dataFile, "utf-8"));
-        if (data.collections) {
-          for (const collection of data.collections) {
-            this.collections.set(collection.id, collection);
-          }
-        }
-        if (data.items) {
-          for (const item of data.items) {
-            this.items.set(item.id, item);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error loading data:", error);
-    }
-  }
-
-  private async saveData() {
-    try {
-      const data = {
-        collections: Array.from(this.collections.values()),
-        items: Array.from(this.items.values()),
-      };
-      fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
-    } catch (error) {
-      console.error("Error saving data:", error);
-    }
-  }
-
   private async seedData() {
-    if (this.collections.size === 0) {
+    // Check if we already have collections
+    const existingCollections = await db.select().from(collections).limit(1);
+    if (existingCollections.length === 0) {
       // Create the "Songs I Know" collection
-      const collectionId = randomUUID();
-      const collection: Collection = {
-        id: collectionId,
+      const [collection] = await db.insert(collections).values({
         name: "Songs I Know",
         description: "My personal collection of songs I can play",
-      };
-      this.collections.set(collectionId, collection);
+      }).returning();
 
-      // Add the "Misty" item
-      const itemId = randomUUID();
-      const item: Item = {
-        id: itemId,
-        collectionId: collectionId,
-        title: "Misty",
-        notes: "Beautiful jazz standard, great for practicing chord voicings",
-        tags: {
-          "Composer": "Erroll Garner",
-          "Style": "Ballad",
-          "Key": "Eb",
-          "Tempo": "Slow",
-          "Difficulty": "Intermediate",
-          "Era": "1940s"
+      // Add sample items with tags
+      const sampleItems = [
+        {
+          title: "Misty",
+          notes: "Beautiful jazz standard, great for practicing chord voicings",
+          tags: {
+            "Composer": "Erroll Garner",
+            "Style": "Ballad",
+            "Key": "Eb",
+            "Tempo": "Slow",
+            "Difficulty": "Intermediate",
+            "Era": "1940s"
+          }
+        },
+        {
+          title: "Autumn Leaves",
+          notes: "Perfect for beginners learning jazz progressions",
+          tags: {
+            "Composer": "Joseph Kosma",
+            "Style": "Jazz Standard",
+            "Key": "G minor",
+            "Difficulty": "Beginner"
+          }
+        },
+        {
+          title: "Blue Moon",
+          notes: "Classic standard with simple chord progression",
+          tags: {
+            "Composer": "Richard Rodgers",
+            "Style": "Ballad",
+            "Key": "C"
+          }
         }
-      };
-      this.items.set(itemId, item);
+      ];
 
-      // Add more sample items
-      const autumnLeavesId = randomUUID();
-      const autumnLeaves: Item = {
-        id: autumnLeavesId,
-        collectionId: collectionId,
-        title: "Autumn Leaves",
-        notes: "Perfect for beginners learning jazz progressions",
-        tags: {
-          "Composer": "Joseph Kosma",
-          "Style": "Jazz Standard",
-          "Key": "G minor",
-          "Difficulty": "Beginner"
+      for (const itemData of sampleItems) {
+        const [item] = await db.insert(items).values({
+          collectionId: collection.id,
+          title: itemData.title,
+          notes: itemData.notes,
+          tags: itemData.tags,
+        }).returning();
+
+        // Create tags in the tags table and link them
+        for (const [key, value] of Object.entries(itemData.tags)) {
+          const tag = await this.upsertTag(key, value);
+          await db.insert(itemTags).values({
+            itemId: item.id,
+            tagId: tag.id,
+          }).onConflictDoNothing();
         }
-      };
-      this.items.set(autumnLeavesId, autumnLeaves);
-
-      const blueMoonId = randomUUID();
-      const blueMoon: Item = {
-        id: blueMoonId,
-        collectionId: collectionId,
-        title: "Blue Moon",
-        notes: "Classic standard with simple chord progression",
-        tags: {
-          "Composer": "Richard Rodgers",
-          "Style": "Ballad",
-          "Key": "C"
-        }
-      };
-      this.items.set(blueMoonId, blueMoon);
-
-      await this.saveData();
+      }
     }
   }
 
   async getCollections(): Promise<CollectionWithCount[]> {
-    const collections = Array.from(this.collections.values());
-    return collections.map(collection => ({
-      ...collection,
-      itemCount: Array.from(this.items.values()).filter(item => item.collectionId === collection.id).length
-    }));
+    const result = await db
+      .select({
+        id: collections.id,
+        name: collections.name,
+        description: collections.description,
+        itemCount: sql<number>`count(${items.id})::int`,
+      })
+      .from(collections)
+      .leftJoin(items, eq(collections.id, items.collectionId))
+      .groupBy(collections.id);
+
+    return result;
   }
 
   async getCollection(id: string): Promise<Collection | undefined> {
-    return this.collections.get(id);
+    const [collection] = await db.select().from(collections).where(eq(collections.id, id));
+    return collection || undefined;
   }
 
   async createCollection(insertCollection: InsertCollection): Promise<Collection> {
-    const id = randomUUID();
-    const collection: Collection = { 
-      ...insertCollection, 
-      id,
-      description: insertCollection.description || null
-    };
-    this.collections.set(id, collection);
-    await this.saveData();
+    const [collection] = await db
+      .insert(collections)
+      .values(insertCollection)
+      .returning();
     return collection;
   }
 
   async updateCollection(id: string, updateData: Partial<InsertCollection>): Promise<Collection | undefined> {
-    const collection = this.collections.get(id);
-    if (!collection) return undefined;
-    
-    const updated: Collection = { ...collection, ...updateData };
-    this.collections.set(id, updated);
-    await this.saveData();
-    return updated;
+    const [updated] = await db
+      .update(collections)
+      .set(updateData)
+      .where(eq(collections.id, id))
+      .returning();
+    return updated || undefined;
   }
 
   async deleteCollection(id: string): Promise<boolean> {
-    const deleted = this.collections.delete(id);
-    if (deleted) {
-      // Delete all items in this collection
-      const itemsToDelete: string[] = [];
-      for (const [itemId, item] of this.items.entries()) {
-        if (item.collectionId === id) {
-          itemsToDelete.push(itemId);
-        }
-      }
-      itemsToDelete.forEach(itemId => this.items.delete(itemId));
-      await this.saveData();
-    }
-    return deleted;
+    // Delete item_tags for all items in this collection
+    await db.delete(itemTags).where(
+      sql`item_id IN (SELECT id FROM items WHERE collection_id = ${id})`
+    );
+    
+    // Delete all items in this collection
+    await db.delete(items).where(eq(items.collectionId, id));
+    
+    // Delete the collection
+    const result = await db.delete(collections).where(eq(collections.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   async getItems(collectionId: string): Promise<Item[]> {
-    return Array.from(this.items.values()).filter(item => item.collectionId === collectionId);
+    return await db.select().from(items).where(eq(items.collectionId, collectionId));
   }
 
   async getItem(id: string): Promise<Item | undefined> {
-    return this.items.get(id);
+    const [item] = await db.select().from(items).where(eq(items.id, id));
+    return item || undefined;
   }
 
   async createItem(insertItem: InsertItem): Promise<Item> {
-    const id = randomUUID();
-    const item: Item = { 
-      ...insertItem, 
-      id,
-      notes: insertItem.notes || null,
-      tags: insertItem.tags || null
-    };
-    this.items.set(id, item);
-    await this.saveData();
+    const [item] = await db.insert(items).values(insertItem).returning();
+    
+    // Create tags in the tags table and link them
+    if (insertItem.tags) {
+      for (const [key, value] of Object.entries(insertItem.tags)) {
+        const tag = await this.upsertTag(key, value);
+        await db.insert(itemTags).values({
+          itemId: item.id,
+          tagId: tag.id,
+        }).onConflictDoNothing();
+      }
+    }
+    
     return item;
   }
 
   async updateItem(id: string, updateData: Partial<InsertItem>): Promise<Item | undefined> {
-    const item = this.items.get(id);
-    if (!item) return undefined;
+    const [updated] = await db
+      .update(items)
+      .set(updateData)
+      .where(eq(items.id, id))
+      .returning();
     
-    const updated: Item = { ...item, ...updateData };
-    this.items.set(id, updated);
-    await this.saveData();
-    return updated;
+    if (updated && updateData.tags) {
+      // Remove existing tag relationships
+      await db.delete(itemTags).where(eq(itemTags.itemId, id));
+      
+      // Create new tag relationships
+      for (const [key, value] of Object.entries(updateData.tags)) {
+        const tag = await this.upsertTag(key, value);
+        await db.insert(itemTags).values({
+          itemId: id,
+          tagId: tag.id,
+        }).onConflictDoNothing();
+      }
+    }
+    
+    return updated || undefined;
   }
 
   async deleteItem(id: string): Promise<boolean> {
-    const deleted = this.items.delete(id);
-    if (deleted) {
-      await this.saveData();
-    }
-    return deleted;
+    // Delete tag relationships
+    await db.delete(itemTags).where(eq(itemTags.itemId, id));
+    
+    // Delete the item
+    const result = await db.delete(items).where(eq(items.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   async filterItems(collectionId: string, filters: Record<string, string>, searchQuery?: string): Promise<Item[]> {
-    let items = Array.from(this.items.values()).filter(item => item.collectionId === collectionId);
+    let conditions = [eq(items.collectionId, collectionId)];
     
-    // Apply tag filters
+    // Apply tag filters using JSON operators
     if (Object.keys(filters).length > 0) {
-      items = items.filter(item => {
-        return Object.entries(filters).every(([key, value]) => {
-          return item.tags?.[key] === value;
-        });
-      });
+      for (const [key, value] of Object.entries(filters)) {
+        conditions.push(sql`${items.tags}->>${key} = ${value}`);
+      }
     }
     
     // Apply search query
     if (searchQuery && searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      items = items.filter(item => {
-        return (
-          item.title.toLowerCase().includes(query) ||
-          (item.notes && item.notes.toLowerCase().includes(query)) ||
-          Object.values(item.tags || {}).some(tag => tag.toLowerCase().includes(query))
-        );
-      });
+      const searchTerm = `%${searchQuery.toLowerCase()}%`;
+      conditions.push(
+        sql`(
+          LOWER(${items.title}) LIKE ${searchTerm} OR
+          LOWER(${items.notes}) LIKE ${searchTerm} OR
+          LOWER(${items.tags}::text) LIKE ${searchTerm}
+        )`
+      );
     }
     
-    return items;
+    return await db.select().from(items).where(and(...conditions));
   }
 
   async getAvailableTags(collectionId: string): Promise<Record<string, string[]>> {
-    const items = Array.from(this.items.values()).filter(item => item.collectionId === collectionId);
+    const itemsInCollection = await db
+      .select({ tags: items.tags })
+      .from(items)
+      .where(eq(items.collectionId, collectionId));
+    
     const tagMap: Record<string, Set<string>> = {};
     
-    items.forEach(item => {
+    itemsInCollection.forEach(item => {
       if (item.tags) {
         Object.entries(item.tags).forEach(([key, value]) => {
           if (!tagMap[key]) {
@@ -270,6 +260,39 @@ export class MemStorage implements IStorage {
     
     return result;
   }
+
+  async getTagKeys(): Promise<string[]> {
+    const result = await db.select({ key: tags.key }).from(tags).groupBy(tags.key);
+    return result.map(r => r.key).sort();
+  }
+
+  async getTagValues(key: string): Promise<string[]> {
+    const result = await db
+      .select({ value: tags.value })
+      .from(tags)
+      .where(eq(tags.key, key));
+    return result.map(r => r.value).sort();
+  }
+
+  async upsertTag(key: string, value: string): Promise<Tag> {
+    // Try to find existing tag
+    const [existingTag] = await db
+      .select()
+      .from(tags)
+      .where(and(eq(tags.key, key), eq(tags.value, value)));
+    
+    if (existingTag) {
+      return existingTag;
+    }
+    
+    // Create new tag
+    const [newTag] = await db
+      .insert(tags)
+      .values({ key, value })
+      .returning();
+    
+    return newTag;
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

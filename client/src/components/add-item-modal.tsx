@@ -20,11 +20,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertItemSchema } from "@shared/schema";
+import { AutocompleteTagInput } from "./autocomplete-tag-input";
 
 const formSchema = insertItemSchema.extend({
   tags: z.record(z.string()).optional(),
@@ -36,11 +35,7 @@ interface AddItemModalProps {
   collectionId?: string;
 }
 
-const popularTagKeys = ["Style", "Key", "Composer", "Tempo", "Difficulty", "Era", "Genre", "Artist"];
-
 export default function AddItemModal({ open, onOpenChange, collectionId }: AddItemModalProps) {
-  const [newTagKey, setNewTagKey] = useState("");
-  const [newTagValue, setNewTagValue] = useState("");
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -88,29 +83,6 @@ export default function AddItemModal({ open, onOpenChange, collectionId }: AddIt
     createItemMutation.mutate({ ...data, collectionId });
   };
 
-  const addTag = () => {
-    if (newTagKey && newTagValue) {
-      const currentTags = form.getValues("tags") || {};
-      form.setValue("tags", {
-        ...currentTags,
-        [newTagKey]: newTagValue,
-      });
-      setNewTagKey("");
-      setNewTagValue("");
-    }
-  };
-
-  const removeTag = (key: string) => {
-    const currentTags = form.getValues("tags") || {};
-    const newTags = { ...currentTags };
-    delete newTags[key];
-    form.setValue("tags", newTags);
-  };
-
-  const useTagKey = (key: string) => {
-    setNewTagKey(key);
-  };
-
   const currentTags = form.watch("tags") || {};
 
   return (
@@ -136,83 +108,11 @@ export default function AddItemModal({ open, onOpenChange, collectionId }: AddIt
               )}
             />
 
-            <div className="space-y-4">
-              <FormLabel>Tags</FormLabel>
-              
-              {/* Existing Tags */}
-              {Object.keys(currentTags).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {Object.entries(currentTags).map(([key, value]) => (
-                    <Badge
-                      key={key}
-                      variant="secondary"
-                      className="bg-primary-100 text-primary-800"
-                    >
-                      {key}: {value}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeTag(key)}
-                        className="ml-2 h-auto p-0 text-primary-600 hover:text-primary-800"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {/* Add New Tag */}
-              <div className="border border-gray-300 rounded-lg p-4 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    placeholder="Tag key (e.g., Style, Key, Composer)"
-                    value={newTagKey}
-                    onChange={(e) => setNewTagKey(e.target.value)}
-                  />
-                  <div className="flex space-x-2">
-                    <Input
-                      placeholder="Tag value"
-                      value={newTagValue}
-                      onChange={(e) => setNewTagValue(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          addTag();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      onClick={addTag}
-                      disabled={!newTagKey || !newTagValue}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Popular Tag Keys */}
-                <div>
-                  <p className="text-xs text-gray-500 mb-2">Popular keys:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {popularTagKeys.map((key) => (
-                      <Button
-                        key={key}
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => useTagKey(key)}
-                        className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      >
-                        {key}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <AutocompleteTagInput
+              tags={currentTags}
+              onChange={(tags) => form.setValue("tags", tags)}
+              className="space-y-2"
+            />
 
             <FormField
               control={form.control}

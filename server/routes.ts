@@ -150,6 +150,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tag cataloging endpoints
+  app.get("/api/tags/keys", async (req, res) => {
+    try {
+      const keys = await storage.getTagKeys();
+      res.json(keys);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tag keys" });
+    }
+  });
+
+  app.get("/api/tags/values/:key", async (req, res) => {
+    try {
+      const values = await storage.getTagValues(req.params.key);
+      res.json(values);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tag values" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
