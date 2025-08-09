@@ -9,7 +9,7 @@ import { type CollectionWithCount } from "@shared/schema";
 interface CollectionListProps {
   collections: CollectionWithCount[];
   activeCollectionId?: string;
-  onEditCollection?: () => void;
+  onEditCollection?: (collection: CollectionWithCount) => void;
 }
 
 export default function CollectionList({ collections, activeCollectionId, onEditCollection }: CollectionListProps) {
@@ -82,8 +82,8 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (collection.id === activeCollectionId && onEditCollection) {
-                    onEditCollection();
+                  if (onEditCollection) {
+                    onEditCollection(collection);
                   }
                 }}
               >

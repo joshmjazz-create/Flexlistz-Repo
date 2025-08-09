@@ -23,6 +23,7 @@ export default function Collections() {
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [showImportItems, setShowImportItems] = useState(false);
   const [showEditCollection, setShowEditCollection] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<CollectionWithCount | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -154,7 +155,10 @@ export default function Collections() {
         <CollectionList 
           collections={collections}
           activeCollectionId={collectionId}
-          onEditCollection={() => setShowEditCollection(true)}
+          onEditCollection={(collection) => {
+            setEditingCollection(collection);
+            setShowEditCollection(true);
+          }}
         />
 
         <Button
@@ -300,11 +304,14 @@ export default function Collections() {
         onFilterChange={setActiveFilters}
       />
 
-      {activeCollection && (
+      {editingCollection && (
         <EditCollectionModal
           isOpen={showEditCollection}
-          onClose={() => setShowEditCollection(false)}
-          collection={activeCollection}
+          onClose={() => {
+            setShowEditCollection(false);
+            setEditingCollection(null);
+          }}
+          collection={editingCollection}
         />
       )}
     </>
