@@ -33,6 +33,8 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
       queryClient.invalidateQueries({ queryKey: [`/api/collections/${item.collectionId}/items`] });
+      // Invalidate field-values queries so autocomplete gets updated immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values"] });
       onClose();
       toast({
         title: "Success",
