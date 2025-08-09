@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music, Palette } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -16,6 +16,8 @@ interface ItemListProps {
   sortOrder?: 'asc' | 'desc' | 'filter-order';
   onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order') => void;
   hasActiveFilters?: boolean;
+  highlightColor?: 'red' | 'green' | 'orange';
+  onHighlightColorChange?: (color: 'red' | 'green' | 'orange') => void;
 }
 
 const tagColors = [
@@ -37,9 +39,24 @@ export default function ItemList({
   onViewModeChange,
   sortOrder = 'asc',
   onSortOrderChange,
-  hasActiveFilters = false
+  hasActiveFilters = false,
+  highlightColor = 'red',
+  onHighlightColorChange
 }: ItemListProps) {
   const { toast } = useToast();
+
+  const getHighlightClasses = (color: 'red' | 'green' | 'orange') => {
+    switch (color) {
+      case 'red':
+        return 'border-red-200 bg-red-50';
+      case 'green':
+        return 'border-green-200 bg-green-50';
+      case 'orange':
+        return 'border-orange-200 bg-orange-50';
+      default:
+        return 'border-red-200 bg-red-50';
+    }
+  };
 
   const deleteItemMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -166,6 +183,36 @@ export default function ItemList({
                 </div>
               )}
             </div>
+
+            {/* Color Picker for Compact View */}
+            {viewMode === 'compact' && onHighlightColorChange && (
+              <div className="flex items-center space-x-2">
+                <Palette className="w-4 h-4 text-gray-500" />
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() => onHighlightColorChange('red')}
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      highlightColor === 'red' ? 'border-gray-600' : 'border-gray-300'
+                    } bg-red-200`}
+                    title="Red highlight"
+                  />
+                  <button
+                    onClick={() => onHighlightColorChange('green')}
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      highlightColor === 'green' ? 'border-gray-600' : 'border-gray-300'
+                    } bg-green-200`}
+                    title="Green highlight"
+                  />
+                  <button
+                    onClick={() => onHighlightColorChange('orange')}
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      highlightColor === 'orange' ? 'border-gray-600' : 'border-gray-300'
+                    } bg-orange-200`}
+                    title="Orange highlight"
+                  />
+                </div>
+              </div>
+            )}
             
             <div className="text-sm text-gray-500">
               {items.length} item{items.length !== 1 ? 's' : ''}
@@ -179,7 +226,7 @@ export default function ItemList({
           /* Compact View */
           <div className="space-y-1">
             {items.map((item, index) => (
-              <div key={item.id} className="bg-white rounded border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow">
+              <div key={item.id} className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow ${getHighlightClasses(highlightColor)}`}>
                 <h3 className="text-sm font-medium text-gray-900 truncate">
                   {item.title}
                 </h3>

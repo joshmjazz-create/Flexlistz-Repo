@@ -31,6 +31,7 @@ export default function Collections() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('compact');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order'>('asc');
+  const [highlightColor, setHighlightColor] = useState<'red' | 'green' | 'orange'>('red');
 
   const { data: collections = [] } = useQuery<CollectionWithCount[]>({
     queryKey: ["/api/collections"],
@@ -237,6 +238,8 @@ export default function Collections() {
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
             hasActiveFilters={Object.keys(activeFilters).length > 0}
+            highlightColor={highlightColor}
+            onHighlightColorChange={setHighlightColor}
           />
         </>
       ) : (
