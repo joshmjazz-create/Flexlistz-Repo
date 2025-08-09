@@ -87,7 +87,7 @@ export default function FilterModal({
             .map(([tagKey, values]) => (
             <div key={tagKey}>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Filter by {tagKey}
+                {tagKey}
               </h3>
               <div className="space-y-2">
                 {values.map((value) => (
