@@ -273,8 +273,8 @@ export default function Collections() {
       />
 
       <BulkImportModal
-        isOpen={showBulkImport}
-        onClose={() => setShowBulkImport(false)}
+        open={showBulkImport}
+        onOpenChange={setShowBulkImport}
         collectionId={collectionId || ""}
       />
 
@@ -298,11 +298,11 @@ export default function Collections() {
       )}
 
       <FilterModal
-        isOpen={showFilters}
-        onClose={() => setShowFilters(false)}
+        open={showFilters}
+        onOpenChange={setShowFilters}
         collectionId={collectionId || ""}
         activeFilters={activeFilters}
-        onFilterChange={setActiveFilters}
+        onFiltersChange={setActiveFilters}
       />
 
       {editingCollection && (
