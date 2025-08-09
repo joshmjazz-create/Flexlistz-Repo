@@ -93,8 +93,8 @@ img[alt="FlexList"] {
   --accent-foreground: hsl(203.8863 88.2845% 53.1373%);
   --destructive: hsl(0 84% 60%);
   --destructive-foreground: hsl(0 0% 100%);
-  --border: hsl(201.4286 30.4348% 90.9804%);
-  --input: hsl(200 23.0769% 97.4510%);
+  --border: hsl(201.4286 30.4348% 85%);
+  --input: hsl(200 23.0769% 85%);
   --ring: hsl(217 91% 60%);
   --chart-1: hsl(203.8863 88.2845% 53.1373%);
   --chart-2: hsl(159.7826 100% 36.0784%);
