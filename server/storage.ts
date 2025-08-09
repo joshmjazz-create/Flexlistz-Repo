@@ -1,7 +1,7 @@
 import { type Collection, type InsertCollection, type Item, type InsertItem, type CollectionWithCount, type Tag, type InsertTag } from "@shared/schema";
 import { collections, items, tags, itemTags } from "@shared/schema";
 import { db } from "./db";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, isNotNull } from "drizzle-orm";
 import { buildTagsFromItem } from "./utils/tags";
 import { norm } from "../client/src/utils/norm";
 
@@ -27,6 +27,7 @@ export interface IStorage {
   // Tag cataloging
   getTagKeys(): Promise<string[]>;
   getTagValues(key: string): Promise<string[]>;
+  getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]>;
   upsertTag(key: string, value: string): Promise<Tag>;
 }
 
@@ -319,6 +320,20 @@ export class DatabaseStorage implements IStorage {
       .from(tags)
       .where(eq(tags.key, key));
     return result.map(r => r.value).sort();
+  }
+
+  async getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]> {
+    const column = field === 'key' ? items.key : 
+                   field === 'composer' ? items.composer : 
+                   items.style;
+    
+    const result = await db.selectDistinct({ value: column })
+      .from(items)
+      .where(isNotNull(column));
+    
+    return result
+      .map(row => row.value)
+      .filter((value): value is string => value !== null && value.trim() !== '');
   }
 
   async upsertTag(key: string, value: string): Promise<Tag> {

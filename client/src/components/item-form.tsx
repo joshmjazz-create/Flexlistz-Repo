@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import AutocompleteInput from "./autocomplete-input";
 
 interface ExtraTag {
   key: string;
@@ -105,30 +106,30 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
 
           <div>
             <Label htmlFor="key">Key</Label>
-            <Input
-              id="key"
+            <AutocompleteInput
+              field="key"
               value={formData.key}
-              onChange={(e) => updateField('key', e.target.value)}
+              onChange={(value) => updateField('key', value)}
               placeholder="e.g., Eb, G minor"
             />
           </div>
 
           <div>
             <Label htmlFor="composer">Composer</Label>
-            <Input
-              id="composer"
+            <AutocompleteInput
+              field="composer"
               value={formData.composer}
-              onChange={(e) => updateField('composer', e.target.value)}
+              onChange={(value) => updateField('composer', value)}
               placeholder="Enter composer name"
             />
           </div>
 
           <div>
             <Label htmlFor="style">Style</Label>
-            <Input
-              id="style"
+            <AutocompleteInput
+              field="style"
               value={formData.style}
-              onChange={(e) => updateField('style', e.target.value)}
+              onChange={(value) => updateField('style', value)}
               placeholder="e.g., Ballad, Jazz Standard"
             />
           </div>
