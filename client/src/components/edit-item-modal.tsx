@@ -165,7 +165,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={(open) => !open && setShowConfirmDialog(false)}>
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Save Changes?</AlertDialogTitle>
