@@ -82,7 +82,7 @@ export class DatabaseStorage implements IStorage {
         const [item] = await db.insert(items).values({
           collectionId: collection.id,
           title: itemData.title,
-          notes: itemData.notes,
+          notes: itemData.notes || "",
           tags: itemData.tags,
         }).returning();
 
@@ -209,25 +209,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
+    // Start with base conditions
     let conditions = [eq(items.collectionId, collectionId)];
     
-    // Apply tag filters using JSON operators
-    if (Object.keys(filters).length > 0) {
-      for (const [key, value] of Object.entries(filters)) {
-        if (Array.isArray(value)) {
-          // Handle multiple values for the same key with OR logic
-          const valueConditions = value.map(v => sql`${items.tags}->>${key} = ${v}`);
-          if (valueConditions.length > 0) {
-            conditions.push(sql`(${sql.join(valueConditions, sql` OR `)})`);
-          }
-        } else {
-          // Single value
-          conditions.push(sql`${items.tags}->>${key} = ${value}`);
-        }
-      }
-    }
-    
-    // Apply search query
+    // Apply search query if provided
     if (searchQuery && searchQuery.trim()) {
       const searchTerm = `%${searchQuery.toLowerCase()}%`;
       conditions.push(
@@ -238,8 +223,32 @@ export class DatabaseStorage implements IStorage {
         )`
       );
     }
-    
-    return await db.select().from(items).where(and(...conditions));
+
+    // Apply tag filters with proper AND logic
+    if (Object.keys(filters).length > 0) {
+      for (const [key, value] of Object.entries(filters)) {
+        const normalizedKey = key.trim();
+        const filterValues = Array.isArray(value) ? value : [value];
+        const normalizedValues = filterValues
+          .map(v => v.trim())
+          .filter(v => v.length > 0);
+        
+        if (normalizedValues.length > 0) {
+          // Create OR conditions for multiple values of the same key
+          const valueConditions = normalizedValues.map(normalizedValue => 
+            sql`LOWER(TRIM(${items.tags}->>${normalizedKey})) = ${normalizedValue.toLowerCase()}`
+          );
+          
+          // Add AND condition for this key
+          conditions.push(sql`(${sql.join(valueConditions, sql` OR `)})`);
+        }
+      }
+    }
+
+    return await db
+      .select()
+      .from(items)
+      .where(and(...conditions));
   }
 
   async getAvailableTags(collectionId: string): Promise<Record<string, string[]>> {

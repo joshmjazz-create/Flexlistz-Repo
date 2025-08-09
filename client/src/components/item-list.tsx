@@ -100,7 +100,7 @@ export default function ItemList({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Controls Bar */}
       {(onViewModeChange || onSortOrderChange) && (
         <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -173,7 +173,7 @@ export default function ItemList({
         </div>
       )}
 
-      <div className="p-6">
+      <div className="flex-1 overflow-y-auto p-6">
         {viewMode === 'compact' ? (
           /* Compact View */
           <div className="space-y-2">
