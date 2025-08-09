@@ -55,7 +55,8 @@ export default function AutocompleteInput({
       : [];
     
     // Show dropdown if there are matching results and user has edited
-    setIsDropdownVisible(newValue.trim().length > 0 && newFilteredValues.length > 0);
+    const shouldShow = newValue.trim().length > 0 && newFilteredValues.length > 0;
+    setIsDropdownVisible(shouldShow);
   };
 
   const handleSelect = (selectedValue: string) => {
@@ -65,9 +66,9 @@ export default function AutocompleteInput({
     setHasBeenEdited(false);
   };
 
-  const handleBlur = () => {
-    // Delay hiding the dropdown to allow for clicks
-    setTimeout(() => setIsDropdownVisible(false), 150);
+  const handleBlur = (e: React.FocusEvent) => {
+    // Don't hide dropdown if user clicks on dropdown items
+    // The onMouseDown on dropdown prevents the blur from firing
   };
 
   // Only show dropdown if user has edited and there are matches
@@ -87,7 +88,10 @@ export default function AutocompleteInput({
       )}
       
       {showDropdown && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
+        <div 
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
+          onMouseDown={(e) => e.preventDefault()} // Prevent input blur when clicking dropdown
+        >
           {filteredValues.length === 0 ? (
             <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
               No matches found
