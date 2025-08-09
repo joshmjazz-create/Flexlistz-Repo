@@ -110,8 +110,8 @@ export default function AutocompleteInput({
       {showDropdown && (
         <>
           <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
-            {filteredValues.slice(0, 10).map((fieldValue) => (
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-64 overflow-y-auto">
+            {filteredValues.map((fieldValue) => (
               <div
                 key={fieldValue}
                 className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
