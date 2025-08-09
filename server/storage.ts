@@ -56,30 +56,51 @@ export class DatabaseStorage implements IStorage {
           key: "Eb",
           composer: "Erroll Garner", 
           style: "Ballad",
-          notes: "Beautiful jazz standard, great for practicing chord voicings",
+          notes: "Beautiful jazz standard, great for practicing chord voicings. Known for its rich harmony and flowing melody.",
+          knowledgeLevel: "knows" as const,
+          youtubeId: "x-64CaD8GXw",
+          startSeconds: 0,
           extraTags: [
             { key: "Tempo", value: "Slow" },
             { key: "Difficulty", value: "Intermediate" },
-            { key: "Era", value: "1940s" }
+            { key: "Era", value: "1940s" },
+            { key: "Form", value: "AABA" },
+            { key: "Time Signature", value: "4/4" }
           ]
         },
         {
           title: "Autumn Leaves",
-          key: "G minor",
+          key: "Bb",
           composer: "Joseph Kosma",
           style: "Jazz Standard", 
-          notes: "Perfect for beginners learning jazz progressions",
+          notes: "Perfect for beginners learning jazz progressions. Features the classic ii-V-I progression throughout.",
+          knowledgeLevel: "kind-of-knows" as const,
+          youtubeId: "r-Z8KuwI7Gc",
+          startSeconds: 0,
           extraTags: [
-            { key: "Difficulty", value: "Beginner" }
+            { key: "Difficulty", value: "Beginner" },
+            { key: "Era", value: "1940s" },
+            { key: "Form", value: "AABA" },
+            { key: "Tempo", value: "Medium" },
+            { key: "Time Signature", value: "4/4" }
           ]
         },
         {
-          title: "Blue Moon",
-          key: "C",
-          composer: "Richard Rodgers",
-          style: "Ballad",
-          notes: "Classic standard with simple chord progression",
-          extraTags: []
+          title: "All The Things You Are",
+          key: "Ab",
+          composer: "Jerome Kern",
+          style: "Jazz Standard",
+          notes: "Sophisticated harmonic movement through multiple key centers. A masterpiece of songwriting with challenging chord changes.",
+          knowledgeLevel: "does-not-know" as const,
+          spotifyUri: "spotify:track:4jlcBjfMU59rSqJXGqGPx1",
+          extraTags: [
+            { key: "Difficulty", value: "Advanced" },
+            { key: "Era", value: "1930s" },
+            { key: "Form", value: "AABA" },
+            { key: "Tempo", value: "Medium" },
+            { key: "Time Signature", value: "4/4" },
+            { key: "Key Centers", value: "Multiple" }
+          ]
         }
       ];
 
@@ -91,6 +112,10 @@ export class DatabaseStorage implements IStorage {
           composer: itemData.composer,
           style: itemData.style,
           notes: itemData.notes || "",
+          knowledgeLevel: itemData.knowledgeLevel,
+          youtubeId: itemData.youtubeId || null,
+          spotifyUri: itemData.spotifyUri || null,
+          startSeconds: itemData.startSeconds || null,
         }).returning();
 
         // Build unified tag list from fixed fields + extra tags
