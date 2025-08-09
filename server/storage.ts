@@ -29,6 +29,9 @@ export interface IStorage {
   getTagValues(key: string): Promise<string[]>;
   getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]>;
   upsertTag(key: string, value: string): Promise<Tag>;
+  
+  // Import items
+  importItems(targetCollectionId: string, itemIds: string[]): Promise<{ count: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -354,6 +357,46 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return newTag;
+  }
+
+  async importItems(targetCollectionId: string, itemIds: string[]): Promise<{ count: number }> {
+    let importedCount = 0;
+    
+    for (const itemId of itemIds) {
+      // Get the source item
+      const sourceItem = await this.getItem(itemId);
+      if (!sourceItem) continue;
+      
+      // Create new item in target collection (without id to generate new one)
+      const { id, ...itemData } = sourceItem;
+      const newItemData = {
+        ...itemData,
+        collectionId: targetCollectionId,
+      };
+      
+      // Create the new item
+      const newItem = await this.createItem(newItemData);
+      
+      // Copy all tags from source item to new item
+      const sourceTags = await db
+        .select({ key: tags.key, value: tags.value })
+        .from(itemTags)
+        .innerJoin(tags, eq(tags.id, itemTags.tagId))
+        .where(eq(itemTags.itemId, itemId));
+      
+      // Create tag relationships for new item
+      for (const tag of sourceTags) {
+        const tagRecord = await this.upsertTag(tag.key, tag.value);
+        await db.insert(itemTags).values({
+          itemId: newItem.id,
+          tagId: tagRecord.id,
+        }).onConflictDoNothing();
+      }
+      
+      importedCount++;
+    }
+    
+    return { count: importedCount };
   }
 }
 

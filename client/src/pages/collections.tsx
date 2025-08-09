@@ -10,15 +10,17 @@ import AddCollectionModal from "@/components/add-collection-modal";
 import EditItemModal from "@/components/edit-item-modal";
 import FilterModal from "@/components/filter-modal";
 import BulkImportModal from "@/components/bulk-import-modal";
+import ImportItemsModal from "@/components/import-items-modal";
 import { type CollectionWithCount, type Item } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Plus, Layers, Upload } from "lucide-react";
+import { Copy, Layers, Plus, Upload } from "lucide-react";
 
 export default function Collections() {
   const { collectionId } = useParams<{ collectionId?: string }>();
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCollection, setShowAddCollection] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
+  const [showImportItems, setShowImportItems] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,6 +188,14 @@ export default function Collections() {
                   <Upload className="w-4 h-4 mr-2" />
                   Bulk Import
                 </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowImportItems(true)}
+                  className="text-gray-600 hover:text-primary-600"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Import from List
+                </Button>
                 <Button onClick={() => setShowAddItem(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item
@@ -252,6 +262,12 @@ export default function Collections() {
         isOpen={showBulkImport}
         onClose={() => setShowBulkImport(false)}
         collectionId={collectionId || ""}
+      />
+
+      <ImportItemsModal
+        isOpen={showImportItems}
+        onClose={() => setShowImportItems(false)}
+        targetCollectionId={collectionId || ""}
       />
 
       <AddCollectionModal

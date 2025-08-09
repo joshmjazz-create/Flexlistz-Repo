@@ -183,6 +183,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import items from another collection
+  app.post("/api/collections/:id/import", async (req, res) => {
+    try {
+      const { id: targetCollectionId } = req.params;
+      const { itemIds } = req.body;
+      
+      if (!Array.isArray(itemIds) || itemIds.length === 0) {
+        return res.status(400).json({ message: "itemIds must be a non-empty array" });
+      }
+      
+      const result = await storage.importItems(targetCollectionId, itemIds);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to import items" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
