@@ -95,6 +95,54 @@ export default function FilterModal({
         </DialogHeader>
 
         <div className="space-y-6 max-h-96 overflow-y-auto">
+          {/* Knowledge Level Filter */}
+          <div>
+            <button
+              type="button"
+              onClick={() => toggleSection('Knowledge Level')}
+              className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3 hover:text-gray-900 transition-colors"
+            >
+              <span>Knowledge Level</span>
+              {expandedSections.has('Knowledge Level') ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+            
+            {expandedSections.has('Knowledge Level') && (
+              <div className="space-y-2 ml-4 mb-4">
+                {[
+                  { value: 'knows', label: 'Knows' },
+                  { value: 'kind-of-knows', label: 'Kind of Knows' },
+                  { value: 'does-not-know', label: 'Learning' }
+                ].map(({ value, label }) => (
+                  <div key={value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`knowledge-${value}`}
+                      checked={
+                        activeFilters['Knowledge Level'] 
+                          ? Array.isArray(activeFilters['Knowledge Level']) 
+                            ? (activeFilters['Knowledge Level'] as string[]).includes(value)
+                            : activeFilters['Knowledge Level'] === value
+                          : false
+                      }
+                      onCheckedChange={(checked) =>
+                        handleFilterChange('Knowledge Level', value, checked as boolean)
+                      }
+                    />
+                    <Label 
+                      htmlFor={`knowledge-${value}`}
+                      className="text-sm text-gray-700 cursor-pointer flex-1"
+                    >
+                      {label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {Object.entries(availableTags)
             .filter(([tagKey]) => tagKey.toLowerCase() !== 'title')
             .map(([tagKey, values]) => (

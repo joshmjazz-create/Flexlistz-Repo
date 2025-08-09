@@ -71,6 +71,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
       style: formData.style.trim() || null,
       notes: formData.notes.trim() || null,
       extraTags: formData.extraTags.filter((tag: any) => tag.key.trim() && tag.value.trim()),
+      knowledgeLevel: formData.knowledgeLevel || item.knowledgeLevel || 'does-not-know',
       ...mediaData,
     });
   };
@@ -95,7 +96,8 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     style: item.style || "",
     notes: item.notes || "",
     mediaUrl: getCurrentMediaUrl(),
-    extraTags: [], // TODO: Extract from item tags
+    knowledgeLevel: item.knowledgeLevel || "does-not-know",
+    extraTags: getExtraTags(),
   };
 
   return (

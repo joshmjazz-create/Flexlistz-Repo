@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AutocompleteInput from "./autocomplete-input";
@@ -19,6 +20,7 @@ interface FormData {
   style: string;
   notes: string;
   mediaUrl: string;
+  knowledgeLevel: string;
   extraTags: ExtraTag[];
 }
 
@@ -37,6 +39,7 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
     style: initial?.style || "",
     notes: initial?.notes || "",
     mediaUrl: initial?.mediaUrl || "",
+    knowledgeLevel: initial?.knowledgeLevel || "does-not-know",
     extraTags: initial?.extraTags || [],
   });
 
@@ -132,6 +135,20 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
               onChange={(value) => updateField('style', value)}
               placeholder="e.g., Ballad, Jazz Standard"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="knowledgeLevel">Knowledge Level</Label>
+            <Select value={formData.knowledgeLevel} onValueChange={(value) => updateField('knowledgeLevel', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select knowledge level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="does-not-know">Learning</SelectItem>
+                <SelectItem value="kind-of-knows">Kind of Knows</SelectItem>
+                <SelectItem value="knows">Knows</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

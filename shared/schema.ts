@@ -20,6 +20,7 @@ export const items = pgTable("items", {
   youtubeId: text("youtube_id"),
   spotifyUri: text("spotify_uri"),
   startSeconds: integer("start_seconds"),
+  knowledgeLevel: text("knowledge_level", { enum: ["knows", "kind-of-knows", "does-not-know"] }).default("does-not-know"),
 });
 
 export const tags = pgTable("tags", {

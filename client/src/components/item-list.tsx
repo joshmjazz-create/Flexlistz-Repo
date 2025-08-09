@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music, Palette } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -16,8 +16,7 @@ interface ItemListProps {
   sortOrder?: 'asc' | 'desc' | 'filter-order';
   onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order') => void;
   hasActiveFilters?: boolean;
-  highlightColor?: 'red' | 'green' | 'orange';
-  onHighlightColorChange?: (color: 'red' | 'green' | 'orange') => void;
+
 }
 
 const tagColors = [
@@ -39,23 +38,69 @@ export default function ItemList({
   onViewModeChange,
   sortOrder = 'asc',
   onSortOrderChange,
-  hasActiveFilters = false,
-  highlightColor = 'red',
-  onHighlightColorChange
+  hasActiveFilters = false
 }: ItemListProps) {
   const { toast } = useToast();
 
-  const getHighlightClasses = (color: 'red' | 'green' | 'orange') => {
-    switch (color) {
-      case 'red':
-        return 'border-red-200 bg-red-50';
-      case 'green':
+  const getKnowledgeClasses = (knowledgeLevel: string | undefined) => {
+    switch (knowledgeLevel) {
+      case 'knows':
         return 'border-green-200 bg-green-50';
-      case 'orange':
+      case 'kind-of-knows':
         return 'border-orange-200 bg-orange-50';
+      case 'does-not-know':
       default:
         return 'border-red-200 bg-red-50';
     }
+  };
+
+  const getKnowledgeLabel = (knowledgeLevel: string | undefined) => {
+    switch (knowledgeLevel) {
+      case 'knows':
+        return 'Knows';
+      case 'kind-of-knows':
+        return 'Kind of';
+      case 'does-not-know':
+      default:
+        return 'Learning';
+    }
+  };
+
+  const getNextKnowledgeLevel = (current: string | undefined) => {
+    switch (current) {
+      case 'does-not-know':
+        return 'kind-of-knows';
+      case 'kind-of-knows':
+        return 'knows';
+      case 'knows':
+      default:
+        return 'does-not-know';
+    }
+  };
+
+  const updateKnowledgeMutation = useMutation({
+    mutationFn: async ({ id, knowledgeLevel }: { id: string; knowledgeLevel: string }) => {
+      await apiRequest("PUT", `/api/items/${id}`, { knowledgeLevel });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      toast({
+        title: "Updated",
+        description: "Knowledge level updated",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update knowledge level",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleKnowledgeToggle = (itemId: string, currentLevel: string | undefined) => {
+    const nextLevel = getNextKnowledgeLevel(currentLevel);
+    updateKnowledgeMutation.mutate({ id: itemId, knowledgeLevel: nextLevel });
   };
 
   const deleteItemMutation = useMutation({
@@ -184,35 +229,7 @@ export default function ItemList({
               )}
             </div>
 
-            {/* Color Picker for Compact View */}
-            {viewMode === 'compact' && onHighlightColorChange && (
-              <div className="flex items-center space-x-2">
-                <Palette className="w-4 h-4 text-gray-500" />
-                <div className="flex space-x-1">
-                  <button
-                    onClick={() => onHighlightColorChange('red')}
-                    className={`w-5 h-5 rounded-full border-2 ${
-                      highlightColor === 'red' ? 'border-gray-600' : 'border-gray-300'
-                    } bg-red-200`}
-                    title="Red highlight"
-                  />
-                  <button
-                    onClick={() => onHighlightColorChange('green')}
-                    className={`w-5 h-5 rounded-full border-2 ${
-                      highlightColor === 'green' ? 'border-gray-600' : 'border-gray-300'
-                    } bg-green-200`}
-                    title="Green highlight"
-                  />
-                  <button
-                    onClick={() => onHighlightColorChange('orange')}
-                    className={`w-5 h-5 rounded-full border-2 ${
-                      highlightColor === 'orange' ? 'border-gray-600' : 'border-gray-300'
-                    } bg-orange-200`}
-                    title="Orange highlight"
-                  />
-                </div>
-              </div>
-            )}
+
             
             <div className="text-sm text-gray-500">
               {items.length} item{items.length !== 1 ? 's' : ''}
@@ -226,10 +243,19 @@ export default function ItemList({
           /* Compact View */
           <div className="space-y-1">
             {items.map((item, index) => (
-              <div key={item.id} className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow ${getHighlightClasses(highlightColor)}`}>
-                <h3 className="text-sm font-medium text-gray-900 truncate">
-                  {item.title}
-                </h3>
+              <div 
+                key={item.id} 
+                className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow cursor-pointer ${getKnowledgeClasses(item.knowledgeLevel)}`}
+                onClick={() => handleKnowledgeToggle(item.id, item.knowledgeLevel)}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                    {item.title}
+                  </h3>
+                  <div className="text-xs text-gray-500 ml-2">
+                    {getKnowledgeLabel(item.knowledgeLevel)}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

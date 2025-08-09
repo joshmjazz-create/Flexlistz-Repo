@@ -204,7 +204,15 @@ export class DatabaseStorage implements IStorage {
       await db.delete(itemTags).where(eq(itemTags.itemId, id));
       
       // Build unified tag list from fixed fields + extra tags
-      const allTags = buildTagsFromItem({ ...updated, extraTags });
+      const itemForTags = {
+        ...updated,
+        key: updated.key || undefined,
+        composer: updated.composer || undefined,
+        style: updated.style || undefined,
+        notes: updated.notes || undefined,
+        extraTags
+      };
+      const allTags = buildTagsFromItem(itemForTags);
       
       // Create new tag relationships
       for (const { key, value } of allTags) {
@@ -235,22 +243,43 @@ export class DatabaseStorage implements IStorage {
     if (searchQuery && searchQuery.trim()) {
       const searchTerm = `%${searchQuery.toLowerCase()}%`;
       query = query.where(
-        sql`(
-          LOWER(${items.title}) LIKE ${searchTerm} OR
-          LOWER(${items.key}) LIKE ${searchTerm} OR
-          LOWER(${items.composer}) LIKE ${searchTerm} OR
-          LOWER(${items.style}) LIKE ${searchTerm} OR
-          LOWER(${items.notes}) LIKE ${searchTerm}
-        )`
+        and(
+          eq(items.collectionId, collectionId),
+          sql`(
+            LOWER(${items.title}) LIKE ${searchTerm} OR
+            LOWER(${items.key}) LIKE ${searchTerm} OR
+            LOWER(${items.composer}) LIKE ${searchTerm} OR
+            LOWER(${items.style}) LIKE ${searchTerm} OR
+            LOWER(${items.notes}) LIKE ${searchTerm}
+          )`
+        )
+      );
+    }
+
+    // Separate knowledge level filters from tag filters
+    const { "Knowledge Level": knowledgeLevels, ...tagFilters } = filters;
+    
+    // Apply knowledge level filtering
+    if (knowledgeLevels) {
+      const levelValues = Array.isArray(knowledgeLevels) ? knowledgeLevels : [knowledgeLevels];
+      const currentConditions = query.toSQL();
+      query = query.where(
+        and(
+          eq(items.collectionId, collectionId),
+          sql`${items.knowledgeLevel} IN (${sql.join(
+            levelValues.map(level => sql`${level}`),
+            sql`, `
+          )})`
+        )
       );
     }
 
     // Apply unified tag filtering with AND logic
-    if (Object.keys(filters).length > 0) {
+    if (Object.keys(tagFilters).length > 0) {
       // Build tag filter pairs using normalized comparisons
       const filterPairs: string[] = [];
       
-      for (const [key, value] of Object.entries(filters)) {
+      for (const [key, value] of Object.entries(tagFilters)) {
         const normalizedKey = norm(key);
         const filterValues = Array.isArray(value) ? value : [value];
         
@@ -268,10 +297,13 @@ export class DatabaseStorage implements IStorage {
           .innerJoin(itemTags, eq(itemTags.itemId, items.id))
           .innerJoin(tags, eq(tags.id, itemTags.tagId))
           .where(
-            sql`LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value})) IN (${sql.join(
-              filterPairs.map(pair => sql`${pair}`),
-              sql`, `
-            )})`
+            and(
+              eq(items.collectionId, collectionId),
+              sql`LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value})) IN (${sql.join(
+                filterPairs.map(pair => sql`${pair}`),
+                sql`, `
+              )})`
+            )
           )
           .groupBy(items.id)
           .having(sql`COUNT(DISTINCT LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value}))) = ${filterPairs.length}`);
