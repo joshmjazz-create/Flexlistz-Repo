@@ -251,16 +251,7 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
-  async updateItemKnowledgeLevel(id: string, knowledgeLevel: string): Promise<Item | null> {
-    const result = await db.update(items).set({ 
-      knowledgeLevel: knowledgeLevel as "does-not-know" | "kind-of-knows" | "knows",
-      updatedAt: new Date()
-    }).where(eq(items.id, id));
-    if ((result.rowCount ?? 0) === 0) return null;
-    
-    const [updated] = await db.select().from(items).where(eq(items.id, id));
-    return updated || null;
-  }
+
 
   async updateItem(id: string, updateData: Partial<InsertItem>): Promise<Item | undefined> {
     // Extract extra tags and remove from update data

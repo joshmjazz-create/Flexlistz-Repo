@@ -62,10 +62,7 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
       });
       queryClient.invalidateQueries({ queryKey: [`/api/collections/${targetCollectionId}/items`] });
       queryClient.invalidateQueries({ queryKey: ['/api/collections'] });
-      onClose();
-      setSelectedItems(new Set());
-      setSourceCollectionId('');
-      setSearchQuery('');
+      resetAndClose();
     },
     onError: () => {
       toast({
@@ -94,26 +91,21 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
     setSelectedItems(newSelected);
   };
 
-  const handleImport = () => {
-    if (selectedItems.size === 0) return;
-    importItemsMutation.mutate(Array.from(selectedItems));
+  const handleImport = (importAll = false) => {
+    const itemIds = importAll ? filteredItems.map(item => item.id) : Array.from(selectedItems);
+    if (itemIds.length === 0) return;
+    importItemsMutation.mutate(itemIds);
   };
 
-  const handleImportAll = () => {
-    // Import all filtered items immediately without selecting them first
-    const allItemIds = filteredItems.map(item => item.id);
-    importItemsMutation.mutate(allItemIds);
-  };
-
-  const handleClose = () => {
-    onClose();
+  const resetAndClose = () => {
     setSelectedItems(new Set());
     setSourceCollectionId('');
     setSearchQuery('');
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={resetAndClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -161,7 +153,7 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
                   {selectedItems.size === filteredItems.length ? 'Deselect All' : 'Select All'}
                 </Button>
                 <Button
-                  onClick={handleImportAll}
+                  onClick={() => handleImport(true)}
                   disabled={filteredItems.length === 0 || importItemsMutation.isPending}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
@@ -221,11 +213,11 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
 
         {/* Actions */}
         <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={handleClose} className="text-gray-900 dark:text-gray-100">
+          <Button variant="outline" onClick={resetAndClose} className="text-gray-900 dark:text-gray-100">
             Cancel
           </Button>
           <Button
-            onClick={handleImport}
+            onClick={() => handleImport(false)}
             disabled={selectedItems.size === 0 || importItemsMutation.isPending}
             className="text-gray-900 dark:text-gray-100"
           >

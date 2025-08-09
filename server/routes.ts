@@ -119,23 +119,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/items/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      
-      // Fast path for knowledge level only updates
-      if (req.body.knowledgeLevel && Object.keys(req.body).length === 1) {
-        const { knowledgeLevel } = req.body;
-        if (!['does-not-know', 'kind-of-knows', 'knows'].includes(knowledgeLevel)) {
-          return res.status(400).json({ message: "Invalid knowledge level" });
-        }
-        
-        const updated = await storage.updateItemKnowledgeLevel(id, knowledgeLevel);
-        if (!updated) {
-          return res.status(404).json({ message: "Item not found" });
-        }
-        
-        return res.json(updated);
-      }
-      
-      // Regular update path
       const validatedData = insertItemSchema.partial().parse(req.body);
       const item = await storage.updateItem(id, validatedData);
       if (!item) {
