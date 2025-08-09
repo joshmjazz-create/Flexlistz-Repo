@@ -120,13 +120,23 @@ export default function Collections() {
   const sidebarContent = (
     <>
       <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-            <Layers className="text-white w-4 h-4" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <Layers className="text-white w-4 h-4" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-gray-900">FlexList</h1>
+              <p className="text-sm text-gray-500">Smart List Manager</p>
+            </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900">FlexList</h1>
+          {activeCollection && (
+            <Button onClick={() => setShowAddItem(true)} size="sm">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
+            </Button>
+          )}
         </div>
-        <p className="text-sm text-gray-500 mt-1">Smart List Manager</p>
       </div>
 
       <div className="flex-1 p-4">
@@ -186,7 +196,7 @@ export default function Collections() {
                   className="text-gray-600 hover:text-primary-600"
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Bulk Import
+                  Import
                 </Button>
                 <Button 
                   variant="outline" 
@@ -195,10 +205,6 @@ export default function Collections() {
                 >
                   <Copy className="w-4 h-4 mr-2" />
                   Import from List
-                </Button>
-                <Button onClick={() => setShowAddItem(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Item
                 </Button>
               </div>
             </div>
