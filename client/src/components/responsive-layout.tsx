@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 
 interface ResponsiveLayoutProps {
   sidebar: React.ReactNode;
@@ -48,8 +49,8 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
             <Menu className="w-5 h-5" />
           </Button>
           <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Layers className="text-white w-3 h-3" />
+            <div className="w-6 h-6 flex items-center justify-center">
+              <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain" />
             </div>
             <h1 className="text-lg font-semibold text-gray-900">FlexList</h1>
           </div>

@@ -15,6 +15,7 @@ import EditCollectionModal from "@/components/edit-collection-modal";
 import { type CollectionWithCount, type Item } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Copy, Layers, Plus, Upload } from "lucide-react";
+import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 
 export default function Collections() {
   const { collectionId } = useParams<{ collectionId?: string }>();
@@ -125,8 +126,8 @@ export default function Collections() {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Layers className="text-white w-4 h-4" />
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img src={logoImage} alt="FlexList" className="w-8 h-8 object-contain" />
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">FlexList</h1>
@@ -241,7 +242,7 @@ export default function Collections() {
       ) : (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Layers className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" />
             <div className="flex items-center justify-center gap-3 mb-2">
               <h2 className="text-xl font-semibold text-gray-900">Welcome to FlexList</h2>
             </div>
