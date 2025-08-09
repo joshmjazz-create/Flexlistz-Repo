@@ -130,12 +130,7 @@ export default function Collections() {
               <p className="text-sm text-gray-500">Smart List Manager</p>
             </div>
           </div>
-          {activeCollection && (
-            <Button onClick={() => setShowAddItem(true)} size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-          )}
+
         </div>
       </div>
 
@@ -176,18 +171,14 @@ export default function Collections() {
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
       {activeCollection ? (
         <>
-          {/* Header */}
+          {/* Main FlexList Header */}
           <div className="bg-white border-b border-gray-200 px-6 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {activeCollection.name}
-                </h1>
-                {activeCollection.description && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    {activeCollection.description}
-                  </p>
-                )}
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-semibold text-gray-900">FlexList</h1>
+                <Button onClick={() => setShowAddItem(true)} size="sm" variant="outline">
+                  <Plus className="w-4 h-4" />
+                </Button>
               </div>
               <div className="flex gap-2">
                 <Button 
@@ -208,6 +199,16 @@ export default function Collections() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* List Title and Description */}
+          <div className="bg-white border-b border-gray-200 px-6 py-3">
+            <h2 className="text-xl font-semibold text-gray-800">{activeCollection.name}</h2>
+            {activeCollection.description && (
+              <p className="text-sm text-gray-600 mt-1">
+                {activeCollection.description}
+              </p>
+            )}
           </div>
 
           {/* Filter Bar */}
@@ -235,9 +236,9 @@ export default function Collections() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Layers className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Welcome to FlexList
-            </h2>
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <h2 className="text-xl font-semibold text-gray-900">Welcome to FlexList</h2>
+            </div>
             <p className="text-gray-500 mb-6">
               Select a list from the sidebar
             </p>
