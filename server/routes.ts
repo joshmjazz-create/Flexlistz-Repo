@@ -222,6 +222,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Static assets for lead sheets
+  app.get("/src/assets/lead-sheets/:filename", (req, res) => {
+    const { filename } = req.params;
+    const filePath = `client/src/assets/lead-sheets/${filename}`;
+    res.sendFile(filePath, { root: process.cwd() });
+  });
+
   // Object storage endpoints for file uploads
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = new ObjectStorageService();

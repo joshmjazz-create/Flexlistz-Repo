@@ -58,7 +58,7 @@ export class DatabaseStorage implements IStorage {
           style: "Ballad",
           notes: "Beautiful jazz standard, great for practicing chord voicings. Known for its rich harmony and flowing melody.",
           knowledgeLevel: "knows" as const,
-          leadSheetUrl: "https://i.imgur.com/2OkK8Zx.png",
+          leadSheetUrl: "/src/assets/lead-sheets/misty.jpg",
           youtubeId: "DkC9bCuahC8",
           startSeconds: 0,
           extraTags: [
@@ -76,7 +76,7 @@ export class DatabaseStorage implements IStorage {
           style: "Jazz Standard", 
           notes: "Perfect for beginners learning jazz progressions. Features the classic ii-V-I progression throughout.",
           knowledgeLevel: "kind-of-knows" as const,
-          leadSheetUrl: "https://i.imgur.com/dGkL4vP.png",
+          leadSheetUrl: "/src/assets/lead-sheets/autumn-leaves.jpg",
           youtubeId: "r-Z8KuwI7Gc",
           startSeconds: 0,
           extraTags: [
@@ -94,6 +94,7 @@ export class DatabaseStorage implements IStorage {
           style: "Jazz Standard",
           notes: "Sophisticated harmonic movement through multiple key centers. A masterpiece of songwriting with challenging chord changes.",
           knowledgeLevel: "does-not-know" as const,
+          leadSheetUrl: "/src/assets/lead-sheets/all-the-things-you-are.png",
           spotifyUri: "spotify:track:4IVLhmrJ00V9HOJ2Dd6Kbf",
           extraTags: [
             { key: "Difficulty", value: "Advanced" },
