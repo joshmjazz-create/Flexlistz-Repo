@@ -19,9 +19,8 @@ export default function AutocompleteInput({
   placeholder,
   className,
 }: AutocompleteInputProps) {
-  const [inputValue, setInputValue] = useState(value);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [hasUserInput, setHasUserInput] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch field values for autocomplete
@@ -30,86 +29,84 @@ export default function AutocompleteInput({
   });
 
   // Filter values based on current input
-  const filteredValues = hasUserInput && inputValue.trim()
+  const filteredValues = value.trim()
     ? fieldValues.filter(val =>
-        val.toLowerCase().includes(inputValue.toLowerCase())
+        val.toLowerCase().includes(value.toLowerCase())
       )
-    : [];
+    : fieldValues;
 
-  // Update input value when prop value changes
-  useEffect(() => {
-    setInputValue(value);
-    setHasUserInput(false);
-    setShowDropdown(false);
-  }, [value]);
+  // Show dropdown when focused and has matches
+  const showDropdown = inputFocused && isOpen && filteredValues.length > 0;
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
+        setIsOpen(false);
+        setInputFocused(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
 
   const handleInputChange = (newValue: string) => {
-    setInputValue(newValue);
     onChange(newValue);
-    setHasUserInput(true);
-    
-    // Show dropdown if there are matching results
-    if (newValue.trim()) {
-      const matches = fieldValues.filter(val =>
-        val.toLowerCase().includes(newValue.toLowerCase())
-      );
-      setShowDropdown(matches.length > 0);
-    } else {
-      setShowDropdown(false);
+    if (!isOpen && newValue.trim()) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleFocus = () => {
+    setInputFocused(true);
+    if (value.trim() || fieldValues.length > 0) {
+      setIsOpen(true);
     }
   };
 
   const handleSelect = (selectedValue: string) => {
-    setInputValue(selectedValue);
     onChange(selectedValue);
-    setShowDropdown(false);
-    setHasUserInput(false);
+    setIsOpen(false);
+    setInputFocused(false);
   };
-
-  const shouldShowDropdown = showDropdown && hasUserInput && filteredValues.length > 0;
 
   return (
     <div ref={containerRef} className="relative">
       <Input
-        value={inputValue}
+        value={value}
         onChange={(e) => handleInputChange(e.target.value)}
+        onFocus={handleFocus}
         placeholder={placeholder}
         className={className}
       />
-      {shouldShowDropdown && (
-        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-      )}
       
-      {shouldShowDropdown && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
-          {filteredValues.slice(0, 10).map((fieldValue) => (
-            <div
-              key={fieldValue}
-              className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={() => handleSelect(fieldValue)}
-            >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  value === fieldValue ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {fieldValue}
-            </div>
-          ))}
-        </div>
+      {showDropdown && (
+        <>
+          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
+            {filteredValues.slice(0, 10).map((fieldValue) => (
+              <div
+                key={fieldValue}
+                className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onMouseDown={(e) => {
+                  e.preventDefault(); // Prevent input blur
+                  handleSelect(fieldValue);
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === fieldValue ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {fieldValue}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
