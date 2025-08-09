@@ -220,10 +220,15 @@ export default function ItemList({
                       {item.title}
                     </h3>
                     
-                    {/* Tags */}
-                    {item.tags && Object.keys(item.tags).length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {Object.entries(item.tags).map(([key, value], tagIndex) => (
+                    {/* Fixed Fields as Tags */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {[
+                        { key: "Key", value: item.key },
+                        { key: "Composer", value: item.composer },
+                        { key: "Style", value: item.style },
+                      ]
+                        .filter(tag => tag.value?.trim())
+                        .map(({ key, value }, tagIndex) => (
                           <Badge
                             key={`${key}-${value}`}
                             variant="secondary"
@@ -233,8 +238,7 @@ export default function ItemList({
                             {value}
                           </Badge>
                         ))}
-                      </div>
-                    )}
+                    </div>
 
                     {/* Media Section */}
                     {(item.youtubeId || item.spotifyUri) && (

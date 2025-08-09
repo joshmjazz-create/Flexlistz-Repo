@@ -80,10 +80,21 @@ export default function Collections() {
           const filterValues = Array.isArray(values) ? values : [values];
           
           filterValues.forEach((value, valueIndex) => {
-            if (a.tags?.[key] === value) {
+            // Get field value from fixed fields or extra tags
+            const getFieldValue = (item: Item, fieldKey: string) => {
+              switch (fieldKey.toLowerCase()) {
+                case 'title': return item.title;
+                case 'key': return item.key;
+                case 'composer': return item.composer;
+                case 'style': return item.style;
+                default: return null; // For extra tags, we'll need a different approach
+              }
+            };
+
+            if (getFieldValue(a, key) === value) {
               aPriority += (filterIndex * 1000) + valueIndex;
             }
-            if (b.tags?.[key] === value) {
+            if (getFieldValue(b, key) === value) {
               bPriority += (filterIndex * 1000) + valueIndex;
             }
           });
@@ -232,36 +243,36 @@ export default function Collections() {
 
       {/* Modals */}
       <AddItemModal
-        open={showAddItem}
-        onOpenChange={setShowAddItem}
-        collectionId={collectionId}
+        isOpen={showAddItem}
+        onClose={() => setShowAddItem(false)}
+        collectionId={collectionId || ""}
       />
 
       <BulkImportModal
-        open={showBulkImport}
-        onOpenChange={setShowBulkImport}
-        collectionId={collectionId}
+        isOpen={showBulkImport}
+        onClose={() => setShowBulkImport(false)}
+        collectionId={collectionId || ""}
       />
 
       <AddCollectionModal
-        open={showAddCollection}
-        onOpenChange={setShowAddCollection}
+        isOpen={showAddCollection}
+        onClose={() => setShowAddCollection(false)}
       />
 
       {editingItem && (
         <EditItemModal
-          open={!!editingItem}
-          onOpenChange={(open) => !open && setEditingItem(null)}
+          isOpen={!!editingItem}
+          onClose={() => setEditingItem(null)}
           item={editingItem}
         />
       )}
 
       <FilterModal
-        open={showFilters}
-        onOpenChange={setShowFilters}
-        collectionId={collectionId}
+        isOpen={showFilters}
+        onClose={() => setShowFilters(false)}
+        collectionId={collectionId || ""}
         activeFilters={activeFilters}
-        onFiltersChange={setActiveFilters}
+        onFilterChange={setActiveFilters}
       />
     </>
   );

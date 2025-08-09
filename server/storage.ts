@@ -2,6 +2,8 @@ import { type Collection, type InsertCollection, type Item, type InsertItem, typ
 import { collections, items, tags, itemTags } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql, and } from "drizzle-orm";
+import { buildTagsFromItem } from "./utils/tags";
+import { norm } from "../client/src/utils/norm";
 
 export interface IStorage {
   // Collections
@@ -43,38 +45,37 @@ export class DatabaseStorage implements IStorage {
         description: "My personal collection of songs I can play",
       }).returning();
 
-      // Add sample items with tags
+      // Add sample items with fixed fields and extra tags
       const sampleItems = [
         {
           title: "Misty",
+          key: "Eb",
+          composer: "Erroll Garner", 
+          style: "Ballad",
           notes: "Beautiful jazz standard, great for practicing chord voicings",
-          tags: {
-            "Composer": "Erroll Garner",
-            "Style": "Ballad",
-            "Key": "Eb",
-            "Tempo": "Slow",
-            "Difficulty": "Intermediate",
-            "Era": "1940s"
-          }
+          extraTags: [
+            { key: "Tempo", value: "Slow" },
+            { key: "Difficulty", value: "Intermediate" },
+            { key: "Era", value: "1940s" }
+          ]
         },
         {
           title: "Autumn Leaves",
+          key: "G minor",
+          composer: "Joseph Kosma",
+          style: "Jazz Standard", 
           notes: "Perfect for beginners learning jazz progressions",
-          tags: {
-            "Composer": "Joseph Kosma",
-            "Style": "Jazz Standard",
-            "Key": "G minor",
-            "Difficulty": "Beginner"
-          }
+          extraTags: [
+            { key: "Difficulty", value: "Beginner" }
+          ]
         },
         {
           title: "Blue Moon",
+          key: "C",
+          composer: "Richard Rodgers",
+          style: "Ballad",
           notes: "Classic standard with simple chord progression",
-          tags: {
-            "Composer": "Richard Rodgers",
-            "Style": "Ballad",
-            "Key": "C"
-          }
+          extraTags: []
         }
       ];
 
@@ -82,12 +83,17 @@ export class DatabaseStorage implements IStorage {
         const [item] = await db.insert(items).values({
           collectionId: collection.id,
           title: itemData.title,
+          key: itemData.key,
+          composer: itemData.composer,
+          style: itemData.style,
           notes: itemData.notes || "",
-          tags: itemData.tags,
         }).returning();
 
+        // Build unified tag list from fixed fields + extra tags
+        const allTags = buildTagsFromItem(itemData);
+        
         // Create tags in the tags table and link them
-        for (const [key, value] of Object.entries(itemData.tags)) {
+        for (const { key, value } of allTags) {
           const tag = await this.upsertTag(key, value);
           await db.insert(itemTags).values({
             itemId: item.id,
@@ -158,36 +164,46 @@ export class DatabaseStorage implements IStorage {
     return item || undefined;
   }
 
-  async createItem(insertItem: InsertItem): Promise<Item> {
-    const [item] = await db.insert(items).values(insertItem).returning();
+  async createItem(itemData: InsertItem): Promise<Item> {
+    // Extract extra tags and remove from item data
+    const { extraTags, ...itemFields } = itemData as any;
     
-    // Create tags in the tags table and link them
-    if (insertItem.tags) {
-      for (const [key, value] of Object.entries(insertItem.tags)) {
-        const tag = await this.upsertTag(key, value);
-        await db.insert(itemTags).values({
-          itemId: item.id,
-          tagId: tag.id,
-        }).onConflictDoNothing();
-      }
+    const [item] = await db.insert(items).values(itemFields).returning();
+    
+    // Build unified tag list from fixed fields + extra tags
+    const allTags = buildTagsFromItem({ ...itemFields, extraTags });
+    
+    // Create tag relationships
+    for (const { key, value } of allTags) {
+      const tag = await this.upsertTag(key, value);
+      await db.insert(itemTags).values({
+        itemId: item.id,
+        tagId: tag.id,
+      }).onConflictDoNothing();
     }
     
     return item;
   }
 
   async updateItem(id: string, updateData: Partial<InsertItem>): Promise<Item | undefined> {
+    // Extract extra tags and remove from update data
+    const { extraTags, ...itemFields } = updateData as any;
+    
     const [updated] = await db
       .update(items)
-      .set(updateData)
+      .set(itemFields)
       .where(eq(items.id, id))
       .returning();
     
-    if (updated && updateData.tags) {
+    if (updated) {
       // Remove existing tag relationships
       await db.delete(itemTags).where(eq(itemTags.itemId, id));
       
+      // Build unified tag list from fixed fields + extra tags
+      const allTags = buildTagsFromItem({ ...updated, extraTags });
+      
       // Create new tag relationships
-      for (const [key, value] of Object.entries(updateData.tags)) {
+      for (const { key, value } of allTags) {
         const tag = await this.upsertTag(key, value);
         await db.insert(itemTags).values({
           itemId: id,
@@ -209,74 +225,87 @@ export class DatabaseStorage implements IStorage {
   }
 
   async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
-    // Start with base conditions
-    let conditions = [eq(items.collectionId, collectionId)];
+    let query = db.select().from(items).where(eq(items.collectionId, collectionId));
     
     // Apply search query if provided
     if (searchQuery && searchQuery.trim()) {
       const searchTerm = `%${searchQuery.toLowerCase()}%`;
-      conditions.push(
+      query = query.where(
         sql`(
           LOWER(${items.title}) LIKE ${searchTerm} OR
-          LOWER(${items.notes}) LIKE ${searchTerm} OR
-          LOWER(${items.tags}::text) LIKE ${searchTerm}
+          LOWER(${items.key}) LIKE ${searchTerm} OR
+          LOWER(${items.composer}) LIKE ${searchTerm} OR
+          LOWER(${items.style}) LIKE ${searchTerm} OR
+          LOWER(${items.notes}) LIKE ${searchTerm}
         )`
       );
     }
 
-    // Apply tag filters with proper AND logic
+    // Apply unified tag filtering with AND logic
     if (Object.keys(filters).length > 0) {
+      // Build tag filter pairs using normalized comparisons
+      const filterPairs: string[] = [];
+      
       for (const [key, value] of Object.entries(filters)) {
-        const normalizedKey = key.trim();
+        const normalizedKey = norm(key);
         const filterValues = Array.isArray(value) ? value : [value];
-        const normalizedValues = filterValues
-          .map(v => v.trim())
-          .filter(v => v.length > 0);
         
-        if (normalizedValues.length > 0) {
-          // Create OR conditions for multiple values of the same key
-          const valueConditions = normalizedValues.map(normalizedValue => 
-            sql`LOWER(TRIM(${items.tags}->>${normalizedKey})) = ${normalizedValue.toLowerCase()}`
-          );
-          
-          // Add AND condition for this key
-          conditions.push(sql`(${sql.join(valueConditions, sql` OR `)})`);
-        }
+        filterValues.forEach(val => {
+          const normalizedValue = norm(val);
+          if (normalizedValue) {
+            filterPairs.push(`${normalizedKey}:${normalizedValue}`);
+          }
+        });
+      }
+      
+      if (filterPairs.length > 0) {
+        // Use the AND logic with normalized tag matching
+        query = query
+          .innerJoin(itemTags, eq(itemTags.itemId, items.id))
+          .innerJoin(tags, eq(tags.id, itemTags.tagId))
+          .where(
+            sql`LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value})) IN (${sql.join(
+              filterPairs.map(pair => sql`${pair}`),
+              sql`, `
+            )})`
+          )
+          .groupBy(items.id)
+          .having(sql`COUNT(DISTINCT LOWER(TRIM(${tags.key}) || ':' || TRIM(${tags.value}))) = ${filterPairs.length}`);
       }
     }
 
-    return await db
-      .select()
-      .from(items)
-      .where(and(...conditions));
+    return await query;
   }
 
   async getAvailableTags(collectionId: string): Promise<Record<string, string[]>> {
-    const itemsInCollection = await db
-      .select({ tags: items.tags })
-      .from(items)
-      .where(eq(items.collectionId, collectionId));
+    // Get all tags for items in this collection
+    const result = await db
+      .select({
+        key: tags.key,
+        value: tags.value,
+      })
+      .from(tags)
+      .innerJoin(itemTags, eq(itemTags.tagId, tags.id))
+      .innerJoin(items, eq(items.id, itemTags.itemId))
+      .where(eq(items.collectionId, collectionId))
+      .groupBy(tags.key, tags.value);
     
+    // Group by key
     const tagMap: Record<string, Set<string>> = {};
-    
-    itemsInCollection.forEach(item => {
-      if (item.tags) {
-        Object.entries(item.tags).forEach(([key, value]) => {
-          if (!tagMap[key]) {
-            tagMap[key] = new Set();
-          }
-          tagMap[key].add(value);
-        });
+    result.forEach(({ key, value }) => {
+      if (!tagMap[key]) {
+        tagMap[key] = new Set();
       }
+      tagMap[key].add(value);
     });
     
     // Convert Sets to arrays
-    const result: Record<string, string[]> = {};
+    const finalResult: Record<string, string[]> = {};
     Object.entries(tagMap).forEach(([key, valueSet]) => {
-      result[key] = Array.from(valueSet).sort();
+      finalResult[key] = Array.from(valueSet).sort();
     });
     
-    return result;
+    return finalResult;
   }
 
   async getTagKeys(): Promise<string[]> {

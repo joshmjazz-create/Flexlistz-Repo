@@ -1,187 +1,80 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertItemSchema } from "@shared/schema";
-import { AutocompleteTagInput } from "./autocomplete-tag-input";
 import { parseMediaLink } from "@/utils/parseMediaLink";
-
-const formSchema = insertItemSchema.extend({
-  tags: z.record(z.string()).optional(),
-  mediaUrl: z.string().optional(),
-});
+import ItemForm from "./item-form";
 
 interface AddItemModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  collectionId?: string;
+  isOpen: boolean;
+  onClose: () => void;
+  collectionId: string;
 }
 
-export default function AddItemModal({ open, onOpenChange, collectionId }: AddItemModalProps) {
+export default function AddItemModal({ isOpen, onClose, collectionId }: AddItemModalProps) {
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      notes: "",
-      tags: {},
-      mediaUrl: "",
-      collectionId: collectionId || "",
-    },
-  });
-
   const createItemMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof formSchema>) => {
-      const response = await apiRequest("POST", "/api/items", data);
+    mutationFn: async (data: any) => {
+      const response = await fetch("/api/items", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create item");
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/collections/${collectionId}/items`] });
+      onClose();
       toast({
         title: "Success",
         description: "Item added successfully",
       });
-      onOpenChange(false);
-      form.reset();
     },
-    onError: () => {
+    onError: (error) => {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Failed to add item",
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
-    if (!collectionId) {
-      toast({
-        title: "Error",
-        description: "Please select a collection first",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleSubmit = (formData: any) => {
     // Parse media URL if provided
-    const mediaData = data.mediaUrl ? parseMediaLink(data.mediaUrl) : {};
-    const { mediaUrl, ...submitData } = data;
-    
-    createItemMutation.mutate({ 
-      ...submitData, 
+    const mediaData = formData.mediaUrl.trim() ? parseMediaLink(formData.mediaUrl) : {};
+
+    createItemMutation.mutate({
       collectionId,
-      youtubeId: mediaData.youtubeId || null,
-      spotifyUri: mediaData.spotifyUri || null,
-      startSeconds: mediaData.startSeconds || null,
+      title: formData.title.trim(),
+      key: formData.key.trim() || null,
+      composer: formData.composer.trim() || null,
+      style: formData.style.trim() || null,
+      notes: formData.notes.trim() || null,
+      extraTags: formData.extraTags.filter((tag: any) => tag.key.trim() && tag.value.trim()),
+      ...mediaData,
     });
   };
 
-  const currentTags = form.watch("tags") || {};
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Item</DialogTitle>
         </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Item Title *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter item title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <AutocompleteTagInput
-              tags={currentTags}
-              onChange={(tags) => form.setValue("tags", tags)}
-              className="space-y-2"
-            />
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Add any additional notes or comments"
-                      rows={3}
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="mediaUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Media URL (Optional)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Paste YouTube or Spotify link here"
-                      {...field}
-                      value={field.value || ""}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createItemMutation.isPending}
-              >
-                {createItemMutation.isPending ? "Adding..." : "Add Item"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        
+        <ItemForm
+          onSubmit={handleSubmit}
+          onCancel={onClose}
+          isSubmitting={createItemMutation.isPending}
+        />
       </DialogContent>
     </Dialog>
   );

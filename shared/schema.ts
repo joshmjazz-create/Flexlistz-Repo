@@ -13,8 +13,10 @@ export const items = pgTable("items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   collectionId: varchar("collection_id").notNull(),
   title: text("title").notNull(),
+  key: text("key"),
+  composer: text("composer"),
+  style: text("style"),
   notes: text("notes"),
-  tags: json("tags").$type<Record<string, string>>().default({}),
   youtubeId: text("youtube_id"),
   spotifyUri: text("spotify_uri"),
   startSeconds: integer("start_seconds"),
@@ -67,6 +69,11 @@ export const insertCollectionSchema = createInsertSchema(collections).omit({
 
 export const insertItemSchema = createInsertSchema(items).omit({
   id: true,
+}).extend({
+  extraTags: z.array(z.object({
+    key: z.string(),
+    value: z.string()
+  })).optional(),
 });
 
 export const insertTagSchema = createInsertSchema(tags).omit({
