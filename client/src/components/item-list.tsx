@@ -206,7 +206,7 @@ export default function ItemList({
                     onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
                     className="px-3 py-1"
                   >
-                    {sortOrder === 'desc' ? <ArrowDownAZ className="w-4 h-4 mr-1" /> : <ArrowUpAZ className="w-4 h-4 mr-1" />}
+                    {sortOrder === 'asc' ? <ArrowDownAZ className="w-4 h-4 mr-1" /> : <ArrowUpAZ className="w-4 h-4 mr-1" />}
                     A-Z
                   </Button>
                   <Button
@@ -217,7 +217,7 @@ export default function ItemList({
                   >
                     <Clock className="w-4 h-4 mr-1" />
                     Last Modified
-                    {sortOrder === 'first-modified' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+                    {sortOrder === 'last-modified' ? <ChevronDown className="w-4 h-4 ml-1" /> : <ChevronUp className="w-4 h-4 ml-1" />}
                   </Button>
                   {hasActiveFilters && (
                     <Button

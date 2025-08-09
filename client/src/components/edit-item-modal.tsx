@@ -97,7 +97,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     notes: item.notes || "",
     mediaUrl: getCurrentMediaUrl(),
     knowledgeLevel: item.knowledgeLevel || "does-not-know",
-    extraTags: getExtraTags(),
+    extraTags: [], // TODO: Load existing extra tags when this feature is fully implemented
   };
 
   return (
