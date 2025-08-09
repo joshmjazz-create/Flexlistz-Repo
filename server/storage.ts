@@ -96,13 +96,15 @@ export class DatabaseStorage implements IStorage {
         // Build unified tag list from fixed fields + extra tags
         const allTags = buildTagsFromItem(itemData);
         
-        // Create tags in the tags table and link them
-        for (const { key, value } of allTags) {
-          const tag = await this.upsertTag(key, value);
-          await db.insert(itemTags).values({
+        // Create tags in the tags table and link them in batch
+        if (allTags.length > 0) {
+          const tagIds = await this.upsertTagsBatch(allTags);
+          const tagRelationships = tagIds.map(tagId => ({
             itemId: item.id,
-            tagId: tag.id,
-          }).onConflictDoNothing();
+            tagId,
+          }));
+          
+          await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
         }
       }
     }
@@ -177,14 +179,19 @@ export class DatabaseStorage implements IStorage {
     // Build unified tag list from fixed fields + extra tags
     const allTags = buildTagsFromItem({ ...itemFields, extraTags });
     
-    // Create tag relationships
-    for (const { key, value } of allTags) {
-      const tag = await this.upsertTag(key, value);
-      await db.insert(itemTags).values({
+    // Create tag relationships in batch
+    if (allTags.length > 0) {
+      const tagIds = await this.upsertTagsBatch(allTags);
+      const tagRelationships = tagIds.map(tagId => ({
         itemId: item.id,
-        tagId: tag.id,
-      }).onConflictDoNothing();
+        tagId,
+      }));
+      
+      await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
     }
+    
+    // Clear cache since field values may have changed
+    this.clearFieldValuesCache();
     
     return item;
   }
@@ -225,14 +232,19 @@ export class DatabaseStorage implements IStorage {
       };
       const allTags = buildTagsFromItem(itemForTags);
       
-      // Create new tag relationships
-      for (const { key, value } of allTags) {
-        const tag = await this.upsertTag(key, value);
-        await db.insert(itemTags).values({
+      // Create new tag relationships in batch
+      if (allTags.length > 0) {
+        const tagIds = await this.upsertTagsBatch(allTags);
+        const tagRelationships = tagIds.map(tagId => ({
           itemId: id,
-          tagId: tag.id,
-        }).onConflictDoNothing();
+          tagId,
+        }));
+        
+        await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
       }
+      
+      // Clear cache since field values may have changed
+      this.clearFieldValuesCache();
     }
     
     return updated || undefined;
@@ -366,7 +378,19 @@ export class DatabaseStorage implements IStorage {
     return result.map(r => r.value).sort();
   }
 
+  private fieldValuesCache = new Map<string, { data: string[], timestamp: number }>();
+  private cacheExpiryMs = 30000; // 30 seconds
+
   async getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]> {
+    // Check cache first
+    const cacheKey = `field_values_${field}`;
+    const cached = this.fieldValuesCache.get(cacheKey);
+    const now = Date.now();
+    
+    if (cached && (now - cached.timestamp) < this.cacheExpiryMs) {
+      return cached.data;
+    }
+    
     const column = field === 'key' ? items.key : 
                    field === 'composer' ? items.composer : 
                    items.style;
@@ -375,9 +399,19 @@ export class DatabaseStorage implements IStorage {
       .from(items)
       .where(isNotNull(column));
     
-    return result
+    const data = result
       .map(row => row.value)
       .filter((value): value is string => value !== null && value.trim() !== '');
+    
+    // Cache the result
+    this.fieldValuesCache.set(cacheKey, { data, timestamp: now });
+    
+    return data;
+  }
+
+  // Clear cache when items are modified
+  private clearFieldValuesCache(): void {
+    this.fieldValuesCache.clear();
   }
 
   async upsertTag(key: string, value: string): Promise<Tag> {
@@ -398,6 +432,51 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return newTag;
+  }
+
+  async upsertTagsBatch(tagPairs: { key: string; value: string }[]): Promise<string[]> {
+    if (tagPairs.length === 0) return [];
+    
+    // First, try to find all existing tags in one query
+    const existingTags = await db
+      .select()
+      .from(tags)
+      .where(
+        sql`(${tags.key}, ${tags.value}) IN (${sql.join(
+          tagPairs.map(pair => sql`(${pair.key}, ${pair.value})`),
+          sql`, `
+        )})`
+      );
+    
+    const existingMap = new Map<string, string>();
+    existingTags.forEach(tag => {
+      existingMap.set(`${tag.key}:${tag.value}`, tag.id);
+    });
+    
+    // Find which tags need to be created
+    const newTags = tagPairs.filter(pair => 
+      !existingMap.has(`${pair.key}:${pair.value}`)
+    );
+    
+    // Batch create new tags
+    let createdTags: Tag[] = [];
+    if (newTags.length > 0) {
+      createdTags = await db
+        .insert(tags)
+        .values(newTags)
+        .returning();
+    }
+    
+    // Return all tag IDs in order
+    return tagPairs.map(pair => {
+      const existing = existingMap.get(`${pair.key}:${pair.value}`);
+      if (existing) return existing;
+      
+      const created = createdTags.find(tag => 
+        tag.key === pair.key && tag.value === pair.value
+      );
+      return created!.id;
+    });
   }
 
   async importItems(targetCollectionId: string, itemIds: string[]): Promise<{ count: number }> {
