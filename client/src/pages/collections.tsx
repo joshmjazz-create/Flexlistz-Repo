@@ -186,7 +186,6 @@ export default function Collections() {
           <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <ThemeToggle />
                 <Button onClick={() => setShowAddItem(true)} size="lg" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
                   <Plus className="w-6 h-6" />
                 </Button>

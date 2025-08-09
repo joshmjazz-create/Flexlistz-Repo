@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 
 interface ResponsiveLayoutProps {
@@ -48,11 +49,14 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
           >
             <Menu className="w-5 h-5" />
           </Button>
-          <div className="flex items-center space-x-3">
-            <div className="w-6 h-6 flex items-center justify-center">
-              <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain opacity-100" />
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 flex items-center justify-center">
+                <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain opacity-100" />
+              </div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
             </div>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
+            <ThemeToggle />
           </div>
         </header>
 
