@@ -50,8 +50,14 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
   const bulkImportMutation = useMutation({
     mutationFn: async (items: string[]) => {
       const promises = items.map(async (title) => {
+        let cleanTitle = title.trim();
+        // Remove "[  ]" prefix if present
+        if (cleanTitle.startsWith('[  ]')) {
+          cleanTitle = cleanTitle.substring(4).trim();
+        }
+        
         const itemData = {
-          title: title.trim(),
+          title: cleanTitle,
           notes: "",
           tags: {},
           collectionId: collectionId!,
@@ -89,9 +95,16 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
     
     const items = text
       .split('\n')
-      .map(line => line.trim())
+      .map(line => {
+        let trimmed = line.trim();
+        // Remove "[  ]" prefix if present
+        if (trimmed.startsWith('[  ]')) {
+          trimmed = trimmed.substring(4).trim();
+        }
+        return trimmed;
+      })
       .filter(line => line.length > 0)
-      .slice(0, 100); // Limit to 100 items for performance
+      .slice(0, 1000); // Limit to 1000 items for performance
     
     setPreviewItems(items);
   };
@@ -108,7 +121,14 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
 
     const items = data.itemsList
       .split('\n')
-      .map(line => line.trim())
+      .map(line => {
+        let trimmed = line.trim();
+        // Remove "[  ]" prefix if present
+        if (trimmed.startsWith('[  ]')) {
+          trimmed = trimmed.substring(4).trim();
+        }
+        return trimmed;
+      })
       .filter(line => line.length > 0);
 
     if (items.length === 0) {
@@ -120,10 +140,10 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       return;
     }
 
-    if (items.length > 100) {
+    if (items.length > 1000) {
       toast({
         title: "Error",
-        description: "Please limit to 100 items per import",
+        description: "Please limit to 1000 items per import",
         variant: "destructive",
       });
       return;
@@ -148,7 +168,7 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
           </DialogTitle>
           <DialogDescription>
             Paste a list of items (one per line) to quickly populate your collection. 
-            You can edit each item afterward to add tags and details.
+            Up to 1000 items per import. Items starting with "[  ]" will be automatically cleaned.
           </DialogDescription>
         </DialogHeader>
 
@@ -210,10 +230,10 @@ Summertime`}
                   </div>
                 </div>
 
-                {previewItems.length > 100 && (
+                {previewItems.length > 1000 && (
                   <div className="flex items-center gap-2 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
                     <AlertCircle className="w-4 h-4" />
-                    Only the first 100 items will be imported. Please split large lists into smaller batches.
+                    Only the first 1000 items will be imported. Please split large lists into smaller batches.
                   </div>
                 )}
               </div>
@@ -226,6 +246,7 @@ Summertime`}
                   <p className="font-medium mb-1">After importing:</p>
                   <ul className="text-xs space-y-1 text-blue-700">
                     <li>• Items will be created with just titles</li>
+                    <li>• Prefixes like "[  ]" are automatically removed</li>
                     <li>• Click on any item to edit and add tags (Style, Key, Composer, etc.)</li>
                     <li>• Use the search and filter features to organize your collection</li>
                   </ul>

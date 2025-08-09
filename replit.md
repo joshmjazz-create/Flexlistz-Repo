@@ -69,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 - **Advanced Filtering**: Filter by tags, search by text, combine multiple filters
 - **Real-time Updates**: Optimistic updates with query invalidation
 - **Responsive Design**: Mobile-friendly interface with collapsible sidebar
-- **Bulk Import**: Paste plain-text lists to quickly populate collections
+- **Bulk Import**: Import up to 1000 items at once with automatic "[  ]" prefix removal
 - **Type Safety**: End-to-end TypeScript with shared schemas between client and server
 
 ## External Dependencies
