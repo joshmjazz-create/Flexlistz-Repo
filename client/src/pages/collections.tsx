@@ -31,7 +31,7 @@ export default function Collections() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('compact');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order'>('asc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order' | 'last-modified' | 'first-modified'>('asc');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
 
@@ -73,6 +73,18 @@ export default function Collections() {
       return [...itemsToSort].sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortOrder === 'desc') {
       return [...itemsToSort].sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortOrder === 'last-modified') {
+      return [...itemsToSort].sort((a, b) => {
+        const aDate = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const bDate = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return bDate - aDate; // Most recent first
+      });
+    } else if (sortOrder === 'first-modified') {
+      return [...itemsToSort].sort((a, b) => {
+        const aDate = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const bDate = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        return aDate - bDate; // Oldest first
+      });
     } else if (sortOrder === 'filter-order') {
       // Sort by filter order when filters are active
       const hasFilters = Object.keys(activeFilters).length > 0;

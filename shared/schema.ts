@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, json, primaryKey, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, json, primaryKey, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -21,6 +21,8 @@ export const items = pgTable("items", {
   spotifyUri: text("spotify_uri"),
   startSeconds: integer("start_seconds"),
   knowledgeLevel: text("knowledge_level", { enum: ["knows", "kind-of-knows", "does-not-know"] }).default("does-not-know"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const tags = pgTable("tags", {
@@ -70,6 +72,8 @@ export const insertCollectionSchema = createInsertSchema(collections).omit({
 
 export const insertItemSchema = createInsertSchema(items).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 }).extend({
   extraTags: z.array(z.object({
     key: z.string(),

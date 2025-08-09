@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter, Youtube, Music } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, Filter, Youtube, Music, Clock } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -13,8 +13,8 @@ interface ItemListProps {
   isLoading?: boolean;
   viewMode?: 'compact' | 'detailed';
   onViewModeChange?: (mode: 'compact' | 'detailed') => void;
-  sortOrder?: 'asc' | 'desc' | 'filter-order';
-  onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order') => void;
+  sortOrder?: 'asc' | 'desc' | 'filter-order' | 'last-modified' | 'first-modified';
+  onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order' | 'last-modified' | 'first-modified') => void;
   hasActiveFilters?: boolean;
   expandedItems?: Set<string>;
   onToggleExpanded?: (itemId: string) => void;
@@ -201,22 +201,22 @@ export default function ItemList({
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort</span>
                   <Button
-                    variant={sortOrder === 'asc' ? 'default' : 'outline'}
+                    variant={sortOrder === 'asc' || sortOrder === 'desc' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => onSortOrderChange('asc')}
+                    onClick={() => onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')}
                     className="px-3 py-1"
                   >
                     <ArrowUpAZ className="w-4 h-4 mr-1" />
-                    A-Z
+                    {sortOrder === 'desc' ? 'Z-A' : 'A-Z'}
                   </Button>
                   <Button
-                    variant={sortOrder === 'desc' ? 'default' : 'outline'}
+                    variant={sortOrder === 'last-modified' || sortOrder === 'first-modified' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => onSortOrderChange('desc')}
+                    onClick={() => onSortOrderChange(sortOrder === 'last-modified' ? 'first-modified' : 'last-modified')}
                     className="px-3 py-1"
                   >
-                    <ArrowDownZA className="w-4 h-4 mr-1" />
-                    Z-A
+                    <Clock className="w-4 h-4 mr-1" />
+                    {sortOrder === 'first-modified' ? 'First Modified' : 'Last Modified'}
                   </Button>
                   {hasActiveFilters && (
                     <Button
