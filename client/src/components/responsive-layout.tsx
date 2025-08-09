@@ -50,7 +50,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
           </Button>
           <div className="flex items-center space-x-3">
             <div className="w-6 h-6 flex items-center justify-center">
-              <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain" />
+              <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain opacity-100" />
             </div>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
           </div>

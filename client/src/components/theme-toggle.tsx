@@ -1,49 +1,48 @@
-import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/contexts/theme-context";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const getIcon = () => {
+  const getNextTheme = () => {
     switch (theme) {
       case 'light':
-        return <Sun className="h-4 w-4" />;
+        return 'dark';
       case 'dark':
-        return <Moon className="h-4 w-4" />;
+        return 'auto';
       case 'auto':
-        return <Monitor className="h-4 w-4" />;
+        return 'light';
+      default:
+        return 'light';
     }
   };
 
+  const getLabel = () => {
+    switch (theme) {
+      case 'light':
+        return 'L';
+      case 'dark':
+        return 'D';
+      case 'auto':
+        return 'A';
+      default:
+        return 'L';
+    }
+  };
+
+  const handleToggle = () => {
+    setTheme(getNextTheme());
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="w-9 px-0">
-          {getIcon()}
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('auto')}>
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>Auto</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={handleToggle}
+      className="w-8 h-8 p-0 font-mono font-bold text-sm"
+      title={`Current: ${theme.charAt(0).toUpperCase() + theme.slice(1)} theme`}
+    >
+      {getLabel()}
+    </Button>
   );
 }

@@ -242,7 +242,7 @@ export default function ItemList({
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
         {viewMode === 'compact' ? (
           /* Compact View */
           <div className="space-y-1">

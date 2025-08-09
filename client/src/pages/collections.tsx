@@ -130,7 +130,7 @@ export default function Collections() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 flex items-center justify-center">
-              <img src={logoImage} alt="FlexList" className="w-8 h-8 object-contain" />
+              <img src={logoImage} alt="FlexList" className="w-8 h-8 object-contain opacity-100" />
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
@@ -259,7 +259,7 @@ export default function Collections() {
       ) : (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" />
+            <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" style={{ filter: 'none' }} />
             <div className="flex items-center justify-center gap-3 mb-2">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Welcome to FlexList</h2>
             </div>
