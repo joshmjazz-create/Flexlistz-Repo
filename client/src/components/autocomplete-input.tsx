@@ -28,12 +28,12 @@ export default function AutocompleteInput({
     queryKey: [`/api/field-values/${field}`],
   });
 
-  // Filter values based on current input
+  // Filter values based on current input - only show matches when there's input
   const filteredValues = value.trim()
     ? fieldValues.filter(val =>
         val.toLowerCase().includes(value.toLowerCase())
       )
-    : fieldValues;
+    : []; // Show nothing when input is empty
 
   // Show dropdown when focused and has matches
   const showDropdown = inputFocused && isOpen && filteredValues.length > 0;
@@ -55,14 +55,18 @@ export default function AutocompleteInput({
 
   const handleInputChange = (newValue: string) => {
     onChange(newValue);
-    if (!isOpen && newValue.trim()) {
+    // Open dropdown when user starts typing, close when empty
+    if (newValue.trim()) {
       setIsOpen(true);
+    } else {
+      setIsOpen(false);
     }
   };
 
   const handleFocus = () => {
     setInputFocused(true);
-    if (value.trim() || fieldValues.length > 0) {
+    // Only open if there's already text to filter on
+    if (value.trim()) {
       setIsOpen(true);
     }
   };
