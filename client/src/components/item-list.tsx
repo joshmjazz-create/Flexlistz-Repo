@@ -66,17 +66,6 @@ export default function ItemList({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
-      toast({
-        title: "Updated",
-        description: "Knowledge level updated",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update knowledge level",
-        variant: "destructive",
-      });
     },
   });
 
@@ -330,7 +319,7 @@ export default function ItemList({
           /* Detailed View */
           <div className="space-y-4">
             {items.map((item, index) => (
-              <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              <div key={item.id} className={`rounded-lg border p-6 hover:shadow-md transition-shadow ${getKnowledgeClasses(item.knowledgeLevel)}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
