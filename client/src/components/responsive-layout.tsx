@@ -13,7 +13,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-80 md:flex-col shrink-0 border-r bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
         {sidebar}
@@ -61,7 +61,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           {children}
         </div>
       </main>

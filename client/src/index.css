@@ -185,7 +185,12 @@ img[alt="FlexList"] {
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-background text-foreground min-h-screen;
+  }
+  
+  html, body, #root {
+    height: 100%;
+    background-color: hsl(var(--background));
   }
 }
 
