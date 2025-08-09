@@ -27,7 +27,7 @@ export interface IStorage {
   // Tag cataloging
   getTagKeys(): Promise<string[]>;
   getTagValues(key: string): Promise<string[]>;
-  getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]>;
+  getFieldValues(field: 'title' | 'key' | 'composer' | 'style'): Promise<string[]>;
   upsertTag(key: string, value: string): Promise<Tag>;
   
   // Import items
@@ -435,7 +435,7 @@ export class DatabaseStorage implements IStorage {
   private fieldValuesCache = new Map<string, { data: string[], timestamp: number }>();
   private cacheExpiryMs = 30000; // 30 seconds
 
-  async getFieldValues(field: 'key' | 'composer' | 'style'): Promise<string[]> {
+  async getFieldValues(field: 'title' | 'key' | 'composer' | 'style'): Promise<string[]> {
     // Check cache first
     const cacheKey = `field_values_${field}`;
     const cached = this.fieldValuesCache.get(cacheKey);
@@ -445,7 +445,8 @@ export class DatabaseStorage implements IStorage {
       return cached.data;
     }
     
-    const column = field === 'key' ? items.key : 
+    const column = field === 'title' ? items.title :
+                   field === 'key' ? items.key : 
                    field === 'composer' ? items.composer : 
                    items.style;
     
@@ -455,7 +456,8 @@ export class DatabaseStorage implements IStorage {
     
     const data = result
       .map(row => row.value)
-      .filter((value): value is string => value !== null && value.trim() !== '');
+      .filter((value): value is string => value !== null && value.trim() !== '')
+      .sort(); // Sort alphabetically for better UX
     
     // Cache the result
     this.fieldValuesCache.set(cacheKey, { data, timestamp: now });

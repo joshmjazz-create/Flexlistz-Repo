@@ -191,10 +191,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/field-values/:field", async (req, res) => {
     try {
       const { field } = req.params;
-      if (!['key', 'composer', 'style'].includes(field)) {
+      if (!['title', 'key', 'composer', 'style'].includes(field)) {
         return res.status(400).json({ message: "Invalid field" });
       }
-      const values = await storage.getFieldValues(field as 'key' | 'composer' | 'style');
+      const values = await storage.getFieldValues(field as 'title' | 'key' | 'composer' | 'style');
       res.json(values);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch field values" });

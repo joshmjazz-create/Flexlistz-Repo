@@ -98,12 +98,12 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
+            <AutocompleteInput
+              field="title"
               value={formData.title}
-              onChange={(e) => updateField('title', e.target.value)}
+              onChange={(value) => updateField('title', value)}
               placeholder="Enter song title"
-              required
+              className="required"
             />
           </div>
 
