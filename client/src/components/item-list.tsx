@@ -180,32 +180,9 @@ export default function ItemList({
           <div className="space-y-1">
             {items.map((item, index) => (
               <div key={item.id} className="bg-white rounded border border-gray-200 px-3 py-2 hover:shadow-sm transition-shadow">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-900 truncate flex-1">
-                    {item.title}
-                  </h3>
-                  
-                  {/* Compact Actions */}
-                  <div className="flex space-x-0.5 ml-3">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditItem(item)}
-                      className="p-1 h-6 w-6 text-gray-400 hover:text-primary-600"
-                    >
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => handleDeleteItem(item.id, e)}
-                      disabled={deleteItemMutation.isPending}
-                      className="p-1 h-6 w-6 text-gray-400 hover:text-red-500"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
+                <h3 className="text-sm font-medium text-gray-900 truncate">
+                  {item.title}
+                </h3>
               </div>
             ))}
           </div>
