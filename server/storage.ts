@@ -43,10 +43,10 @@ export class DatabaseStorage implements IStorage {
     // Check if we already have collections
     const existingCollections = await db.select().from(collections).limit(1);
     if (existingCollections.length === 0) {
-      // Create the "Songs I Know" collection
+      // Create the "Sample" collection
       const [collection] = await db.insert(collections).values({
-        name: "Songs I Know",
-        description: "My personal collection of songs I can play",
+        name: "Sample",
+        description: "Example collection with jazz standards",
       }).returning();
 
       // Add sample items with fixed fields and extra tags
