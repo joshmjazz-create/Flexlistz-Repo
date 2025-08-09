@@ -4,12 +4,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { parseMediaLink } from "@/utils/parseMediaLink";
 import { type Item } from "@shared/schema";
 import ItemForm from "./item-form";
+import { useState } from "react";
 
 interface EditItemModalProps {
   isOpen: boolean;
@@ -19,6 +30,9 @@ interface EditItemModalProps {
 
 export default function EditItemModal({ isOpen, onClose, item }: EditItemModalProps) {
   const { toast } = useToast();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
 
   const updateItemMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -78,6 +92,35 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
       knowledgeLevel: formData.knowledgeLevel || item.knowledgeLevel || 'does-not-know',
       ...mediaData,
     });
+    
+    // Reset unsaved changes flag after successful save
+    setHasUnsavedChanges(false);
+  };
+
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleSaveAndExit = () => {
+    if (pendingFormData) {
+      handleSubmit(pendingFormData);
+    }
+    setShowConfirmDialog(false);
+  };
+
+  const handleExitWithoutSaving = () => {
+    setHasUnsavedChanges(false);
+    setShowConfirmDialog(false);
+    onClose();
+  };
+
+  const handleFormChange = (formData: any) => {
+    setHasUnsavedChanges(true);
+    setPendingFormData(formData);
   };
 
   // Reconstruct current media URL for comparison
@@ -105,19 +148,41 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Item</DialogTitle>
-        </DialogHeader>
-        
-        <ItemForm
-          initial={initialData}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-          isSubmitting={updateItemMutation.isPending}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Item</DialogTitle>
+          </DialogHeader>
+          
+          <ItemForm
+            initial={initialData}
+            onSubmit={handleSubmit}
+            onCancel={handleClose}
+            onChange={handleFormChange}
+            isSubmitting={updateItemMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save Changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Do you want to save your changes before closing?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleExitWithoutSaving}>
+              Exit Without Saving
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveAndExit}>
+              Save Changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

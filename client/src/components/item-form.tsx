@@ -28,10 +28,11 @@ interface ItemFormProps {
   initial?: Partial<FormData>;
   onSubmit: (data: FormData) => void;
   onCancel: () => void;
+  onChange?: (data: FormData) => void;
   isSubmitting?: boolean;
 }
 
-export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = false }: ItemFormProps) {
+export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubmitting = false }: ItemFormProps) {
   const [formData, setFormData] = useState<FormData>({
     title: initial?.title || "",
     key: initial?.key || "",
@@ -57,30 +58,38 @@ export default function ItemForm({ initial, onSubmit, onCancel, isSubmitting = f
   };
 
   const updateField = (field: keyof Omit<FormData, 'extraTags'>, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    onChange?.(newFormData);
   };
 
   const addExtraTag = () => {
-    setFormData(prev => ({
-      ...prev,
-      extraTags: [...prev.extraTags, { key: "", value: "" }]
-    }));
+    const newFormData = {
+      ...formData,
+      extraTags: [...formData.extraTags, { key: "", value: "" }]
+    };
+    setFormData(newFormData);
+    onChange?.(newFormData);
   };
 
   const updateExtraTag = (index: number, field: 'key' | 'value', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      extraTags: prev.extraTags.map((tag, i) => 
+    const newFormData = {
+      ...formData,
+      extraTags: formData.extraTags.map((tag, i) => 
         i === index ? { ...tag, [field]: value } : tag
       )
-    }));
+    };
+    setFormData(newFormData);
+    onChange?.(newFormData);
   };
 
   const removeExtraTag = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      extraTags: prev.extraTags.filter((_, i) => i !== index)
-    }));
+    const newFormData = {
+      ...formData,
+      extraTags: formData.extraTags.filter((_, i) => i !== index)
+    };
+    setFormData(newFormData);
+    onChange?.(newFormData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
