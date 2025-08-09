@@ -186,6 +186,7 @@ export default function Collections() {
           <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
+                <ThemeToggle />
                 <Button onClick={() => setShowAddItem(true)} size="lg" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
                   <Plus className="w-6 h-6" />
                 </Button>
@@ -207,7 +208,6 @@ export default function Collections() {
                   <Copy className="w-4 h-4 mr-2" />
                   Import from List
                 </Button>
-                <ThemeToggle />
               </div>
             </div>
           </div>
@@ -257,7 +257,7 @@ export default function Collections() {
           />
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
           <div className="text-center">
             <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" style={{ filter: 'none' }} />
             <div className="flex items-center justify-center gap-3 mb-2">
