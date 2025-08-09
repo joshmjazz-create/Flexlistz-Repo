@@ -145,7 +145,11 @@ export class MemStorage implements IStorage {
 
   async createCollection(insertCollection: InsertCollection): Promise<Collection> {
     const id = randomUUID();
-    const collection: Collection = { ...insertCollection, id };
+    const collection: Collection = { 
+      ...insertCollection, 
+      id,
+      description: insertCollection.description || null
+    };
     this.collections.set(id, collection);
     await this.saveData();
     return collection;
@@ -165,11 +169,13 @@ export class MemStorage implements IStorage {
     const deleted = this.collections.delete(id);
     if (deleted) {
       // Delete all items in this collection
+      const itemsToDelete: string[] = [];
       for (const [itemId, item] of this.items.entries()) {
         if (item.collectionId === id) {
-          this.items.delete(itemId);
+          itemsToDelete.push(itemId);
         }
       }
+      itemsToDelete.forEach(itemId => this.items.delete(itemId));
       await this.saveData();
     }
     return deleted;
@@ -185,7 +191,12 @@ export class MemStorage implements IStorage {
 
   async createItem(insertItem: InsertItem): Promise<Item> {
     const id = randomUUID();
-    const item: Item = { ...insertItem, id };
+    const item: Item = { 
+      ...insertItem, 
+      id,
+      notes: insertItem.notes || null,
+      tags: insertItem.tags || null
+    };
     this.items.set(id, item);
     await this.saveData();
     return item;

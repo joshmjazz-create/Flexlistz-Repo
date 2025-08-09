@@ -9,20 +9,22 @@ import AddItemModal from "@/components/add-item-modal";
 import AddCollectionModal from "@/components/add-collection-modal";
 import EditItemModal from "@/components/edit-item-modal";
 import FilterModal from "@/components/filter-modal";
+import BulkImportModal from "@/components/bulk-import-modal";
 import { type Collection, type Item } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Plus, Layers } from "lucide-react";
+import { Plus, Layers, Upload } from "lucide-react";
 
 export default function Collections() {
   const { collectionId } = useParams<{ collectionId?: string }>();
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCollection, setShowAddCollection] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
 
-  const { data: collections = [] } = useQuery<Collection[]>({
+  const { data: collections = [] } = useQuery<CollectionWithCount[]>({
     queryKey: ["/api/collections"],
   });
 
@@ -102,10 +104,20 @@ export default function Collections() {
                     </p>
                   )}
                 </div>
-                <Button onClick={() => setShowAddItem(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Item
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowBulkImport(true)}
+                    className="text-gray-600 hover:text-primary-600"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Bulk Import
+                  </Button>
+                  <Button onClick={() => setShowAddItem(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -148,6 +160,12 @@ export default function Collections() {
       <AddItemModal
         open={showAddItem}
         onOpenChange={setShowAddItem}
+        collectionId={collectionId}
+      />
+
+      <BulkImportModal
+        open={showBulkImport}
+        onOpenChange={setShowBulkImport}
         collectionId={collectionId}
       />
 

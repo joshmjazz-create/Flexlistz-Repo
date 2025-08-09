@@ -225,6 +225,7 @@ export default function AddItemModal({ open, onOpenChange, collectionId }: AddIt
                       placeholder="Add any additional notes or comments"
                       rows={3}
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />

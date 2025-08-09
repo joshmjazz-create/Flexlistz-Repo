@@ -227,6 +227,7 @@ export default function EditItemModal({ open, onOpenChange, item }: EditItemModa
                       placeholder="Add any additional notes or comments"
                       rows={3}
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
