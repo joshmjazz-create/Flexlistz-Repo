@@ -31,6 +31,7 @@ export default function Collections() {
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('compact');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order'>('asc');
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
 
   const { data: collections = [] } = useQuery<CollectionWithCount[]>({
@@ -238,6 +239,18 @@ export default function Collections() {
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
             hasActiveFilters={Object.keys(activeFilters).length > 0}
+            expandedItems={expandedItems}
+            onToggleExpanded={(itemId) => {
+              setExpandedItems(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(itemId)) {
+                  newSet.delete(itemId);
+                } else {
+                  newSet.add(itemId);
+                }
+                return newSet;
+              });
+            }}
 
           />
         </>

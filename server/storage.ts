@@ -257,7 +257,7 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Separate knowledge level filters from tag filters
-    const { "Knowledge Level": knowledgeLevels, ...tagFilters } = filters;
+    const { "Color": knowledgeLevels, ...tagFilters } = filters;
     
     // Apply knowledge level filtering
     if (knowledgeLevels) {

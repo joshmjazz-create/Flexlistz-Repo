@@ -95,47 +95,47 @@ export default function FilterModal({
         </DialogHeader>
 
         <div className="space-y-6 max-h-96 overflow-y-auto">
-          {/* Knowledge Level Filter */}
+          {/* Color Filter */}
           <div>
             <button
               type="button"
-              onClick={() => toggleSection('Knowledge Level')}
+              onClick={() => toggleSection('Color')}
               className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 mb-3 hover:text-gray-900 transition-colors"
             >
-              <span>Knowledge Level</span>
-              {expandedSections.has('Knowledge Level') ? (
+              <span>Color</span>
+              {expandedSections.has('Color') ? (
                 <ChevronDown className="w-4 h-4" />
               ) : (
                 <ChevronRight className="w-4 h-4" />
               )}
             </button>
             
-            {expandedSections.has('Knowledge Level') && (
+            {expandedSections.has('Color') && (
               <div className="space-y-2 ml-4 mb-4">
                 {[
-                  { value: 'knows', label: 'Knows' },
-                  { value: 'kind-of-knows', label: 'Kind of Knows' },
-                  { value: 'does-not-know', label: 'Learning' }
-                ].map(({ value, label }) => (
+                  { value: 'knows', color: 'bg-green-200', border: 'border-green-300' },
+                  { value: 'kind-of-knows', color: 'bg-orange-200', border: 'border-orange-300' },
+                  { value: 'does-not-know', color: 'bg-red-200', border: 'border-red-300' }
+                ].map(({ value, color, border }) => (
                   <div key={value} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`knowledge-${value}`}
+                      id={`color-${value}`}
                       checked={
-                        activeFilters['Knowledge Level'] 
-                          ? Array.isArray(activeFilters['Knowledge Level']) 
-                            ? (activeFilters['Knowledge Level'] as string[]).includes(value)
-                            : activeFilters['Knowledge Level'] === value
+                        activeFilters['Color'] 
+                          ? Array.isArray(activeFilters['Color']) 
+                            ? (activeFilters['Color'] as string[]).includes(value)
+                            : activeFilters['Color'] === value
                           : false
                       }
                       onCheckedChange={(checked) =>
-                        handleFilterChange('Knowledge Level', value, checked as boolean)
+                        handleFilterChange('Color', value, checked as boolean)
                       }
                     />
                     <Label 
-                      htmlFor={`knowledge-${value}`}
-                      className="text-sm text-gray-700 cursor-pointer flex-1"
+                      htmlFor={`color-${value}`}
+                      className="text-sm text-gray-700 cursor-pointer flex items-center space-x-2"
                     >
-                      {label}
+                      <div className={`w-4 h-4 rounded border-2 ${color} ${border}`} />
                     </Label>
                   </div>
                 ))}

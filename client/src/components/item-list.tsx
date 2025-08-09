@@ -16,6 +16,8 @@ interface ItemListProps {
   sortOrder?: 'asc' | 'desc' | 'filter-order';
   onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order') => void;
   hasActiveFilters?: boolean;
+  expandedItems?: Set<string>;
+  onToggleExpanded?: (itemId: string) => void;
 
 }
 
@@ -38,7 +40,9 @@ export default function ItemList({
   onViewModeChange,
   sortOrder = 'asc',
   onSortOrderChange,
-  hasActiveFilters = false
+  hasActiveFilters = false,
+  expandedItems = new Set(),
+  onToggleExpanded
 }: ItemListProps) {
   const { toast } = useToast();
 
@@ -217,55 +221,110 @@ export default function ItemList({
         {viewMode === 'compact' ? (
           /* Compact View */
           <div className="space-y-1">
-            {items.map((item, index) => (
-              <div 
-                key={item.id} 
-                className={`rounded border px-3 py-2 hover:shadow-sm transition-shadow ${getKnowledgeClasses(item.knowledgeLevel)}`}
-              >
-                <div className="flex items-center justify-between">
-                  <div 
-                    className="flex-1 cursor-pointer"
-                    onClick={() => onViewModeChange && onViewModeChange('detailed')}
-                  >
-                    <h3 className="text-sm font-medium text-gray-900 truncate">
-                      {item.title}
-                    </h3>
+            {items.map((item, index) => {
+              const isExpanded = expandedItems.has(item.id);
+              return (
+                <div 
+                  key={item.id} 
+                  className={`rounded border ${isExpanded ? 'border-blue-300' : ''} hover:shadow-sm transition-shadow ${getKnowledgeClasses(item.knowledgeLevel)}`}
+                >
+                  <div className="px-3 py-2">
+                    <div className="flex items-center justify-between">
+                      <div 
+                        className="flex-1 cursor-pointer"
+                        onClick={() => onToggleExpanded && onToggleExpanded(item.id)}
+                      >
+                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <div className="flex space-x-1 ml-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'does-not-know' });
+                          }}
+                          className={`w-4 h-4 rounded border-2 ${
+                            item.knowledgeLevel === 'does-not-know' ? 'border-gray-600' : 'border-gray-300'
+                          } bg-red-200 hover:border-gray-500 transition-colors`}
+                          title="Learning"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'kind-of-knows' });
+                          }}
+                          className={`w-4 h-4 rounded border-2 ${
+                            item.knowledgeLevel === 'kind-of-knows' ? 'border-gray-600' : 'border-gray-300'
+                          } bg-orange-200 hover:border-gray-500 transition-colors`}
+                          title="Kind of Knows"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'knows' });
+                          }}
+                          className={`w-4 h-4 rounded border-2 ${
+                            item.knowledgeLevel === 'knows' ? 'border-gray-600' : 'border-gray-300'
+                          } bg-green-200 hover:border-gray-500 transition-colors`}
+                          title="Knows"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex space-x-1 ml-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'does-not-know' });
-                      }}
-                      className={`w-4 h-4 rounded border-2 ${
-                        item.knowledgeLevel === 'does-not-know' ? 'border-gray-600' : 'border-gray-300'
-                      } bg-red-200 hover:border-gray-500 transition-colors`}
-                      title="Learning"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'kind-of-knows' });
-                      }}
-                      className={`w-4 h-4 rounded border-2 ${
-                        item.knowledgeLevel === 'kind-of-knows' ? 'border-gray-600' : 'border-gray-300'
-                      } bg-orange-200 hover:border-gray-500 transition-colors`}
-                      title="Kind of Knows"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateKnowledgeMutation.mutate({ id: item.id, knowledgeLevel: 'knows' });
-                      }}
-                      className={`w-4 h-4 rounded border-2 ${
-                        item.knowledgeLevel === 'knows' ? 'border-gray-600' : 'border-gray-300'
-                      } bg-green-200 hover:border-gray-500 transition-colors`}
-                      title="Knows"
-                    />
-                  </div>
+                  
+                  {/* Expanded detailed view */}
+                  {isExpanded && (
+                    <div className="px-3 pb-3 border-t border-gray-200 mt-2 pt-3">
+                      <div className="grid gap-3 md:grid-cols-2 text-sm">
+                        {item.key && (
+                          <div>
+                            <span className="font-medium text-gray-600">Key:</span> {item.key}
+                          </div>
+                        )}
+                        {item.composer && (
+                          <div>
+                            <span className="font-medium text-gray-600">Composer:</span> {item.composer}
+                          </div>
+                        )}
+                        {item.style && (
+                          <div>
+                            <span className="font-medium text-gray-600">Style:</span> {item.style}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {item.notes && (
+                        <div className="mt-3 text-sm">
+                          <span className="font-medium text-gray-600">Notes:</span>
+                          <p className="text-gray-700 mt-1">{item.notes}</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2 mt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onEditItem(item)}
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => deleteItemMutation.mutate(item.id)}
+                          disabled={deleteItemMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Detailed View */
