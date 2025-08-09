@@ -46,7 +46,7 @@ export default function ItemList({
 }: ItemListProps) {
   const { toast } = useToast();
 
-  const getKnowledgeClasses = (knowledgeLevel: string | undefined) => {
+  const getKnowledgeClasses = (knowledgeLevel: string | null | undefined) => {
     switch (knowledgeLevel) {
       case 'knows':
         return 'border-green-200 bg-green-50';
@@ -262,52 +262,99 @@ export default function ItemList({
                     </div>
                   </div>
                   
-                  {/* Expanded detailed view */}
+                  {/* Expanded detailed view - identical to detailed view */}
                   {isExpanded && (
                     <div className="px-3 pb-3 border-t border-gray-200 mt-2 pt-3">
-                      <div className="grid gap-3 md:grid-cols-2 text-sm">
-                        {item.key && (
-                          <div>
-                            <span className="font-medium text-gray-600">Key:</span> {item.key}
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          {/* Fixed Fields as Tags */}
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {[
+                              { key: "Key", value: item.key },
+                              { key: "Composer", value: item.composer },
+                              { key: "Style", value: item.style },
+                            ]
+                              .filter(tag => tag.value?.trim())
+                              .map(({ key, value }, tagIndex) => (
+                                <Badge
+                                  key={`${key}-${value}`}
+                                  variant="secondary"
+                                  className={`${tagColors[tagIndex % tagColors.length]} border-0`}
+                                >
+                                  <span className="text-gray-600 mr-1">{key}:</span>
+                                  {value}
+                                </Badge>
+                              ))}
                           </div>
-                        )}
-                        {item.composer && (
-                          <div>
-                            <span className="font-medium text-gray-600">Composer:</span> {item.composer}
-                          </div>
-                        )}
-                        {item.style && (
-                          <div>
-                            <span className="font-medium text-gray-600">Style:</span> {item.style}
-                          </div>
-                        )}
-                      </div>
-                      
-                      {item.notes && (
-                        <div className="mt-3 text-sm">
-                          <span className="font-medium text-gray-600">Notes:</span>
-                          <p className="text-gray-700 mt-1">{item.notes}</p>
+
+                          {/* Media Section */}
+                          {(item.youtubeId || item.spotifyUri) && (
+                            <div className="mb-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm font-medium text-gray-700">Media:</span>
+                                {item.youtubeId && (
+                                  <Badge variant="secondary" className="bg-red-100 text-red-800 border-0">
+                                    <Youtube className="w-3 h-3 mr-1" />
+                                    YouTube
+                                  </Badge>
+                                )}
+                                {item.spotifyUri && (
+                                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-0">
+                                    <Music className="w-3 h-3 mr-1" />
+                                    Spotify
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {/* YouTube Player */}
+                              {item.youtubeId && (
+                                <div className="mb-3">
+                                  <YouTubePlayer 
+                                    videoId={item.youtubeId} 
+                                    startSeconds={item.startSeconds || undefined} 
+                                  />
+                                </div>
+                              )}
+                              
+                              {/* Spotify Player */}
+                              {item.spotifyUri && (
+                                <div className="mb-3">
+                                  <SpotifyEmbed spotifyUri={item.spotifyUri} />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Notes */}
+                          {item.notes && (
+                            <div className="text-sm text-gray-600">
+                              <p>
+                                <span className="font-medium">Notes:</span> {item.notes}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      
-                      <div className="flex items-center gap-2 mt-3">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onEditItem(item)}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => deleteItemMutation.mutate(item.id)}
-                          disabled={deleteItemMutation.isPending}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Delete
-                        </Button>
+
+                        {/* Actions */}
+                        <div className="flex space-x-2 ml-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEditItem(item)}
+                            className="p-2 text-gray-400 hover:text-primary-600"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => handleDeleteItem(item.id, e)}
+                            disabled={deleteItemMutation.isPending}
+                            className="p-2 text-gray-400 hover:text-red-500"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )}
