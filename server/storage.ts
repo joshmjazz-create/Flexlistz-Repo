@@ -208,13 +208,22 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async filterItems(collectionId: string, filters: Record<string, string>, searchQuery?: string): Promise<Item[]> {
+  async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
     let conditions = [eq(items.collectionId, collectionId)];
     
     // Apply tag filters using JSON operators
     if (Object.keys(filters).length > 0) {
       for (const [key, value] of Object.entries(filters)) {
-        conditions.push(sql`${items.tags}->>${key} = ${value}`);
+        if (Array.isArray(value)) {
+          // Handle multiple values for the same key with OR logic
+          const valueConditions = value.map(v => sql`${items.tags}->>${key} = ${v}`);
+          if (valueConditions.length > 0) {
+            conditions.push(sql`(${sql.join(valueConditions, sql` OR `)})`);
+          }
+        } else {
+          // Single value
+          conditions.push(sql`${items.tags}->>${key} = ${value}`);
+        }
       }
     }
     

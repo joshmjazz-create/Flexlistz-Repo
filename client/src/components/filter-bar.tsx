@@ -6,8 +6,8 @@ import { Search, Filter, X } from "lucide-react";
 interface FilterBarProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  activeFilters: Record<string, string>;
-  onFilterChange: (filters: Record<string, string>) => void;
+  activeFilters: Record<string, string | string[]>;
+  onFilterChange: (filters: Record<string, string | string[]>) => void;
   onToggleFilters: () => void;
 }
 
@@ -55,23 +55,39 @@ export default function FilterBar({
       {/* Active Filters */}
       {(Object.keys(activeFilters).length > 0 || searchQuery) && (
         <div className="flex flex-wrap items-center gap-2">
-          {Object.entries(activeFilters).map(([key, value]) => (
-            <Badge
-              key={key}
-              variant="secondary"
-              className="bg-primary-100 text-primary-800 border-primary-200"
-            >
-              {key}: {value}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeFilter(key)}
-                className="ml-2 h-auto p-0 text-primary-600 hover:text-primary-800"
+          {Object.entries(activeFilters).map(([key, value]) => {
+            const values = Array.isArray(value) ? value : [value];
+            return values.map((val, index) => (
+              <Badge
+                key={`${key}-${val}-${index}`}
+                variant="secondary"
+                className="bg-primary-100 text-primary-800 border-primary-200"
               >
-                <X className="w-3 h-3" />
-              </Button>
-            </Badge>
-          ))}
+                {key}: {val}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const newFilters = { ...activeFilters };
+                    if (Array.isArray(newFilters[key])) {
+                      const filteredValues = (newFilters[key] as string[]).filter(v => v !== val);
+                      if (filteredValues.length === 0) {
+                        delete newFilters[key];
+                      } else {
+                        newFilters[key] = filteredValues;
+                      }
+                    } else {
+                      delete newFilters[key];
+                    }
+                    onFilterChange(newFilters);
+                  }}
+                  className="ml-2 h-auto p-0 text-primary-600 hover:text-primary-800"
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            ));
+          })}
           
           {(Object.keys(activeFilters).length > 0 || searchQuery) && (
             <Button

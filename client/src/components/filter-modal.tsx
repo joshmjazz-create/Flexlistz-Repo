@@ -13,8 +13,8 @@ interface FilterModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   collectionId?: string;
-  activeFilters: Record<string, string>;
-  onFiltersChange: (filters: Record<string, string>) => void;
+  activeFilters: Record<string, string | string[]>;
+  onFiltersChange: (filters: Record<string, string | string[]>) => void;
 }
 
 export default function FilterModal({
@@ -33,9 +33,28 @@ export default function FilterModal({
     const newFilters = { ...activeFilters };
     
     if (checked) {
-      newFilters[key] = value;
+      // For multiple filters, store as array of values per key
+      if (newFilters[key]) {
+        // If key exists, add to array if not already present
+        const currentValues = Array.isArray(newFilters[key]) ? newFilters[key] : [newFilters[key]];
+        if (!currentValues.includes(value)) {
+          newFilters[key] = [...currentValues, value];
+        }
+      } else {
+        // First value for this key
+        newFilters[key] = [value];
+      }
     } else {
-      delete newFilters[key];
+      // Remove value from filter
+      if (newFilters[key]) {
+        const currentValues = Array.isArray(newFilters[key]) ? newFilters[key] : [newFilters[key]];
+        const filteredValues = currentValues.filter(v => v !== value);
+        if (filteredValues.length === 0) {
+          delete newFilters[key];
+        } else {
+          newFilters[key] = filteredValues;
+        }
+      }
     }
     
     onFiltersChange(newFilters);
@@ -73,7 +92,13 @@ export default function FilterModal({
                   <div key={value} className="flex items-center space-x-2">
                     <Checkbox
                       id={`${tagKey}-${value}`}
-                      checked={activeFilters[tagKey] === value}
+                      checked={
+                        activeFilters[tagKey] 
+                          ? Array.isArray(activeFilters[tagKey]) 
+                            ? (activeFilters[tagKey] as string[]).includes(value)
+                            : activeFilters[tagKey] === value
+                          : false
+                      }
                       onCheckedChange={(checked) =>
                         handleFilterChange(tagKey, value, checked as boolean)
                       }

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -10,6 +10,8 @@ interface ItemListProps {
   items: Item[];
   onEditItem: (item: Item) => void;
   isLoading?: boolean;
+  viewMode?: 'compact' | 'detailed';
+  onViewModeChange?: (mode: 'compact' | 'detailed') => void;
 }
 
 const tagColors = [
@@ -23,7 +25,13 @@ const tagColors = [
   "bg-gray-100 text-gray-800"
 ];
 
-export default function ItemList({ items, onEditItem, isLoading }: ItemListProps) {
+export default function ItemList({ 
+  items, 
+  onEditItem, 
+  isLoading, 
+  viewMode = 'detailed',
+  onViewModeChange 
+}: ItemListProps) {
   const { toast } = useToast();
 
   const deleteItemMutation = useMutation({
@@ -86,65 +94,133 @@ export default function ItemList({ items, onEditItem, isLoading }: ItemListProps
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <div className="space-y-4">
-        {items.map((item, index) => (
-          <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {item.title}
-                </h3>
-                
-                {/* Tags */}
-                {item.tags && Object.keys(item.tags).length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {Object.entries(item.tags).map(([key, value], tagIndex) => (
-                      <Badge
-                        key={`${key}-${value}`}
-                        variant="secondary"
-                        className={`${tagColors[tagIndex % tagColors.length]} border-0`}
-                      >
-                        <span className="text-gray-600 mr-1">{key}:</span>
-                        {value}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {/* Notes */}
-                {item.notes && (
-                  <div className="text-sm text-gray-600">
-                    <p>
-                      <span className="font-medium">Notes:</span> {item.notes}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex space-x-2 ml-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEditItem(item)}
-                  className="p-2 text-gray-400 hover:text-primary-600"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => handleDeleteItem(item.id, e)}
-                  disabled={deleteItemMutation.isPending}
-                  className="p-2 text-gray-400 hover:text-red-500"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+    <div className="flex-1 overflow-y-auto">
+      {/* View Mode Toggle */}
+      {onViewModeChange && (
+        <div className="bg-white border-b border-gray-200 px-6 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">View Mode</span>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={viewMode === 'compact' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onViewModeChange('compact')}
+                className="px-3 py-1"
+              >
+                <List className="w-4 h-4 mr-1" />
+                Compact
+              </Button>
+              <Button
+                variant={viewMode === 'detailed' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => onViewModeChange('detailed')}
+                className="px-3 py-1"
+              >
+                <Grid3X3 className="w-4 h-4 mr-1" />
+                Detailed
+              </Button>
             </div>
           </div>
-        ))}
+        </div>
+      )}
+
+      <div className="p-6">
+        {viewMode === 'compact' ? (
+          /* Compact View */
+          <div className="space-y-2">
+            {items.map((item, index) => (
+              <div key={item.id} className="bg-white rounded-lg border border-gray-200 px-4 py-3 hover:shadow-sm transition-shadow">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-medium text-gray-900 truncate flex-1">
+                    {item.title}
+                  </h3>
+                  
+                  {/* Compact Actions */}
+                  <div className="flex space-x-1 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditItem(item)}
+                      className="p-1 text-gray-400 hover:text-primary-600"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDeleteItem(item.id, e)}
+                      disabled={deleteItemMutation.isPending}
+                      className="p-1 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Detailed View */
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div key={item.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {item.title}
+                    </h3>
+                    
+                    {/* Tags */}
+                    {item.tags && Object.keys(item.tags).length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {Object.entries(item.tags).map(([key, value], tagIndex) => (
+                          <Badge
+                            key={`${key}-${value}`}
+                            variant="secondary"
+                            className={`${tagColors[tagIndex % tagColors.length]} border-0`}
+                          >
+                            <span className="text-gray-600 mr-1">{key}:</span>
+                            {value}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    {item.notes && (
+                      <div className="text-sm text-gray-600">
+                        <p>
+                          <span className="font-medium">Notes:</span> {item.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex space-x-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditItem(item)}
+                      className="p-2 text-gray-400 hover:text-primary-600"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => handleDeleteItem(item.id, e)}
+                      disabled={deleteItemMutation.isPending}
+                      className="p-2 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

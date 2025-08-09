@@ -66,7 +66,8 @@ Preferred communication style: Simple, everyday language.
 ### Key Features
 - **Flexible Tagging System**: Items can have arbitrary key-value tag pairs
 - **Persistent Tag Cataloging**: Autocomplete for tag keys and values from previously used tags
-- **Advanced Filtering**: Filter by tags, search by text, combine multiple filters
+- **Advanced Filtering**: Multiple simultaneous filters per tag key (e.g., Style: Jazz + Blues), search by text, combine filters across categories
+- **Dual View Modes**: Toggle between compact list view (names only) and detailed view (with all tags and notes visible)
 - **Real-time Updates**: Optimistic updates with query invalidation
 - **Responsive Design**: Mobile-friendly interface with collapsible sidebar
 - **Bulk Import**: Import up to 1000 items at once with smart duplicate filtering and automatic "[  ]" prefix removal

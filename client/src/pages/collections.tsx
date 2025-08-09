@@ -22,7 +22,8 @@ export default function Collections() {
   const [showFilters, setShowFilters] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
+  const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
+  const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
 
   const { data: collections = [] } = useQuery<CollectionWithCount[]>({
     queryKey: ["/api/collections"],
@@ -136,6 +137,8 @@ export default function Collections() {
             items={displayItems}
             onEditItem={setEditingItem}
             isLoading={filteredItems.isLoading}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
         </>
       ) : (
