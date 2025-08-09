@@ -21,41 +21,69 @@ export default function AutocompleteInput({
 }: AutocompleteInputProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [hasBeenEdited, setHasBeenEdited] = useState(false);
 
   // Fetch field values for autocomplete
   const { data: fieldValues = [] } = useQuery<string[]>({
     queryKey: [`/api/field-values/${field}`],
   });
 
-  // Filter values based on input
-  const filteredValues = fieldValues.filter(val =>
-    val.toLowerCase().includes(inputValue.toLowerCase())
-  );
+  // Filter values based on input - only show items that contain the typed text
+  const filteredValues = inputValue.trim() 
+    ? fieldValues.filter(val =>
+        val.toLowerCase().includes(inputValue.toLowerCase())
+      )
+    : [];
 
   // Update input value when prop value changes
   useEffect(() => {
     setInputValue(value);
+    setHasBeenEdited(false); // Reset edit state when value changes from outside
   }, [value]);
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     onChange(newValue);
+    setHasBeenEdited(true); // Mark as edited when user types
+    
+    // Calculate filtered values for the new input
+    const newFilteredValues = newValue.trim() 
+      ? fieldValues.filter(val =>
+          val.toLowerCase().includes(newValue.toLowerCase())
+        )
+      : [];
+    
+    // Show dropdown if there are matching results
+    if (newValue.trim().length > 0 && newFilteredValues.length > 0) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
   };
 
   const handleSelect = (selectedValue: string) => {
     setInputValue(selectedValue);
     onChange(selectedValue);
     setOpen(false);
+    setHasBeenEdited(false); // Reset after selection
   };
 
-  const showDropdown = inputValue.length > 0 && filteredValues.length > 0;
+  // Only show dropdown if:
+  // 1. User has started editing (hasBeenEdited is true)
+  // 2. There's text in the input field
+  // 3. There are matching filtered values
+  const showDropdown = hasBeenEdited && inputValue.trim().length > 0 && filteredValues.length > 0;
 
   return (
     <div className="relative">
       <Input
         value={inputValue}
         onChange={(e) => handleInputChange(e.target.value)}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          if (hasBeenEdited && showDropdown) {
+            setOpen(true);
+          }
+        }}
         onBlur={() => setTimeout(() => setOpen(false), 200)} // Delay to allow selection
         placeholder={placeholder}
         className={className}
