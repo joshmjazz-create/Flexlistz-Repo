@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AutocompleteInputProps {
-  field: 'key' | 'composer' | 'style' | string;
+  field: 'key' | 'composer' | 'style';
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
@@ -30,31 +30,23 @@ export default function AutocompleteInput({
     'F', 'F minor', 'G', 'G minor', 'Gb', 'Gb minor'
   ];
 
-  // Fetch field values for autocomplete - use different endpoint for built-in vs custom fields
-  const isBuiltInField = ['key', 'composer', 'style'].includes(field);
-  const isTagKeyField = field === 'tag-key';
-  
+  // Fetch field values for autocomplete
   const { data: fieldValues = [] } = useQuery<string[]>({
-    queryKey: isTagKeyField ? [`/api/tags/keys`] : 
-               isBuiltInField ? [`/api/field-values/${field}`] : 
-               [`/api/tags/values`, field],
-    enabled: !!field,
+    queryKey: [`/api/field-values/${field}`],
   });
 
   // Combine all available values - for key field, always include musical keys
   const allValues = field === 'key' 
     ? Array.from(new Set([...musicalKeys, ...fieldValues])) // Remove duplicates
-    : isTagKeyField
-    ? Array.from(new Set(['Key', 'Composer', 'Style', ...fieldValues])) // Include standard fields
     : fieldValues;
 
-  // Filter values based on current input - for keys and tag-keys, always show all when empty
-  const filteredValues = (field === 'key' || isTagKeyField)
+  // Filter values based on current input - for keys, always show all when empty
+  const filteredValues = field === 'key'
     ? value.trim()
       ? allValues.filter(val =>
           val.toLowerCase().includes(value.toLowerCase())
         )
-      : allValues // Show all when input is empty
+      : allValues // Show all keys when input is empty
     : value.trim()
       ? allValues.filter(val =>
           val.toLowerCase().includes(value.toLowerCase())

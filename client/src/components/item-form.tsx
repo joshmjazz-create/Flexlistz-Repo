@@ -17,6 +17,9 @@ interface ExtraTag {
 
 interface FormData {
   title: string;
+  key: string;
+  composer: string;
+  style: string;
   notes: string;
   leadSheetUrl: string;
   mediaUrl: string;
@@ -25,37 +28,25 @@ interface FormData {
 }
 
 interface ItemFormProps {
-  initial?: Partial<FormData> & { key?: string; composer?: string; style?: string };
-  onSubmit: (data: FormData & { key?: string; composer?: string; style?: string }) => void;
+  initial?: Partial<FormData>;
+  onSubmit: (data: FormData) => void;
   onCancel: () => void;
-  onChange?: (data: FormData & { key?: string; composer?: string; style?: string }) => void;
+  onChange?: (data: FormData) => void;
   isSubmitting?: boolean;
 }
 
 export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubmitting = false }: ItemFormProps) {
   const [formData, setFormData] = useState<FormData>({
     title: initial?.title || "",
+    key: initial?.key || "",
+    composer: initial?.composer || "",
+    style: initial?.style || "",
     notes: initial?.notes || "",
     leadSheetUrl: initial?.leadSheetUrl || "",
     mediaUrl: initial?.mediaUrl || "",
     knowledgeLevel: initial?.knowledgeLevel || "does-not-know",
     extraTags: initial?.extraTags || [],
   });
-
-  // Initialize with built-in tag fields if they exist in initial data
-  useEffect(() => {
-    if (initial) {
-      const builtInTags: ExtraTag[] = [];
-      if (initial.key) builtInTags.push({ key: "Key", value: initial.key });
-      if (initial.composer) builtInTags.push({ key: "Composer", value: initial.composer });
-      if (initial.style) builtInTags.push({ key: "Style", value: initial.style });
-      
-      setFormData(prev => ({
-        ...prev,
-        extraTags: [...builtInTags, ...(initial.extraTags || [])]
-      }));
-    }
-  }, [initial]);
 
   const queryClient = useQueryClient();
 
@@ -112,23 +103,6 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
     onChange?.(newFormData);
   };
 
-  // Helper to add standard tag fields if they don't exist
-  const ensureStandardTags = () => {
-    const standardTags = ["Key", "Composer", "Style"];
-    const existingKeys = formData.extraTags.map(tag => tag.key);
-    const missingTags = standardTags.filter(key => !existingKeys.includes(key));
-    
-    if (missingTags.length > 0) {
-      const newTags = missingTags.map(key => ({ key, value: "" }));
-      const newFormData = {
-        ...formData,
-        extraTags: [...newTags, ...formData.extraTags]
-      };
-      setFormData(newFormData);
-      onChange?.(newFormData);
-    }
-  };
-
   const addExtraTag = () => {
     const newFormData = {
       ...formData,
@@ -161,33 +135,14 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
-    
-    // Extract Key, Composer, Style from tags and pass as separate fields for backend compatibility
-    const keyTag = formData.extraTags.find(tag => tag.key === "Key");
-    const composerTag = formData.extraTags.find(tag => tag.key === "Composer");
-    const styleTag = formData.extraTags.find(tag => tag.key === "Style");
-    
-    const submitData = {
-      ...formData,
-      key: keyTag?.value || "",
-      composer: composerTag?.value || "",
-      style: styleTag?.value || "",
-      extraTags: formData.extraTags.filter(tag => !["Key", "Composer", "Style"].includes(tag.key))
-    };
-    
-    onSubmit(submitData);
+    onSubmit(formData);
   };
-
-  // Ensure standard tags are present when form loads
-  useEffect(() => {
-    ensureStandardTags();
-  }, []);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Fixed Fields */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Song Details</h3>
+        <h3 className="text-sm font-medium text-gray-700">Song Details</h3>
         
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -198,6 +153,33 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
               onChange={(e) => updateField('title', e.target.value)}
               placeholder="Enter song title"
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="key">Key</Label>
+            <AutocompleteInput
+              field="key"
+              value={formData.key}
+              onChange={(value) => updateField('key', value)}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="composer">Composer</Label>
+            <AutocompleteInput
+              field="composer"
+              value={formData.composer}
+              onChange={(value) => updateField('composer', value)}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="style">Style</Label>
+            <AutocompleteInput
+              field="style"
+              value={formData.style}
+              onChange={(value) => updateField('style', value)}
             />
           </div>
 
@@ -274,13 +256,10 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
         </div>
       </div>
 
-      {/* All Filterable Tags (includes Key, Composer, Style as text boxes) */}
+      {/* Extra Tags */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Filterable Tags
-            <span className="text-xs text-gray-500 ml-2">(Key, Composer, Style, etc.)</span>
-          </h3>
+          <h3 className="text-sm font-medium text-gray-700">Additional Tags</h3>
           <Button
             type="button"
             variant="outline"
@@ -295,52 +274,47 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
 
         {formData.extraTags.length > 0 && (
           <div className="space-y-3">
-            {formData.extraTags.map((tag, index) => {
-              const isStandardTag = ["Key", "Composer", "Style"].includes(tag.key);
-              return (
-                <div key={index} className="flex gap-2 items-center">
-                  <div className="flex-1">
-                    <AutocompleteInput
-                      field="tag-key"
-                      value={tag.key}
-                      onChange={(value) => updateExtraTag(index, 'key', value)}
-                      placeholder="Tag name (e.g., Key, Composer, Style, Era, Tempo)"
-                    />
-                  </div>
-                  
-                  <div className="flex-1">
-                    <AutocompleteInput
-                      field={tag.key || "tag-value"}
-                      value={tag.value}
-                      onChange={(value) => updateExtraTag(index, 'value', value)}
-                      placeholder={
-                        tag.key === "Key" ? "e.g., C, Bb, F minor" :
-                        tag.key === "Composer" ? "e.g., Duke Ellington" :
-                        tag.key === "Style" ? "e.g., Jazz, Ballad, Swing" :
-                        "Tag value"
-                      }
-                    />
-                  </div>
-                  
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeExtraTag(index)}
-                    className={`${isStandardTag ? 'text-orange-600 hover:text-orange-700' : 'text-red-600 hover:text-red-700'}`}
-                    title={isStandardTag ? 'Remove standard field' : 'Remove custom tag'}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+            {formData.extraTags.map((tag, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <div className="flex-1">
+                  <Input
+                    value={tag.key}
+                    onChange={(e) => updateExtraTag(index, 'key', e.target.value)}
+                    placeholder="Tag name (e.g., Era, Tempo)"
+                    list={`keys-datalist-${index}`}
+                  />
+                  <datalist id={`keys-datalist-${index}`}>
+                    {tagKeys.map((key: string) => (
+                      <option key={key} value={key} />
+                    ))}
+                  </datalist>
                 </div>
-              );
-            })}
+                
+                <div className="flex-1">
+                  <Input
+                    value={tag.value}
+                    onChange={(e) => updateExtraTag(index, 'value', e.target.value)}
+                    placeholder="Tag value (e.g., 1950s, Slow)"
+                  />
+                </div>
+                
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeExtraTag(index)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
           </div>
         )}
         
         {formData.extraTags.length === 0 && (
           <p className="text-sm text-gray-500 italic">
-            No tags yet. The form will auto-add Key, Composer, and Style fields. Use "Add Tag" for more.
+            No additional tags. Use the "Add Tag" button to add custom attributes.
           </p>
         )}
       </div>
