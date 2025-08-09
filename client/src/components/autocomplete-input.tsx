@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from './ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from './ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -53,31 +51,31 @@ export default function AutocompleteInput({
   const showDropdown = inputValue.length > 0 && filteredValues.length > 0;
 
   return (
-    <Popover open={open && showDropdown} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative">
-          <Input
-            value={inputValue}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onFocus={() => setOpen(true)}
-            placeholder={placeholder}
-            className={className}
-          />
-          {showDropdown && (
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          )}
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <Command>
-          <CommandEmpty>No matches found.</CommandEmpty>
-          <CommandGroup className="max-h-48 overflow-y-auto">
-            {filteredValues.slice(0, 10).map((fieldValue) => (
-              <CommandItem
+    <div className="relative">
+      <Input
+        value={inputValue}
+        onChange={(e) => handleInputChange(e.target.value)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 200)} // Delay to allow selection
+        placeholder={placeholder}
+        className={className}
+      />
+      {showDropdown && (
+        <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+      )}
+      
+      {open && showDropdown && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {filteredValues.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+              No matches found
+            </div>
+          ) : (
+            filteredValues.slice(0, 10).map((fieldValue) => (
+              <div
                 key={fieldValue}
-                value={fieldValue}
-                onSelect={handleSelect}
-                className="cursor-pointer"
+                className="flex items-center px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => handleSelect(fieldValue)}
               >
                 <Check
                   className={cn(
@@ -86,11 +84,11 @@ export default function AutocompleteInput({
                   )}
                 />
                 {fieldValue}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
   );
 }
