@@ -82,7 +82,9 @@ export default function FilterModal({
         </DialogHeader>
 
         <div className="space-y-6 max-h-96 overflow-y-auto">
-          {Object.entries(availableTags).map(([tagKey, values]) => (
+          {Object.entries(availableTags)
+            .filter(([tagKey]) => tagKey.toLowerCase() !== 'title')
+            .map(([tagKey, values]) => (
             <div key={tagKey}>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 Filter by {tagKey}
@@ -115,7 +117,7 @@ export default function FilterModal({
             </div>
           ))}
 
-          {Object.keys(availableTags).length === 0 && (
+          {Object.keys(availableTags).filter(key => key.toLowerCase() !== 'title').length === 0 && (
             <div className="text-center py-8 text-gray-500">
               No tags available in this collection
             </div>
