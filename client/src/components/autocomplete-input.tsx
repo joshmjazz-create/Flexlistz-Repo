@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AutocompleteInputProps {
-  field: 'title' | 'key' | 'composer' | 'style';
+  field: 'key' | 'composer' | 'style';
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
