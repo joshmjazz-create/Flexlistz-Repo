@@ -99,6 +99,12 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
     importItemsMutation.mutate(Array.from(selectedItems));
   };
 
+  const handleImportAll = () => {
+    // Import all filtered items immediately without selecting them first
+    const allItemIds = filteredItems.map(item => item.id);
+    importItemsMutation.mutate(allItemIds);
+  };
+
   const handleClose = () => {
     onClose();
     setSelectedItems(new Set());
@@ -153,6 +159,13 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
                   disabled={filteredItems.length === 0}
                 >
                   {selectedItems.size === filteredItems.length ? 'Deselect All' : 'Select All'}
+                </Button>
+                <Button
+                  onClick={handleImportAll}
+                  disabled={filteredItems.length === 0 || importItemsMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {importItemsMutation.isPending ? 'Importing...' : `Import All (${filteredItems.length})`}
                 </Button>
               </div>
 
