@@ -31,7 +31,6 @@ export default function Collections() {
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
-  const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('compact');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order' | 'last-modified' | 'first-modified'>('asc');
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
@@ -254,8 +253,6 @@ export default function Collections() {
             items={displayItems}
             onEditItem={setEditingItem}
             isLoading={filteredItems.isLoading}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
             hasActiveFilters={Object.keys(activeFilters).length > 0}
@@ -271,7 +268,6 @@ export default function Collections() {
                 return newSet;
               });
             }}
-
           />
         </>
       ) : (
