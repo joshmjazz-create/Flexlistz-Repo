@@ -24,6 +24,7 @@ export default function Collections() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
   const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order'>('asc');
 
   const { data: collections = [] } = useQuery<CollectionWithCount[]>({
     queryKey: ["/api/collections"],
@@ -41,7 +42,50 @@ export default function Collections() {
     enabled: !!collectionId && (Object.keys(activeFilters).length > 0 || searchQuery.length > 0),
   });
 
-  const displayItems = filteredItems.data || items;
+  // Sort items based on selected order
+  const sortItems = (itemsToSort: Item[]) => {
+    if (sortOrder === 'asc') {
+      return [...itemsToSort].sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortOrder === 'desc') {
+      return [...itemsToSort].sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortOrder === 'filter-order') {
+      // Sort by filter order when filters are active
+      const hasFilters = Object.keys(activeFilters).length > 0;
+      if (!hasFilters) {
+        return [...itemsToSort].sort((a, b) => a.title.localeCompare(b.title));
+      }
+      
+      return [...itemsToSort].sort((a, b) => {
+        // Calculate priority based on filter order
+        let aPriority = 0;
+        let bPriority = 0;
+        
+        Object.entries(activeFilters).forEach(([key, values], filterIndex) => {
+          const filterValues = Array.isArray(values) ? values : [values];
+          
+          filterValues.forEach((value, valueIndex) => {
+            if (a.tags?.[key] === value) {
+              aPriority += (filterIndex * 1000) + valueIndex;
+            }
+            if (b.tags?.[key] === value) {
+              bPriority += (filterIndex * 1000) + valueIndex;
+            }
+          });
+        });
+        
+        // If priorities are different, sort by priority
+        if (aPriority !== bPriority) {
+          return aPriority - bPriority;
+        }
+        
+        // If same priority, fall back to alphabetical
+        return a.title.localeCompare(b.title);
+      });
+    }
+    return itemsToSort;
+  };
+
+  const displayItems = sortItems(filteredItems.data || items);
 
   // Sidebar content
   const sidebarContent = (
@@ -139,6 +183,9 @@ export default function Collections() {
             isLoading={filteredItems.isLoading}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
+            hasActiveFilters={Object.keys(activeFilters).length > 0}
           />
         </>
       ) : (

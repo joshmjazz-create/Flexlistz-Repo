@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Search, List, Grid3X3 } from "lucide-react";
+import { Edit, Trash2, Search, List, Grid3X3, ArrowUpAZ, ArrowDownZA, Filter } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
@@ -12,6 +12,9 @@ interface ItemListProps {
   isLoading?: boolean;
   viewMode?: 'compact' | 'detailed';
   onViewModeChange?: (mode: 'compact' | 'detailed') => void;
+  sortOrder?: 'asc' | 'desc' | 'filter-order';
+  onSortOrderChange?: (order: 'asc' | 'desc' | 'filter-order') => void;
+  hasActiveFilters?: boolean;
 }
 
 const tagColors = [
@@ -30,7 +33,10 @@ export default function ItemList({
   onEditItem, 
   isLoading, 
   viewMode = 'detailed',
-  onViewModeChange 
+  onViewModeChange,
+  sortOrder = 'asc',
+  onSortOrderChange,
+  hasActiveFilters = false
 }: ItemListProps) {
   const { toast } = useToast();
 
@@ -95,30 +101,73 @@ export default function ItemList({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      {/* View Mode Toggle */}
-      {onViewModeChange && (
+      {/* Controls Bar */}
+      {(onViewModeChange || onSortOrderChange) && (
         <div className="bg-white border-b border-gray-200 px-6 py-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">View Mode</span>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant={viewMode === 'compact' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onViewModeChange('compact')}
-                className="px-3 py-1"
-              >
-                <List className="w-4 h-4 mr-1" />
-                Compact
-              </Button>
-              <Button
-                variant={viewMode === 'detailed' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => onViewModeChange('detailed')}
-                className="px-3 py-1"
-              >
-                <Grid3X3 className="w-4 h-4 mr-1" />
-                Detailed
-              </Button>
+            <div className="flex items-center space-x-6">
+              {onViewModeChange && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">View</span>
+                  <Button
+                    variant={viewMode === 'compact' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onViewModeChange('compact')}
+                    className="px-3 py-1"
+                  >
+                    <List className="w-4 h-4 mr-1" />
+                    Compact
+                  </Button>
+                  <Button
+                    variant={viewMode === 'detailed' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onViewModeChange('detailed')}
+                    className="px-3 py-1"
+                  >
+                    <Grid3X3 className="w-4 h-4 mr-1" />
+                    Detailed
+                  </Button>
+                </div>
+              )}
+              
+              {onSortOrderChange && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">Sort</span>
+                  <Button
+                    variant={sortOrder === 'asc' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onSortOrderChange('asc')}
+                    className="px-3 py-1"
+                  >
+                    <ArrowUpAZ className="w-4 h-4 mr-1" />
+                    A-Z
+                  </Button>
+                  <Button
+                    variant={sortOrder === 'desc' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => onSortOrderChange('desc')}
+                    className="px-3 py-1"
+                  >
+                    <ArrowDownZA className="w-4 h-4 mr-1" />
+                    Z-A
+                  </Button>
+                  {hasActiveFilters && (
+                    <Button
+                      variant={sortOrder === 'filter-order' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => onSortOrderChange('filter-order')}
+                      className="px-3 py-1"
+                    >
+                      <Filter className="w-4 h-4 mr-1" />
+                      Filter Order
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+            
+            <div className="text-sm text-gray-500">
+              {items.length} item{items.length !== 1 ? 's' : ''}
             </div>
           </div>
         </div>

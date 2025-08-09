@@ -54,7 +54,7 @@ Preferred communication style: Simple, everyday language.
 - **Tag Cataloging Endpoints**: Autocomplete support for tag input
   - GET /api/tags/keys - Get all unique tag keys for autocomplete
   - GET /api/tags/values/:key - Get all values for a specific tag key
-- **Filtering**: Query parameters for tag-based filtering and text search
+- **Filtering**: Query parameters for tag-based filtering and text search with client-side sorting options
 
 ### Development & Build Tools
 - **Build System**: Vite for frontend bundling with React plugin
@@ -67,6 +67,7 @@ Preferred communication style: Simple, everyday language.
 - **Flexible Tagging System**: Items can have arbitrary key-value tag pairs
 - **Persistent Tag Cataloging**: Autocomplete for tag keys and values from previously used tags
 - **Advanced Filtering**: Multiple simultaneous filters per tag key (e.g., Style: Jazz + Blues), search by text, combine filters across categories
+- **Smart Sorting**: A-Z, Z-A, and Filter Order sorting (maintains the order of selected filter values)
 - **Dual View Modes**: Toggle between compact list view (names only) and detailed view (with all tags and notes visible)
 - **Real-time Updates**: Optimistic updates with query invalidation
 - **Responsive Design**: Mobile-friendly interface with collapsible sidebar
