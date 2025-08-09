@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,10 +21,10 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, AlertCircle } from "lucide-react";
+import { Upload, FileText, AlertCircle, AlertTriangle } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertItemSchema } from "@shared/schema";
+import { insertItemSchema, type Item } from "@shared/schema";
 
 const formSchema = z.object({
   itemsList: z.string().min(1, "Please enter at least one item"),
@@ -38,7 +38,21 @@ interface BulkImportModalProps {
 
 export default function BulkImportModal({ open, onOpenChange, collectionId }: BulkImportModalProps) {
   const [previewItems, setPreviewItems] = useState<string[]>([]);
+  const [duplicates, setDuplicates] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Fetch existing items to check for duplicates
+  const { data: existingItems } = useQuery({
+    queryKey: ["/api/collections", collectionId, "items"],
+    enabled: !!collectionId && open,
+  });
+
+  // Re-check duplicates when existing items data changes
+  useEffect(() => {
+    if (previewItems.length > 0) {
+      generatePreview();
+    }
+  }, [existingItems]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,6 +104,7 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
     const text = form.getValues("itemsList");
     if (!text.trim()) {
       setPreviewItems([]);
+      setDuplicates([]);
       return;
     }
     
@@ -107,6 +122,15 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       .slice(0, 1000); // Limit to 1000 items for performance
     
     setPreviewItems(items);
+    
+    // Check for duplicates with existing items
+    if (existingItems && Array.isArray(existingItems)) {
+      const existingTitles = new Set(existingItems.map((item: Item) => item.title.toLowerCase()));
+      const duplicateItems = items.filter(item => existingTitles.has(item.toLowerCase()));
+      setDuplicates(duplicateItems);
+    } else {
+      setDuplicates([]);
+    }
   };
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
@@ -149,6 +173,16 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       return;
     }
 
+    // Check for duplicates before importing
+    if (duplicates.length > 0) {
+      toast({
+        title: "Error",
+        description: `Cannot import: ${duplicates.length} duplicate item(s) found. Remove duplicates and try again.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     bulkImportMutation.mutate(items);
   };
 
@@ -156,6 +190,7 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
     onOpenChange(false);
     form.reset();
     setPreviewItems([]);
+    setDuplicates([]);
   };
 
   return (
@@ -168,7 +203,7 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
           </DialogTitle>
           <DialogDescription>
             Paste a list of items (one per line) to quickly populate your collection. 
-            Up to 1000 items per import. Items starting with "[  ]" will be automatically cleaned.
+            Up to 1000 items per import. Duplicate items are prevented, and "[  ]" prefixes are automatically removed.
           </DialogDescription>
         </DialogHeader>
 
@@ -236,6 +271,34 @@ Summertime`}
                     Only the first 1000 items will be imported. Please split large lists into smaller batches.
                   </div>
                 )}
+
+                {duplicates.length > 0 && (
+                  <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 mt-0.5" />
+                    <div>
+                      <p className="font-medium mb-2">
+                        {duplicates.length} duplicate item(s) found:
+                      </p>
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {duplicates.slice(0, 5).map((item, index) => (
+                          <Badge
+                            key={index}
+                            variant="destructive"
+                            className="bg-red-100 text-red-800 text-xs"
+                          >
+                            {item}
+                          </Badge>
+                        ))}
+                        {duplicates.length > 5 && (
+                          <Badge variant="destructive" className="bg-red-100 text-red-800 text-xs">
+                            +{duplicates.length - 5} more...
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs">Remove these items from your list to continue.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -247,6 +310,7 @@ Summertime`}
                   <ul className="text-xs space-y-1 text-blue-700">
                     <li>• Items will be created with just titles</li>
                     <li>• Prefixes like "[  ]" are automatically removed</li>
+                    <li>• Duplicate titles are blocked to prevent conflicts</li>
                     <li>• Click on any item to edit and add tags (Style, Key, Composer, etc.)</li>
                     <li>• Use the search and filter features to organize your collection</li>
                   </ul>
@@ -264,10 +328,12 @@ Summertime`}
               </Button>
               <Button
                 type="submit"
-                disabled={bulkImportMutation.isPending || previewItems.length === 0}
+                disabled={bulkImportMutation.isPending || previewItems.length === 0 || duplicates.length > 0}
               >
                 {bulkImportMutation.isPending 
                   ? `Importing ${previewItems.length} items...` 
+                  : duplicates.length > 0
+                  ? `Remove Duplicates First`
                   : `Import ${previewItems.length} Items`
                 }
               </Button>
