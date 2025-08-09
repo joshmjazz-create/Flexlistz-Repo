@@ -72,6 +72,7 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Updates**: Optimistic updates with query invalidation
 - **Responsive Design**: Mobile-friendly interface with collapsible sidebar
 - **Bulk Import**: Import up to 1000 items at once with smart duplicate filtering and automatic "[  ]" prefix removal
+- **Advanced Theme System**: Light/Dark/Auto modes with time-based switching (defaults to Auto), square toggle button in header
 - **Type Safety**: End-to-end TypeScript with shared schemas between client and server
 
 ## External Dependencies
