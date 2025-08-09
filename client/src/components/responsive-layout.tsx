@@ -14,13 +14,13 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
   return (
     <div className="flex h-screen w-full overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-80 md:flex-col shrink-0 border-r bg-white">
+      <aside className="hidden md:flex md:w-80 md:flex-col shrink-0 border-r bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
         {sidebar}
       </aside>
 
       {/* Mobile Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-80 bg-white shadow-lg transition-transform duration-300 md:hidden ${
+        className={`fixed inset-y-0 left-0 z-40 w-80 bg-white dark:bg-gray-900 shadow-lg transition-transform duration-300 md:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -38,7 +38,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
       {/* Main Content */}
       <main className="flex-1 min-w-0 flex flex-col">
         {/* Mobile Header */}
-        <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-white px-4 py-3 md:hidden">
+        <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 px-4 py-3 md:hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -52,7 +52,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
             <div className="w-6 h-6 flex items-center justify-center">
               <img src={logoImage} alt="FlexList" className="w-6 h-6 object-contain" />
             </div>
-            <h1 className="text-lg font-semibold text-gray-900">FlexList</h1>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
           </div>
         </header>
 

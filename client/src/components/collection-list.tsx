@@ -53,20 +53,24 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
           key={collection.id}
           className={`rounded-lg p-3 cursor-pointer transition-colors ${
             collection.id === activeCollectionId
-              ? "bg-primary-50 border border-primary-200"
-              : "border border-gray-200 hover:bg-gray-50"
+              ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700"
+              : "border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
           }`}
           onClick={() => setLocation(`/collections/${collection.id}`)}
         >
           <div className="flex items-center justify-between">
             <div>
               <h3 className={`font-medium ${
-                collection.id === activeCollectionId ? "text-primary-900" : "text-gray-900"
+                collection.id === activeCollectionId 
+                  ? "text-primary-900 dark:text-primary-100" 
+                  : "text-gray-900 dark:text-gray-100"
               }`}>
                 {collection.name}
               </h3>
               <p className={`text-xs mt-1 ${
-                collection.id === activeCollectionId ? "text-primary-600" : "text-gray-500"
+                collection.id === activeCollectionId 
+                  ? "text-primary-600 dark:text-primary-300" 
+                  : "text-gray-500 dark:text-gray-400"
               }`}>
                 {collection.itemCount} items
               </p>

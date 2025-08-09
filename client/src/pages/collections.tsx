@@ -126,31 +126,31 @@ export default function Collections() {
   // Sidebar content
   const sidebarContent = (
     <>
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 flex items-center justify-center">
               <img src={logoImage} alt="FlexList" className="w-8 h-8 object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">FlexList</h1>
-              <p className="text-sm text-gray-500">Smart List Manager</p>
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">FlexList</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Smart List Manager</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 bg-white dark:bg-gray-900">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
             Lists
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowAddCollection(true)}
-            className="p-1 text-gray-400 hover:text-primary-600"
+            className="p-1 text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"
           >
             <Plus className="w-3 h-3" />
           </Button>
@@ -168,7 +168,7 @@ export default function Collections() {
         <Button
           variant="outline"
           onClick={() => setShowAddCollection(true)}
-          className="w-full mt-4 border-dashed border-2 hover:border-primary-300 hover:text-primary-600"
+          className="w-full mt-4 border-dashed border-2 hover:border-primary-300 hover:text-primary-600 dark:border-gray-600 dark:hover:border-primary-400 dark:hover:text-primary-400 dark:text-gray-300"
         >
           <Plus className="w-4 h-4 mr-2" />
           New List
@@ -186,7 +186,7 @@ export default function Collections() {
           <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button onClick={() => setShowAddItem(true)} size="lg" className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={() => setShowAddItem(true)} size="lg" className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600">
                   <Plus className="w-6 h-6" />
                 </Button>
               </div>
@@ -261,9 +261,9 @@ export default function Collections() {
           <div className="text-center">
             <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" />
             <div className="flex items-center justify-center gap-3 mb-2">
-              <h2 className="text-xl font-semibold text-gray-900">Welcome to FlexList</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Welcome to FlexList</h2>
             </div>
-            <p className="text-gray-500 mb-6">
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
               Select a list from the sidebar
             </p>
             <Button onClick={() => setShowAddCollection(true)}>

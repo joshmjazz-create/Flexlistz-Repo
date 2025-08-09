@@ -22,14 +22,14 @@ interface ItemListProps {
 }
 
 const tagColors = [
-  "bg-blue-100 text-blue-800",
-  "bg-green-100 text-green-800", 
-  "bg-purple-100 text-purple-800",
-  "bg-yellow-100 text-yellow-800",
-  "bg-red-100 text-red-800",
-  "bg-indigo-100 text-indigo-800",
-  "bg-pink-100 text-pink-800",
-  "bg-gray-100 text-gray-800"
+  "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200",
+  "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200", 
+  "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200",
+  "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200",
+  "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200",
+  "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200",
+  "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200",
+  "bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200"
 ];
 
 export default function ItemList({ 
@@ -49,12 +49,12 @@ export default function ItemList({
   const getKnowledgeClasses = (knowledgeLevel: string | null | undefined) => {
     switch (knowledgeLevel) {
       case 'knows':
-        return 'border-green-200 bg-green-50';
+        return 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20';
       case 'kind-of-knows':
-        return 'border-orange-200 bg-orange-50';
+        return 'border-orange-200 dark:border-orange-700 bg-orange-50 dark:bg-orange-900/20';
       case 'does-not-know':
       default:
-        return 'border-red-200 bg-red-50';
+        return 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20';
     }
   };
 
@@ -139,12 +139,12 @@ export default function ItemList({
       <div className="flex-1 overflow-y-auto p-6">
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-lg border border-gray-200 p-6">
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
               <div className="animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-1/4 mb-4"></div>
                 <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded w-full"></div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-full"></div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-3/4"></div>
                 </div>
               </div>
             </div>
@@ -158,9 +158,9 @@ export default function ItemList({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center py-12">
-          <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No items found</h3>
-          <p className="text-gray-500 mb-6">Try adjusting your filters or add a new item</p>
+          <Search className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No items found</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">Try adjusting your filters or add a new item</p>
         </div>
       </div>
     );
@@ -170,12 +170,12 @@ export default function ItemList({
     <div className="flex-1 flex flex-col min-h-0">
       {/* Controls Bar */}
       {(onViewModeChange || onSortOrderChange) && (
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
           <div className="flex items-center justify-between mb-3">
             <div className="space-y-3">
               {onViewModeChange && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700">View</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View</span>
                   <Button
                     variant={viewMode === 'compact' ? 'default' : 'outline'}
                     size="sm"
@@ -199,7 +199,7 @@ export default function ItemList({
               
               {onSortOrderChange && (
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-700">Sort</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort</span>
                   <Button
                     variant={sortOrder === 'asc' ? 'default' : 'outline'}
                     size="sm"
@@ -235,7 +235,7 @@ export default function ItemList({
 
 
             
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {items.length} item{items.length !== 1 ? 's' : ''}
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function ItemList({
                         className="flex-1 cursor-pointer"
                         onClick={() => onToggleExpanded && onToggleExpanded(item.id)}
                       >
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {item.title}
                         </h3>
                       </div>
@@ -300,7 +300,7 @@ export default function ItemList({
                   
                   {/* Expanded detailed view - identical to detailed view */}
                   {isExpanded && (
-                    <div className="px-3 pb-3 border-t border-gray-200 mt-2 pt-3">
+                    <div className="px-3 pb-3 border-t border-gray-200 dark:border-gray-700 mt-2 pt-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           {/* Fixed Fields as Tags */}
@@ -317,7 +317,7 @@ export default function ItemList({
                                   variant="secondary"
                                   className={`${tagColors[tagIndex % tagColors.length]} border-0`}
                                 >
-                                  <span className="text-gray-600 mr-1">{key}:</span>
+                                  <span className="text-gray-600 dark:text-gray-400 mr-1">{key}:</span>
                                   {value}
                                 </Badge>
                               ))}
@@ -327,7 +327,7 @@ export default function ItemList({
                           {(item.youtubeId || item.spotifyUri) && (
                             <div className="mb-4">
                               <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm font-medium text-gray-700">Media:</span>
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Media:</span>
                                 {item.youtubeId && (
                                   <Badge variant="secondary" className="bg-red-100 text-red-800 border-0">
                                     <Youtube className="w-3 h-3 mr-1" />
@@ -363,7 +363,7 @@ export default function ItemList({
 
                           {/* Notes */}
                           {item.notes && (
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
                               <p>
                                 <span className="font-medium">Notes:</span> {item.notes}
                               </p>
@@ -405,7 +405,7 @@ export default function ItemList({
               <div key={item.id} className={`rounded-lg border p-6 hover:shadow-md transition-shadow ${getKnowledgeClasses(item.knowledgeLevel)}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       {item.title}
                     </h3>
                     
@@ -423,7 +423,7 @@ export default function ItemList({
                             variant="secondary"
                             className={`${tagColors[tagIndex % tagColors.length]} border-0`}
                           >
-                            <span className="text-gray-600 mr-1">{key}:</span>
+                            <span className="text-gray-600 dark:text-gray-400 mr-1">{key}:</span>
                             {value}
                           </Badge>
                         ))}
@@ -433,15 +433,15 @@ export default function ItemList({
                     {(item.youtubeId || item.spotifyUri) && (
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="text-sm font-medium text-gray-700">Media:</span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Media:</span>
                           {item.youtubeId && (
-                            <Badge variant="secondary" className="bg-red-100 text-red-800 border-0">
+                            <Badge variant="secondary" className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-0">
                               <Youtube className="w-3 h-3 mr-1" />
                               YouTube
                             </Badge>
                           )}
                           {item.spotifyUri && (
-                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-0">
+                            <Badge variant="secondary" className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-0">
                               <Music className="w-3 h-3 mr-1" />
                               Spotify
                             </Badge>
@@ -469,7 +469,7 @@ export default function ItemList({
 
                     {/* Notes */}
                     {item.notes && (
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         <p>
                           <span className="font-medium">Notes:</span> {item.notes}
                         </p>
