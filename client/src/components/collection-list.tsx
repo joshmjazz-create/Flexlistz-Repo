@@ -10,9 +10,10 @@ interface CollectionListProps {
   collections: CollectionWithCount[];
   activeCollectionId?: string;
   onEditCollection?: (collection: CollectionWithCount) => void;
+  onCollectionSelect?: () => void;
 }
 
-export default function CollectionList({ collections, activeCollectionId, onEditCollection }: CollectionListProps) {
+export default function CollectionList({ collections, activeCollectionId, onEditCollection, onCollectionSelect }: CollectionListProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -56,7 +57,10 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
               ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700"
               : "border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
           }`}
-          onClick={() => setLocation(`/collections/${collection.id}`)}
+          onClick={() => {
+            setLocation(`/collections/${collection.id}`);
+            onCollectionSelect?.();
+          }}
         >
           <div className="flex items-center justify-between">
             <div>

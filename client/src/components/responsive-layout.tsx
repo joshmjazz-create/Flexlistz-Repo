@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 
 interface ResponsiveLayoutProps {
-  sidebar: React.ReactNode;
+  sidebar: (closeSidebar: () => void) => React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -14,11 +14,13 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [, setLocation] = useLocation();
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex md:w-80 md:flex-col shrink-0 border-r bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
-        {sidebar}
+        {sidebar(() => {})} {/* No-op for desktop */}
       </aside>
 
       {/* Mobile Sidebar */}
@@ -27,7 +29,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {sidebar}
+        {sidebar(closeSidebar)}
       </aside>
 
       {/* Mobile Backdrop */}

@@ -137,7 +137,7 @@ export default function Collections() {
   const displayItems = sortItems(filteredItems.data || items);
 
   // Sidebar content
-  const sidebarContent = (
+  const sidebarContent = (closeSidebar: () => void) => (
     <>
       <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="flex items-center justify-between">
@@ -181,6 +181,7 @@ export default function Collections() {
             setEditingCollection(collection);
             setShowEditCollection(true);
           }}
+          onCollectionSelect={closeSidebar}
         />
 
         <Button
