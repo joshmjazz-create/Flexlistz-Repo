@@ -33,7 +33,7 @@ export default function ItemList({
   items, 
   onEditItem, 
   isLoading, 
-  viewMode = 'detailed',
+  viewMode = 'compact',
   onViewModeChange,
   sortOrder = 'asc',
   onSortOrderChange,

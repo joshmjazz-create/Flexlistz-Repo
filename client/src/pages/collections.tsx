@@ -29,7 +29,7 @@ export default function Collections() {
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<Record<string, string | string[]>>({});
-  const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
+  const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('compact');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'filter-order'>('asc');
 
   const { data: collections = [] } = useQuery<CollectionWithCount[]>({
