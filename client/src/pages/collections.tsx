@@ -223,11 +223,11 @@ export default function Collections() {
               Welcome to FlexList
             </h2>
             <p className="text-gray-500 mb-6">
-              Select a collection from the sidebar to get started
+              Select a list from the sidebar
             </p>
             <Button onClick={() => setShowAddCollection(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Create Your First Collection
+              Create a List
             </Button>
           </div>
         </div>
