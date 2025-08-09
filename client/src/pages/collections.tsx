@@ -11,6 +11,7 @@ import EditItemModal from "@/components/edit-item-modal";
 import FilterModal from "@/components/filter-modal";
 import BulkImportModal from "@/components/bulk-import-modal";
 import ImportItemsModal from "@/components/import-items-modal";
+import EditCollectionModal from "@/components/edit-collection-modal";
 import { type CollectionWithCount, type Item } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Copy, Layers, Plus, Upload } from "lucide-react";
@@ -21,6 +22,7 @@ export default function Collections() {
   const [showAddCollection, setShowAddCollection] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [showImportItems, setShowImportItems] = useState(false);
+  const [showEditCollection, setShowEditCollection] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -152,6 +154,7 @@ export default function Collections() {
         <CollectionList 
           collections={collections}
           activeCollectionId={collectionId}
+          onEditCollection={() => setShowEditCollection(true)}
         />
 
         <Button
@@ -296,6 +299,14 @@ export default function Collections() {
         activeFilters={activeFilters}
         onFilterChange={setActiveFilters}
       />
+
+      {activeCollection && (
+        <EditCollectionModal
+          isOpen={showEditCollection}
+          onClose={() => setShowEditCollection(false)}
+          collection={activeCollection}
+        />
+      )}
     </>
   );
 }

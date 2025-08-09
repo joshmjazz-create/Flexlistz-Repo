@@ -9,9 +9,10 @@ import { type CollectionWithCount } from "@shared/schema";
 interface CollectionListProps {
   collections: CollectionWithCount[];
   activeCollectionId?: string;
+  onEditCollection?: () => void;
 }
 
-export default function CollectionList({ collections, activeCollectionId }: CollectionListProps) {
+export default function CollectionList({ collections, activeCollectionId, onEditCollection }: CollectionListProps) {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
@@ -23,7 +24,7 @@ export default function CollectionList({ collections, activeCollectionId }: Coll
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
       toast({
         title: "Success",
-        description: "Collection deleted successfully",
+        description: "List deleted successfully",
       });
       if (activeCollectionId) {
         setLocation("/");
@@ -32,7 +33,7 @@ export default function CollectionList({ collections, activeCollectionId }: Coll
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to delete collection",
+        description: "Failed to delete list",
         variant: "destructive",
       });
     },
@@ -40,7 +41,7 @@ export default function CollectionList({ collections, activeCollectionId }: Coll
 
   const handleDeleteCollection = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this collection? All items will be removed.")) {
+    if (confirm("Are you sure you want to delete this list? All items will be removed.")) {
       deleteCollectionMutation.mutate(id);
     }
   };
@@ -81,7 +82,9 @@ export default function CollectionList({ collections, activeCollectionId }: Coll
                 }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  // TODO: Implement edit collection
+                  if (collection.id === activeCollectionId && onEditCollection) {
+                    onEditCollection();
+                  }
                 }}
               >
                 <Edit className="w-3 h-3" />
