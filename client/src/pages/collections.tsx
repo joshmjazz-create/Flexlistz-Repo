@@ -179,7 +179,7 @@ export default function Collections() {
 
   // Main content
   const mainContent = (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 mt-4 md:mt-8">
       {activeCollection ? (
         <>
           {/* Main FlexList Header */}
@@ -256,7 +256,7 @@ export default function Collections() {
           />
         </>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900 pt-8 md:pt-16">
           <div className="text-center">
             <img src={logoImage} alt="FlexList" className="w-24 h-24 mx-auto mb-4 opacity-60" style={{ filter: 'none' }} />
             <div className="flex items-center justify-center gap-3 mb-2">

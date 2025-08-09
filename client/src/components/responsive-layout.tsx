@@ -61,7 +61,7 @@ export default function ResponsiveLayout({ sidebar, children }: ResponsiveLayout
         </header>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900 pt-4 md:pt-8">
           {children}
         </div>
       </main>
