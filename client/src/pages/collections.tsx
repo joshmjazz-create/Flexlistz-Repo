@@ -38,7 +38,23 @@ export default function Collections() {
   });
 
   const filteredItems = useQuery<Item[]>({
-    queryKey: ["/api/collections", collectionId, "items", { filters: activeFilters, search: searchQuery }],
+    queryKey: ["/api/collections", collectionId, "items", "filtered", { filters: activeFilters, search: searchQuery }],
+    queryFn: async () => {
+      if (!collectionId) return [];
+      
+      const params = new URLSearchParams();
+      if (Object.keys(activeFilters).length > 0) {
+        params.append('filters', JSON.stringify(activeFilters));
+      }
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery);
+      }
+      
+      const url = `/api/collections/${collectionId}/items${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch filtered items');
+      return response.json();
+    },
     enabled: !!collectionId && (Object.keys(activeFilters).length > 0 || searchQuery.length > 0),
   });
 

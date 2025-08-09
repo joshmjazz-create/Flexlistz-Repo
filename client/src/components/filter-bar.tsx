@@ -18,9 +18,27 @@ export default function FilterBar({
   onFilterChange,
   onToggleFilters,
 }: FilterBarProps) {
-  const removeFilter = (key: string) => {
+  const removeFilter = (key: string, valueToRemove?: string) => {
     const newFilters = { ...activeFilters };
-    delete newFilters[key];
+    
+    if (valueToRemove) {
+      // Remove a specific value from the filter
+      const currentValue = newFilters[key];
+      if (Array.isArray(currentValue)) {
+        const filteredValues = currentValue.filter(v => v !== valueToRemove);
+        if (filteredValues.length > 0) {
+          newFilters[key] = filteredValues.length === 1 ? filteredValues[0] : filteredValues;
+        } else {
+          delete newFilters[key];
+        }
+      } else if (currentValue === valueToRemove) {
+        delete newFilters[key];
+      }
+    } else {
+      // Remove the entire filter key
+      delete newFilters[key];
+    }
+    
     onFilterChange(newFilters);
   };
 
