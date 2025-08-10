@@ -40,17 +40,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async seedData() {
-    // Check if we already have collections
-    const existingCollections = await db.select().from(collections).limit(1);
-    if (existingCollections.length === 0) {
-      // Create the "Sample" collection
-      const [collection] = await db.insert(collections).values({
-        name: "Sample",
-        description: "Sample list with jazz standards",
-      }).returning();
+    // Force reset: delete existing data and recreate sample data
+    try {
+      await db.delete(itemTags);
+      await db.delete(tags);
+      await db.delete(items);
+      await db.delete(collections);
+    } catch (error) {
+      // Ignore errors if tables don't exist yet
+    }
+    
+    // Create the "Sample" collection
+    const [collection] = await db.insert(collections).values({
+      name: "Sample", 
+      description: "Sample list with jazz standards",
+    }).returning();
 
-      // Add sample items with fixed fields and extra tags
-      const sampleItems = [
+    // Add sample items with fixed fields and extra tags
+    const sampleItems = [
         {
           title: "Misty",
           key: "Eb",
@@ -107,7 +114,7 @@ export class DatabaseStorage implements IStorage {
         }
       ];
 
-      for (const itemData of sampleItems) {
+    for (const itemData of sampleItems) {
         const [item] = await db.insert(items).values({
           collectionId: collection.id,
           title: itemData.title,
@@ -136,7 +143,6 @@ export class DatabaseStorage implements IStorage {
           await db.insert(itemTags).values(tagRelationships).onConflictDoNothing();
         }
       }
-    }
   }
 
   async getCollections(): Promise<CollectionWithCount[]> {
