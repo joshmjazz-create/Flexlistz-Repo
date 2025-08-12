@@ -28,7 +28,7 @@ function Router() {
       <Route path="/" component={Collections} />
       <Route path="/index.html" component={Collections} />
       <Route path="/collections/:collectionId?" component={Collections} />
-      <Route path="*" component={Collections} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
