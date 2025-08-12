@@ -23,8 +23,13 @@ if (typeof window !== 'undefined' && sessionStorage.redirect) {
 }
 
 function Router() {
-  // Force show Collections for all routes while debugging
-  return <Collections />;
+  return (
+    <Switch>
+      <Route path="/" component={Collections} />
+      <Route path="/collections/:collectionId?" component={Collections} />
+      <Route component={NotFound} />
+    </Switch>
+  );
 }
 
 function App() {
