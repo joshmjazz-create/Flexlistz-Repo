@@ -9,12 +9,6 @@ export function IOSInstallBanner() {
   useEffect(() => {
     // Check if we should show the banner
     const checkShouldShow = () => {
-      // Check if user has dismissed the banner before
-      const dismissed = localStorage.getItem('ios-install-banner-dismissed');
-      if (dismissed === 'true') {
-        return false;
-      }
-
       // Check if we're on iOS Safari
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -53,7 +47,6 @@ export function IOSInstallBanner() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem('ios-install-banner-dismissed', 'true');
   };
 
   if (!shouldShow || !isVisible) {
