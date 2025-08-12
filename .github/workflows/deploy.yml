@@ -32,7 +32,7 @@ jobs:
       - name: Build Vite project
         run: |
           export NODE_ENV=production
-          npx vite build
+          npx vite build --base=./
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -40,7 +40,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist/public'
+          path: 'dist/public'
           
       - name: Deploy to GitHub Pages
         id: deployment

@@ -75,6 +75,20 @@ Preferred communication style: Simple, everyday language.
 - **Advanced Theme System**: Light/Dark/Auto modes with time-based switching (defaults to Auto), square toggle button in header
 - **Type Safety**: End-to-end TypeScript with shared schemas between client and server
 
+## Recent Changes (August 2025)
+
+### Browser Storage Conversion & GitHub Pages Deployment
+- **Converted from PostgreSQL to browser-only storage**: All data now stored in user's browser via IndexedDB/localStorage
+- **GitHub Pages deployment configured**: Updated workflow with proper Vite build settings (`--base=./`) to fix asset path issues
+- **iOS install banner**: Added persistent PWA install prompt for Safari users
+- **Error boundary**: Added comprehensive error handling for production deployment
+- **Fixed GitHub Actions versions**: Updated to `actions/upload-pages-artifact@v3` and `actions/deploy-pages@v4`
+
+### Storage Architecture Changes
+- **Browser-only data persistence**: No server-side storage - collections and items persist only in user's browser
+- **Image storage**: Images converted to base64 and stored directly in IndexedDB
+- **Simplified query client**: Replaced complex server API with direct browser storage calls
+
 ## External Dependencies
 
 ### Database & ORM
