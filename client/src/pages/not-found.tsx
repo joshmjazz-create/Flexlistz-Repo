@@ -12,6 +12,11 @@ export default function NotFound() {
           </div>
 
           <p className="mt-4 text-sm text-gray-600">
+            Current path: {window.location.pathname}<br/>
+            Current hash: {window.location.hash}<br/>
+            Current search: {window.location.search}
+          </p>
+          <p className="mt-2 text-sm text-gray-600">
             Did you forget to add the page to the router?
           </p>
         </CardContent>

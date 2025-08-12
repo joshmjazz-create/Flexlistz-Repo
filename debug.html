@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FlexList Debug</title>
+</head>
+<body>
+    <h1>FlexList Debug Info</h1>
+    <p>Current URL: <span id="url"></span></p>
+    <p>Pathname: <span id="pathname"></span></p>
+    <p>Hash: <span id="hash"></span></p>
+    <p>Search: <span id="search"></span></p>
+    <p>Host: <span id="host"></span></p>
+    
+    <h2>Test FlexList</h2>
+    <a href="/">Root /</a><br>
+    <a href="/index.html">/index.html</a><br>
+    <a href="./index.html">./index.html</a><br>
+    
+    <script>
+        document.getElementById('url').textContent = window.location.href;
+        document.getElementById('pathname').textContent = window.location.pathname;
+        document.getElementById('hash').textContent = window.location.hash;
+        document.getElementById('search').textContent = window.location.search;
+        document.getElementById('host').textContent = window.location.host;
+    </script>
+</body>
+</html>
