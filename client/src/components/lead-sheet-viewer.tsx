@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { BrowserImage } from "@/components/BrowserImage";
 import { Button } from "@/components/ui/button";
 import { Expand, X } from "lucide-react";
 
@@ -16,16 +17,13 @@ export default function LeadSheetViewer({ imageUrl, title }: LeadSheetViewerProp
   return (
     <>
       <div className="relative group">
-        <img
-          src={imageUrl}
-          alt={`Lead sheet for ${title}`}
-          className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:opacity-80 transition-opacity"
-          onClick={() => setIsExpanded(true)}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-          }}
-        />
+        <div onClick={() => setIsExpanded(true)} className="cursor-pointer">
+          <BrowserImage
+            fileId={imageUrl}
+            alt={`Lead sheet for ${title}`}
+            className="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700 hover:opacity-80 transition-opacity"
+          />
+        </div>
         <Button
           variant="secondary"
           size="sm"
@@ -47,8 +45,8 @@ export default function LeadSheetViewer({ imageUrl, title }: LeadSheetViewerProp
             >
               <X className="w-4 h-4" />
             </Button>
-            <img
-              src={imageUrl}
+            <BrowserImage
+              fileId={imageUrl}
               alt={`Lead sheet for ${title}`}
               className="w-full h-auto max-h-[85vh] object-contain"
             />

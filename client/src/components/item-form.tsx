@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, X, Upload, Image } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ObjectUploader } from "./ObjectUploader";
+import { BrowserFileUploader } from "./BrowserFileUploader";
 import { apiRequest } from "@/lib/queryClient";
 import AutocompleteInput from "./autocomplete-input";
 
@@ -50,38 +50,11 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
 
   const queryClient = useQueryClient();
 
-  // Handle lead sheet upload
-  const handleGetUploadParameters = async () => {
-    const response = await fetch("/api/objects/upload", {
-      method: "POST",
-    });
-    const data = await response.json();
-    return {
-      method: "PUT" as const,
-      url: data.uploadURL,
-    };
-  };
-
-  const handleUploadComplete = async (result: any) => {
-    if (result.successful && result.successful.length > 0) {
-      const uploadedFile = result.successful[0];
-      const uploadURL = uploadedFile.uploadURL;
-      
-      // Normalize the URL to get the object path
-      const response = await fetch("/api/lead-sheets", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ leadSheetURL: uploadURL }),
-      });
-      const data = await response.json();
-      
-      // Update the form data with the normalized object path
-      const newFormData = { ...formData, leadSheetUrl: data.objectPath };
-      setFormData(newFormData);
-      onChange?.(newFormData);
-    }
+  // Handle lead sheet upload with browser storage
+  const handleUploadComplete = (fileId: string) => {
+    const newFormData = { ...formData, leadSheetUrl: fileId };
+    setFormData(newFormData);
+    onChange?.(newFormData);
   };
 
   // Fetch available tag keys for autocomplete
@@ -201,10 +174,8 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
                   </Button>
                 </div>
               )}
-              <ObjectUploader
-                maxNumberOfFiles={1}
+              <BrowserFileUploader
                 maxFileSize={10485760}
-                onGetUploadParameters={handleGetUploadParameters}
                 onComplete={handleUploadComplete}
                 buttonClassName="w-full"
               >
@@ -212,7 +183,7 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
                   <Upload className="w-4 h-4" />
                   <span>{formData.leadSheetUrl ? 'Replace Lead Sheet' : 'Upload Lead Sheet'}</span>
                 </div>
-              </ObjectUploader>
+              </BrowserFileUploader>
               <p className="text-xs text-gray-500">
                 Upload a .png or .jpg image of the lead sheet
               </p>

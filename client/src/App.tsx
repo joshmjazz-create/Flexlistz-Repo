@@ -4,8 +4,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { setupBrowserAPI } from "@/lib/browser-api";
 import Collections from "@/pages/collections";
 import NotFound from "@/pages/not-found";
+
+// Initialize browser-based API on startup
+setupBrowserAPI();
 
 function Router() {
   return (
