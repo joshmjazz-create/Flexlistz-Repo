@@ -13,10 +13,20 @@ import NotFound from "@/pages/not-found";
 // Initialize browser-based API on startup
 setupBrowserAPI();
 
+// Handle GitHub Pages SPA routing
+if (typeof window !== 'undefined' && sessionStorage.redirect) {
+  const redirect = sessionStorage.redirect;
+  delete sessionStorage.redirect;
+  if (redirect && redirect !== location.href) {
+    history.replaceState(null, null, redirect);
+  }
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Collections} />
+      <Route path="/index.html" component={Collections} />
       <Route path="/collections/:collectionId?" component={Collections} />
       <Route component={NotFound} />
     </Switch>
