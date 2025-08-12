@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head><title>Create Icons</title></head>
+<body>
+<canvas id="canvas192" width="192" height="192"></canvas>
+<canvas id="canvas512" width="512" height="512"></canvas>
+<script>
+function createIcon(canvas, size) {
+  const ctx = canvas.getContext('2d');
+  
+  // Blue background with rounded corners
+  ctx.fillStyle = '#3B82F6';
+  ctx.fillRect(0, 0, size, size);
+  
+  // White list lines
+  ctx.fillStyle = 'white';
+  const scale = size / 192;
+  
+  // Line 1 - full width
+  ctx.fillRect(32*scale, 40*scale, 128*scale, 16*scale);
+  
+  // Line 2 - shorter
+  ctx.fillRect(32*scale, 72*scale, 96*scale, 16*scale);
+  
+  // Line 3 - medium
+  ctx.fillRect(32*scale, 104*scale, 112*scale, 16*scale);
+  
+  // Line 4 - shortest
+  ctx.fillRect(32*scale, 136*scale, 80*scale, 16*scale);
+}
+
+createIcon(document.getElementById('canvas192'), 192);
+createIcon(document.getElementById('canvas512'), 512);
+
+// Download function
+function downloadCanvas(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+setTimeout(() => {
+  downloadCanvas(document.getElementById('canvas192'), 'icon-192.png');
+  downloadCanvas(document.getElementById('canvas512'), 'icon-512.png');
+}, 100);
+</script>
+</body>
+</html>
