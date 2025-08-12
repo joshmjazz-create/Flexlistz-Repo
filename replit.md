@@ -79,10 +79,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Browser Storage Conversion & GitHub Pages Deployment
 - **Converted from PostgreSQL to browser-only storage**: All data now stored in user's browser via IndexedDB/localStorage
-- **GitHub Pages deployment configured**: Updated workflow with proper Vite build settings (`--base=./`) to fix asset path issues
+- **GitHub Pages deployment configured**: Successfully deployed using docs folder approach with Vite build settings (`--base=./`)
+- **Routing fixes for GitHub Pages**: Added catch-all routing and SPA support for proper navigation on static hosting
 - **iOS install banner**: Added persistent PWA install prompt for Safari users
 - **Error boundary**: Added comprehensive error handling for production deployment
-- **Fixed GitHub Actions versions**: Updated to `actions/upload-pages-artifact@v3` and `actions/deploy-pages@v4`
+- **Deployment method**: Using docs folder deployment (recommended over GitHub Actions for simplicity)
 
 ### Storage Architecture Changes
 - **Browser-only data persistence**: No server-side storage - collections and items persist only in user's browser
