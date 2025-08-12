@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { setupBrowserAPI } from "@/lib/browser-api";
+import { IOSInstallBanner } from "@/components/ios-install-banner";
 import Collections from "@/pages/collections";
 import NotFound from "@/pages/not-found";
 
@@ -27,6 +28,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            <IOSInstallBanner />
             <Router />
             <Toaster />
           </div>
