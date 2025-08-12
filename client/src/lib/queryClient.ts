@@ -69,8 +69,12 @@ export async function apiRequest(
     }
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Request failed: ${response.status}`);
+      try {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Request failed`);
+      } catch {
+        throw new Error(`Request failed: ${(response as any).status || 'Unknown error'}`);
+      }
     }
 
     return response as Response;
@@ -122,8 +126,12 @@ export const getQueryFn: <T>(options: {
         if (unauthorizedBehavior === "returnNull" && (response as any).status === 401) {
           return null;
         }
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Query failed');
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Query failed');
+        } catch {
+          throw new Error('Query failed');
+        }
       }
 
       return await response.json();
