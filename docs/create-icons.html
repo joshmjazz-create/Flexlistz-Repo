@@ -12,6 +12,14 @@ function createIcon(canvas, size) {
   ctx.fillStyle = '#3B82F6';
   ctx.fillRect(0, 0, size, size);
   
+  // Add rounded corners effect
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.beginPath();
+  const radius = size * 0.125;
+  ctx.roundRect(0, 0, size, size, radius);
+  ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  
   // White list lines
   ctx.fillStyle = 'white';
   const scale = size / 192;
@@ -40,10 +48,15 @@ function downloadCanvas(canvas, filename) {
   link.click();
 }
 
+// Auto-download icons after creation
 setTimeout(() => {
   downloadCanvas(document.getElementById('canvas192'), 'icon-192.png');
-  downloadCanvas(document.getElementById('canvas512'), 'icon-512.png');
-}, 100);
+  setTimeout(() => {
+    downloadCanvas(document.getElementById('canvas512'), 'icon-512.png');
+  }, 500);
+}, 1000);
+
+console.log('FlexList icons created! Download should start automatically.');
 </script>
 </body>
 </html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create FlexList Icons</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192" style="border: 1px solid #000; margin: 10px;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="border: 1px solid #000; margin: 10px;"></canvas>
+    <br>
+    <button onclick="downloadIcons()">Download Icons</button>
+    
+    <script>
+        function createIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.fillStyle = '#3B82F6';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add white border
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = size * 0.02;
+            ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, size - ctx.lineWidth, size - ctx.lineWidth);
+            
+            // Draw FlexList logo text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold ${size * 0.25}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Draw "FL" for FlexList
+            ctx.fillText('FL', size/2, size/2);
+            
+            // Add small dot accent
+            ctx.beginPath();
+            ctx.arc(size * 0.75, size * 0.25, size * 0.03, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        // Create icons
+        const icon192 = createIcon(document.getElementById('canvas192'), 192);
+        const icon512 = createIcon(document.getElementById('canvas512'), 512);
+        
+        function downloadIcons() {
+            // Download 192x192 icon
+            const link192 = document.createElement('a');
+            link192.download = 'icon-192.png';
+            link192.href = icon192;
+            link192.click();
+            
+            // Download 512x512 icon
+            setTimeout(() => {
+                const link512 = document.createElement('a');
+                link512.download = 'icon-512.png';
+                link512.href = icon512;
+                link512.click();
+            }, 500);
+        }
+    </script>
+</body>
+</html>
