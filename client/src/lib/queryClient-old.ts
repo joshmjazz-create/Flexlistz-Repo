@@ -1,156 +1,163 @@
-import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { browserAPI } from "./browser-api";
 
-// Browser storage API request handler
+// Simplified browser storage API request handler
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Parse the URL to determine which browser API method to call
-  const urlParts = url.split('/').filter(Boolean);
+  console.log(`Browser API Request: ${method} ${url}`, data);
   
   try {
+    const urlParts = url.split('/').filter(Boolean);
     let response;
-    
+
+    // Route API calls to browser storage
     if (url.includes('/collections')) {
       if (method === 'GET' && urlParts.length === 2) {
-        // GET /api/collections
         response = await browserAPI.getCollections();
       } else if (method === 'GET' && urlParts.length === 3) {
-        // GET /api/collections/:id
-        const id = urlParts[2];
-        response = await browserAPI.getCollection(id);
+        response = await browserAPI.getCollection(urlParts[2]);
       } else if (method === 'POST' && urlParts.length === 2) {
-        // POST /api/collections
         response = await browserAPI.createCollection(data as any);
       } else if (method === 'PUT' && urlParts.length === 3) {
-        // PUT /api/collections/:id
-        const id = urlParts[2];
-        response = await browserAPI.updateCollection(id, data as any);
+        response = await browserAPI.updateCollection(urlParts[2], data as any);
       } else if (method === 'DELETE' && urlParts.length === 3) {
-        // DELETE /api/collections/:id
-        const id = urlParts[2];
-        response = await browserAPI.deleteCollection(id);
+        response = await browserAPI.deleteCollection(urlParts[2]);
       } else if (url.includes('/items')) {
-        // GET /api/collections/:id/items
         const collectionId = urlParts[2];
-        const searchParams = new URLSearchParams(window.location.search);
-        const params: Record<string, string | string[]> = { collectionId };
-        searchParams.forEach((value, key) => {
-          params[key] = value;
+        // Parse query params from URL
+        const urlObj = new URL(`http://localhost${url}`);
+        const params: Record<string, string | string[]> = {};
+        urlObj.searchParams.forEach((value, key) => {
+          if (key === 'filters') {
+            try {
+              const parsedFilters = JSON.parse(value);
+              Object.assign(params, parsedFilters);
+            } catch (e) {
+              console.error('Failed to parse filters:', e);
+            }
+          } else {
+            params[key] = value;
+          }
         });
-        response = await browserAPI.getItems(collectionId, params);
+        response = await browserAPI.getItems(collectionId, Object.keys(params).length > 0 ? params : undefined);
       }
     } else if (url.includes('/items')) {
       if (method === 'POST') {
-        // POST /api/items
         response = await browserAPI.createItem(data as any);
+        // Invalidate tags after creating item with new tags
+        queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/collections'] });
       } else if (method === 'PUT') {
-        // PUT /api/items/:id
-        const id = urlParts[2];
-        response = await browserAPI.updateItem(id, data as any);
+        response = await browserAPI.updateItem(urlParts[2], data as any);
+        // Invalidate tags after updating item
+        queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/items', urlParts[2], 'tags'] });
       } else if (method === 'DELETE') {
-        // DELETE /api/items/:id
-        const id = urlParts[2];
-        response = await browserAPI.deleteItem(id);
+        response = await browserAPI.deleteItem(urlParts[2]);
       }
     } else if (url.includes('/tags/keys')) {
-      // GET /api/tags/keys
       response = await browserAPI.getTagKeys();
     } else if (url.includes('/tags/values')) {
-      // GET /api/tags/values/:key
-      const key = urlParts[3];
-      response = await browserAPI.getTagValues(key);
+      response = await browserAPI.getTagValues(urlParts[3]);
+    } else if (url.includes('/field-values/')) {
+      const field = url.split('/').pop() as 'key' | 'composer' | 'style';
+      console.log('Getting field values for:', field);
+      response = await browserAPI.getFieldValues(field);
+    } else if (url.includes('/collections/') && url.includes('/tags')) {
+      const collectionId = urlParts[2];
+      response = await browserAPI.getAvailableTags(collectionId);
     }
 
-    if (!response) {
-      throw new Error(`Unsupported API endpoint: ${method} ${url}`);
-    }
-
-    if (!response.ok) {
-      try {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Request failed`);
-      } catch {
-        throw new Error(`Request failed: ${(response as any).status || 'Unknown error'}`);
-      }
+    if (!response || !response.ok) {
+      throw new Error(`API request failed: ${method} ${url}`);
     }
 
     return response as Response;
   } catch (error) {
-    console.error('Browser API request failed:', error);
+    console.error('Browser API request error:', error);
     throw error;
   }
 }
 
-// Browser storage query function
-type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
-  ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }): Promise<T> => {
-    const url = queryKey.join("/") as string;
+// Simple query function for browser storage
+async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
+  const url = queryKey.join("/") as string;
+  console.log(`Browser Query: ${url}`);
+  
+  // Parse URL parts more carefully
+  const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+  const parts = cleanUrl.split('/').filter(p => p);
+  console.log('URL parts:', parts);
+  
+  try {
+    let response;
     
-    try {
-      let response;
+    if (url === '/api/collections') {
+      response = await browserAPI.getCollections();
+    } else if (url.includes('/collections/') && !url.includes('/items')) {
+      const id = url.split('/').pop();
+      if (id) response = await browserAPI.getCollection(id);
+    } else if (url.includes('/items') && url.includes('/collections/')) {
+      const urlParts = url.split('/');
+      const collectionId = urlParts[3]; // Should be api/collections/{id}/items
       
-      if (url.includes('/collections') && !url.includes('/items')) {
-        if (url === '/api/collections') {
-          response = await browserAPI.getCollections();
-        } else {
-          const id = url.split('/').pop();
-          if (id) {
-            response = await browserAPI.getCollection(id);
+      // Parse query params from URL
+      const urlObj = new URL(`http://localhost${url}`);
+      const params: Record<string, string | string[]> = {};
+      urlObj.searchParams.forEach((value, key) => {
+        if (key === 'filters') {
+          try {
+            const parsedFilters = JSON.parse(value);
+            console.log('Parsed filters from URL:', parsedFilters);
+            // Don't nest under 'filters' key, spread directly into params
+            Object.assign(params, parsedFilters);
+          } catch (e) {
+            console.error('Failed to parse filters:', e);
           }
+        } else {
+          params[key] = value;
         }
-      } else if (url.includes('/items')) {
-        const urlParts = url.split('/');
-        const collectionId = urlParts[2];
-        response = await browserAPI.getItems(collectionId);
-      } else if (url.includes('/tags/keys')) {
-        response = await browserAPI.getTagKeys();
-      } else if (url.includes('/tags/values')) {
-        const key = url.split('/').pop();
-        if (key) {
-          response = await browserAPI.getTagValues(key);
-        }
-      }
-
-      if (!response) {
-        throw new Error(`Unsupported query endpoint: ${url}`);
-      }
-
-      if (!response.ok) {
-        if (unauthorizedBehavior === "returnNull" && (response as any).status === 401) {
-          return null;
-        }
-        try {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Query failed');
-        } catch {
-          throw new Error('Query failed');
-        }
-      }
-
-      return await response.json() as T;
-    } catch (error) {
-      console.error('Browser query failed:', error);
-      if (unauthorizedBehavior === "returnNull") {
-        return null as T;
-      }
-      throw error;
+      });
+      
+      response = await browserAPI.getItems(collectionId, Object.keys(params).length > 0 ? params : undefined);
+    } else if (url.includes('/tags/keys')) {
+      response = await browserAPI.getTagKeys();
+    } else if (url.includes('/tags/values/')) {
+      const key = url.split('/').pop();
+      if (key) response = await browserAPI.getTagValues(key);
+    } else if (parts[0] === 'api' && parts[1] === 'collections' && parts[3] === 'tags' && parts.length === 4) {
+      // /api/collections/{id}/tags
+      const collectionId = parts[2];
+      console.log('Getting available tags for collection:', collectionId);
+      response = await browserAPI.getAvailableTags(collectionId);
+    } else if (url.includes('/items/') && url.includes('/tags')) {
+      const urlParts = url.split('/').filter(Boolean);
+      const itemId = urlParts[2]; // api/items/{id}/tags  
+      console.log('Getting item tags for item:', itemId);
+      response = await browserAPI.getItemTags(itemId);
     }
-  };
+
+    if (!response || !response.ok) {
+      throw new Error(`Query failed: ${url}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Browser query error:', error);
+    return { error: error.message };
+  }
+}
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      queryFn: getQueryFn({ on401: "throw" }),
+      queryFn: browserQueryFn,
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 0, // Force fresh data fetch
+      staleTime: 0,
       retry: false,
     },
     mutations: {
