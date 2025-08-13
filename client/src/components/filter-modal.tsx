@@ -144,7 +144,7 @@ export default function FilterModal({
           </div>
 
           {Object.entries(availableTags)
-            .filter(([tagKey]) => tagKey.toLowerCase() !== 'title')
+            .filter(([tagKey]) => tagKey.toLowerCase() !== 'title' && tagKey.toLowerCase() !== 'color')
             .map(([tagKey, values]) => (
             <div key={tagKey}>
               <button

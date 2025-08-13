@@ -520,10 +520,7 @@ class BrowserStorage implements IBrowserStorage {
         if (!tagMap["Style"]) tagMap["Style"] = new Set();
         tagMap["Style"].add(item.style);
       }
-      if (item.knowledgeLevel?.trim()) {
-        if (!tagMap["Color"]) tagMap["Color"] = new Set();
-        tagMap["Color"].add(item.knowledgeLevel);
-      }
+      // Don't add knowledgeLevel as Color here since it's handled by the UI component directly
     });
     
     console.log('Legacy field counts:', {
