@@ -226,11 +226,13 @@ class BrowserStorage implements IBrowserStorage {
   async getCollections(): Promise<CollectionWithCount[]> {
     const collectionsWithCounts = this.db.collections.map(collection => {
       const itemCount = this.db.items.filter(item => item.collectionId === collection.id).length;
+      console.log(`Collection ${collection.name} (${collection.id}): ${itemCount} items`);
       return {
         ...collection,
         itemCount
       };
     });
+    console.log('Total items in storage:', this.db.items.length);
     return collectionsWithCounts;
   }
 
@@ -279,7 +281,10 @@ class BrowserStorage implements IBrowserStorage {
 
   // Items
   async getItems(collectionId: string): Promise<Item[]> {
-    return this.db.items.filter(item => item.collectionId === collectionId);
+    const items = this.db.items.filter(item => item.collectionId === collectionId);
+    console.log(`BrowserStorage.getItems(${collectionId}): Found ${items.length} items`, items.map(i => i.title));
+    console.log('All items in storage:', this.db.items.length, this.db.items.map(i => `${i.title} (${i.collectionId})`));
+    return items;
   }
 
   async getItem(id: string): Promise<Item | undefined> {
