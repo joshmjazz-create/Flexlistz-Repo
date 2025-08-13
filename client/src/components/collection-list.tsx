@@ -1,4 +1,3 @@
-import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
@@ -14,7 +13,6 @@ interface CollectionListProps {
 }
 
 export default function CollectionList({ collections, activeCollectionId, onEditCollection, onCollectionSelect }: CollectionListProps) {
-  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
   const deleteCollectionMutation = useMutation({
@@ -28,7 +26,7 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
         description: "List deleted successfully",
       });
       if (activeCollectionId) {
-        setLocation("/");
+        window.location.hash = "#/";
       }
     },
     onError: () => {
@@ -58,7 +56,7 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
               : "border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
           }`}
           onClick={() => {
-            setLocation(`/collections/${collection.id}`);
+            window.location.hash = `#/collections/${collection.id}`;
             onCollectionSelect?.();
           }}
         >

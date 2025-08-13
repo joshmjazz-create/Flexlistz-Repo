@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import React, { useState, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,9 +23,26 @@ if (typeof window !== 'undefined' && sessionStorage.redirect) {
 }
 
 function Router() {
-  // Since the issue is specifically with GitHub Pages and wouter compatibility,
-  // let's go back to the working solution: just show Collections directly
-  return <Collections />;
+  // Use hash-based routing for GitHub Pages compatibility
+  const [currentCollection, setCurrentCollection] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Parse hash-based route on load and changes
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const collectionMatch = hash.match(/#\/collections\/([^/?]+)/);
+      setCurrentCollection(collectionMatch ? collectionMatch[1] : null);
+    };
+
+    // Set initial state
+    handleHashChange();
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  return <Collections collectionId={currentCollection} />;
 }
 
 function App() {

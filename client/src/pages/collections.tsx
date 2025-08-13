@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useLocation } from "wouter";
+// Removed wouter imports - now using hash-based routing from App.tsx
 import { useQuery } from "@tanstack/react-query";
 import ResponsiveLayout from "@/components/responsive-layout";
 import CollectionList from "@/components/collection-list";
@@ -18,9 +18,15 @@ import { Copy, Layers, Plus, Upload } from "lucide-react";
 import logoImage from "@assets/file_00000000293061f5b6c62d71c7ed0c97_1754724182356.png";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-export default function Collections() {
-  const { collectionId } = useParams<{ collectionId?: string }>();
-  const [, setLocation] = useLocation();
+interface CollectionsProps {
+  collectionId?: string | null;
+}
+
+export default function Collections({ collectionId }: CollectionsProps = {}) {
+  // Hash-based navigation function for GitHub Pages compatibility
+  const navigate = (path: string) => {
+    window.location.hash = path;
+  };
   const [showAddItem, setShowAddItem] = useState(false);
   const [showAddCollection, setShowAddCollection] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -147,7 +153,7 @@ export default function Collections() {
             <div>
               <h1 
                 className="text-xl font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                onClick={() => setLocation('/')}
+                onClick={() => navigate('/')}
               >
                 FlexList
               </h1>
@@ -175,7 +181,7 @@ export default function Collections() {
 
         <CollectionList 
           collections={collections}
-          activeCollectionId={collectionId}
+          activeCollectionId={collectionId || undefined}
           onEditCollection={(collection) => {
             setEditingCollection(collection);
             setShowEditCollection(true);
