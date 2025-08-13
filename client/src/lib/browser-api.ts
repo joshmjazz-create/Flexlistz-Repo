@@ -40,16 +40,18 @@ export const browserAPI = {
 
   // Items
   async getItems(collectionId: string, params?: Record<string, string | string[]>) {
+    console.log('BrowserAPI.getItems called with:', { collectionId, params });
     let items: Item[];
     
     if (params && Object.keys(params).length > 0) {
       // Filter items
-      const { collectionId: _, search, ...filters } = params;
+      const { search, ...filters } = params;
       const searchQuery = typeof search === 'string' ? search : undefined;
-      console.log('Filtering items with:', { collectionId, filters, searchQuery });
+      console.log('BrowserAPI calling filterItems with:', { collectionId, filters, searchQuery });
       items = await browserStorage.filterItems(collectionId, filters, searchQuery);
     } else {
       // Get all items
+      console.log('BrowserAPI getting all items (no filters)');
       items = await browserStorage.getItems(collectionId);
     }
     
