@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Search, ArrowUpAZ, ArrowDownAZ, Filter, Youtube, Music, Clock, ChevronDown, ChevronUp } from "lucide-react";
@@ -29,6 +29,65 @@ const tagColors = [
   "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200",
   "bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-200"
 ];
+
+// Component to display item tags (including custom ones)
+function ItemTags({ itemId }: { itemId: string }) {
+  const { data: itemTags } = useQuery({
+    queryKey: ["/api/items", itemId, "tags"],
+    enabled: !!itemId,
+  });
+
+  const fixedTags = [
+    { key: "Key", value: itemTags?.find((tag: any) => tag.key === "Key")?.value },
+    { key: "Composer", value: itemTags?.find((tag: any) => tag.key === "Composer")?.value },
+    { key: "Style", value: itemTags?.find((tag: any) => tag.key === "Style")?.value },
+  ];
+
+  // Get all other tags (custom ones)
+  const customTags = itemTags?.filter((tag: any) => 
+    !["Key", "Composer", "Style"].includes(tag.key)
+  ) || [];
+
+  const getColorClassForTag = (tagKey: string, index: number) => {
+    // Fixed colors for standard tags
+    if (tagKey === "Key") return "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200";
+    if (tagKey === "Composer") return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200";
+    if (tagKey === "Style") return "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200";
+    
+    // Use color rotation for custom tags
+    return tagColors[index % tagColors.length];
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {/* Fixed Fields */}
+      {fixedTags
+        .filter(tag => tag.value?.trim())
+        .map(({ key, value }) => (
+          <Badge
+            key={`${key}-${value}`}
+            variant="secondary"
+            className={`${getColorClassForTag(key, 0)} border-0`}
+          >
+            <span className="text-gray-600 dark:text-gray-400 mr-1">{key}:</span>
+            {value}
+          </Badge>
+        ))}
+      
+      {/* Custom Tags */}
+      {customTags.map((tag: any, index: number) => (
+        <Badge
+          key={`${tag.key}-${tag.value}`}
+          variant="secondary"
+          className={`${getColorClassForTag(tag.key, index + 3)} border-0`}
+        >
+          <span className="text-gray-600 dark:text-gray-400 mr-1">{tag.key}:</span>
+          {tag.value}
+        </Badge>
+      ))}
+    </div>
+  );
+}
 
 export default function ItemList({ 
   items, 
@@ -265,25 +324,7 @@ export default function ItemList({
                   <div className="px-3 pb-3 border-t border-gray-200 dark:border-gray-700 mt-2 pt-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        {/* Fixed Fields as Tags */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {[
-                            { key: "Key", value: item.key, colorClass: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200" },
-                            { key: "Composer", value: item.composer, colorClass: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200" },
-                            { key: "Style", value: item.style, colorClass: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200" },
-                          ]
-                            .filter(tag => tag.value?.trim())
-                            .map(({ key, value, colorClass }) => (
-                              <Badge
-                                key={`${key}-${value}`}
-                                variant="secondary"
-                                className={`${colorClass} border-0`}
-                              >
-                                <span className="text-gray-600 dark:text-gray-400 mr-1">{key}:</span>
-                                {value}
-                              </Badge>
-                            ))}
-                        </div>
+                        <ItemTags itemId={item.id} />
 
                         {/* Lead Sheet Section */}
                         {item.leadSheetUrl && (

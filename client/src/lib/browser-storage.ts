@@ -429,7 +429,7 @@ class BrowserStorage implements IBrowserStorage {
           const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
           
           // Special handling for knowledge level
-          if (filterKey === "Color" || filterKey === "Knowledge Level") {
+          if (filterKey === "Knowledge Level") {
             if (!item.knowledgeLevel || !filterValues.includes(item.knowledgeLevel)) {
               return false;
             }
@@ -579,6 +579,18 @@ class BrowserStorage implements IBrowserStorage {
   async getFileUrl(fileId: string): Promise<string | null> {
     const file = this.db.files.find(f => f.id === fileId);
     return file ? file.data : null;
+  }
+
+  async getItemTags(itemId: string): Promise<{ key: string; value: string }[]> {
+    const itemTagIds = this.db.itemTags
+      .filter(it => it.itemId === itemId)
+      .map(it => it.tagId);
+    
+    const tags = this.db.tags
+      .filter(tag => itemTagIds.includes(tag.id))
+      .map(tag => ({ key: tag.key, value: tag.value }));
+    
+    return tags;
   }
 }
 

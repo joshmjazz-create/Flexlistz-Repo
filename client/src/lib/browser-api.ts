@@ -126,6 +126,11 @@ export const browserAPI = {
   async getFileUrl(fileId: string) {
     const url = await browserStorage.getFileUrl(fileId);
     return url;
+  },
+
+  async getItemTags(itemId: string) {
+    const tags = await browserStorage.getItemTags(itemId);
+    return { ok: true, json: async () => tags };
   }
 };
 

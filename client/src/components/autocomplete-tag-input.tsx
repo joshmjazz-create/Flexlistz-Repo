@@ -110,7 +110,13 @@ export function AutocompleteTagInput({ tags, onChange, className }: Autocomplete
           const response = await fetch(`/api/tags/values/${encodeURIComponent(newKey)}`);
           if (response.ok) {
             const values = await response.json();
-            setValueAutocomplete(values);
+            // Only show suggestions for existing tag keys, not new ones
+            const existingTagKeys = await fetch('/api/tags/keys').then(r => r.ok ? r.json() : []);
+            if (existingTagKeys.includes(newKey)) {
+              setValueAutocomplete(values);
+            } else {
+              setValueAutocomplete([]); // No suggestions for new tags
+            }
           } else {
             setValueAutocomplete([]);
           }

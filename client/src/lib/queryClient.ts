@@ -27,13 +27,34 @@ export async function apiRequest(
         response = await browserAPI.deleteCollection(urlParts[2]);
       } else if (url.includes('/items')) {
         const collectionId = urlParts[2];
-        response = await browserAPI.getItems(collectionId);
+        // Parse query params from URL
+        const urlObj = new URL(`http://localhost${url}`);
+        const params: Record<string, string | string[]> = {};
+        urlObj.searchParams.forEach((value, key) => {
+          if (key === 'filters') {
+            try {
+              const parsedFilters = JSON.parse(value);
+              Object.assign(params, parsedFilters);
+            } catch (e) {
+              console.error('Failed to parse filters:', e);
+            }
+          } else {
+            params[key] = value;
+          }
+        });
+        response = await browserAPI.getItems(collectionId, Object.keys(params).length > 0 ? params : undefined);
       }
     } else if (url.includes('/items')) {
       if (method === 'POST') {
         response = await browserAPI.createItem(data as any);
+        // Invalidate tags after creating item with new tags
+        queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/collections'] });
       } else if (method === 'PUT') {
         response = await browserAPI.updateItem(urlParts[2], data as any);
+        // Invalidate tags after updating item
+        queryClient.invalidateQueries({ queryKey: ['/api/tags'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/items', urlParts[2], 'tags'] });
       } else if (method === 'DELETE') {
         response = await browserAPI.deleteItem(urlParts[2]);
       }
@@ -82,7 +103,24 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
     } else if (url.includes('/items') && url.includes('/collections/')) {
       const urlParts = url.split('/');
       const collectionId = urlParts[3]; // Should be api/collections/{id}/items
-      response = await browserAPI.getItems(collectionId);
+      
+      // Parse query params from URL
+      const urlObj = new URL(`http://localhost${url}`);
+      const params: Record<string, string | string[]> = {};
+      urlObj.searchParams.forEach((value, key) => {
+        if (key === 'filters') {
+          try {
+            const parsedFilters = JSON.parse(value);
+            Object.assign(params, parsedFilters);
+          } catch (e) {
+            console.error('Failed to parse filters:', e);
+          }
+        } else {
+          params[key] = value;
+        }
+      });
+      
+      response = await browserAPI.getItems(collectionId, Object.keys(params).length > 0 ? params : undefined);
     } else if (url.includes('/tags/keys')) {
       response = await browserAPI.getTagKeys();
     } else if (url.includes('/tags/values/')) {
@@ -92,6 +130,10 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
       const urlParts = url.split('/');
       const collectionId = urlParts[2];
       response = await browserAPI.getAvailableTags(collectionId);
+    } else if (url.includes('/items/') && url.includes('/tags')) {
+      const urlParts = url.split('/');
+      const itemId = urlParts[2];
+      response = await browserAPI.getItemTags(itemId);
     }
 
     if (!response || !response.ok) {
