@@ -31,19 +31,22 @@ const tagColors = [
 ];
 
 // Component to display item tags (including custom ones)
-function ItemTags({ itemId }: { itemId: string }) {
+function ItemTags({ item }: { item: Item }) {
+  if (!item) return null;
+  
   const { data: itemTags } = useQuery({
-    queryKey: ["/api/items", itemId, "tags"],
-    enabled: !!itemId,
+    queryKey: ["/api/items", item.id, "tags"],
+    enabled: !!item?.id,
   });
 
+  // Fixed tags from legacy fields
   const fixedTags = [
-    { key: "Key", value: itemTags?.find((tag: any) => tag.key === "Key")?.value },
-    { key: "Composer", value: itemTags?.find((tag: any) => tag.key === "Composer")?.value },
-    { key: "Style", value: itemTags?.find((tag: any) => tag.key === "Style")?.value },
+    { key: "Key", value: item.key },
+    { key: "Composer", value: item.composer },
+    { key: "Style", value: item.style },
   ];
 
-  // Get all other tags (custom ones)
+  // Get all custom tags from the tag system (excluding the legacy ones)
   const customTags = itemTags?.filter((tag: any) => 
     !["Key", "Composer", "Style"].includes(tag.key)
   ) || [];
@@ -324,7 +327,7 @@ export default function ItemList({
                   <div className="px-3 pb-3 border-t border-gray-200 dark:border-gray-700 mt-2 pt-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <ItemTags itemId={item.id} />
+                        <ItemTags item={item} />
 
                         {/* Lead Sheet Section */}
                         {item.leadSheetUrl && (

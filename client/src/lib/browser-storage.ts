@@ -402,6 +402,7 @@ class BrowserStorage implements IBrowserStorage {
   // Filtering
   async filterItems(collectionId: string, filters: Record<string, string | string[]>, searchQuery?: string): Promise<Item[]> {
     let items = this.db.items.filter(item => item.collectionId === collectionId);
+    console.log(`Filtering ${items.length} items in collection ${collectionId} with:`, { filters, searchQuery });
 
     // Apply search query if provided
     if (searchQuery && searchQuery.trim()) {
@@ -424,29 +425,47 @@ class BrowserStorage implements IBrowserStorage {
           .map(it => it.tagId);
         const itemTags = this.db.tags.filter(tag => itemTagIds.includes(tag.id));
         
+        console.log(`Item ${item.title}: tags=`, itemTags.map(t => `${t.key}:${t.value}`));
+        
         // Check each filter
         for (const [filterKey, filterValue] of Object.entries(filters)) {
           const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
+          console.log(`  Checking filter ${filterKey}:`, filterValues);
           
           // Special handling for knowledge level
           if (filterKey === "Knowledge Level") {
             if (!item.knowledgeLevel || !filterValues.includes(item.knowledgeLevel)) {
+              console.log(`    Failed knowledge level check: ${item.knowledgeLevel} not in`, filterValues);
               return false;
             }
+            console.log(`    Passed knowledge level check`);
             continue;
           }
           
-          // Check if item has any matching tags for this filter
-          const hasMatchingTag = itemTags.some(tag => 
-            tag.key === filterKey && filterValues.includes(tag.value)
-          );
+          // Check standard tags from legacy fields (Key, Composer, Style)
+          let hasMatch = false;
+          if (filterKey === "Key" && item.key && filterValues.includes(item.key)) {
+            hasMatch = true;
+          } else if (filterKey === "Composer" && item.composer && filterValues.includes(item.composer)) {
+            hasMatch = true;
+          } else if (filterKey === "Style" && item.style && filterValues.includes(item.style)) {
+            hasMatch = true;
+          } else {
+            // Check if item has any matching tags for this filter
+            hasMatch = itemTags.some(tag => 
+              tag.key === filterKey && filterValues.includes(tag.value)
+            );
+          }
           
-          if (!hasMatchingTag) {
+          if (!hasMatch) {
+            console.log(`    Failed filter check for ${filterKey}`);
             return false;
           }
+          console.log(`    Passed filter check for ${filterKey}`);
         }
         return true;
       });
+      console.log(`After filtering: ${items.length} items remain`);
     }
 
     return items;
@@ -463,6 +482,24 @@ class BrowserStorage implements IBrowserStorage {
     const relevantTags = this.db.tags.filter(tag => relevantTagIds.includes(tag.id));
     
     const tagMap: Record<string, Set<string>> = {};
+    
+    // Add legacy fields as tags
+    items.forEach(item => {
+      if (item.key?.trim()) {
+        if (!tagMap["Key"]) tagMap["Key"] = new Set();
+        tagMap["Key"].add(item.key);
+      }
+      if (item.composer?.trim()) {
+        if (!tagMap["Composer"]) tagMap["Composer"] = new Set();
+        tagMap["Composer"].add(item.composer);
+      }
+      if (item.style?.trim()) {
+        if (!tagMap["Style"]) tagMap["Style"] = new Set();
+        tagMap["Style"].add(item.style);
+      }
+    });
+    
+    // Add custom tags from tag system
     relevantTags.forEach(tag => {
       if (!tagMap[tag.key]) {
         tagMap[tag.key] = new Set();

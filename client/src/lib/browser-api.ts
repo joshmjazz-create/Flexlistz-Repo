@@ -42,10 +42,11 @@ export const browserAPI = {
   async getItems(collectionId: string, params?: Record<string, string | string[]>) {
     let items: Item[];
     
-    if (params && (Object.keys(params).length > 1 || !params.collectionId)) {
+    if (params && Object.keys(params).length > 0) {
       // Filter items
-      const { collectionId: _, ...filters } = params;
-      const searchQuery = typeof params.search === 'string' ? params.search : undefined;
+      const { collectionId: _, search, ...filters } = params;
+      const searchQuery = typeof search === 'string' ? search : undefined;
+      console.log('Filtering items with:', { collectionId, filters, searchQuery });
       items = await browserStorage.filterItems(collectionId, filters, searchQuery);
     } else {
       // Get all items
