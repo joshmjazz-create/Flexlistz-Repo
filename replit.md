@@ -85,6 +85,13 @@ Preferred communication style: Simple, everyday language.
 - **Error boundary**: Added comprehensive error handling for production deployment
 - **Deployment method**: Using docs folder deployment (recommended over GitHub Actions for simplicity)
 
+### PWA & iOS Homescreen Compatibility (August 13, 2025)
+- **Hash-based routing**: Replaced wouter with hash navigation for GitHub Pages SPA compatibility
+- **PWA configuration fixed**: Updated manifest.json with relative paths (`./` instead of `/`) for bit.ly redirect compatibility
+- **Service Worker added**: Basic SW for offline capability and proper PWA registration
+- **iOS homescreen fixes**: Enhanced meta tags for better iOS homescreen app behavior
+- **Distribution URL**: App accessible via bit.ly/FlexList redirect to GitHub Pages deployment
+
 ### Storage Architecture Changes
 - **Browser-only data persistence**: No server-side storage - collections and items persist only in user's browser
 - **Image storage**: Images converted to base64 and stored directly in IndexedDB
