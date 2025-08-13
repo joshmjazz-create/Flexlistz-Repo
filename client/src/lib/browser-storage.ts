@@ -283,7 +283,18 @@ class BrowserStorage implements IBrowserStorage {
   async getItems(collectionId: string): Promise<Item[]> {
     const items = this.db.items.filter(item => item.collectionId === collectionId);
     console.log(`BrowserStorage.getItems(${collectionId}): Found ${items.length} items`, items.map(i => i.title));
-    console.log('All items in storage:', this.db.items.length, this.db.items.map(i => `${i.title} (${i.collectionId})`));
+    
+    // Debug: Check a few sample items to see their structure
+    const sampleItems = items.slice(0, 3);
+    console.log('Sample items structure:', sampleItems.map(item => ({
+      title: item.title,
+      key: item.key,
+      composer: item.composer, 
+      style: item.style,
+      knowledgeLevel: item.knowledgeLevel,
+      tags: item.tags
+    })));
+    
     return items;
   }
 
@@ -425,7 +436,7 @@ class BrowserStorage implements IBrowserStorage {
           .map(it => it.tagId);
         const itemTags = this.db.tags.filter(tag => itemTagIds.includes(tag.id));
         
-        console.log(`Item ${item.title}: tags=`, itemTags.map(t => `${t.key}:${t.value}`));
+        console.log(`Item ${item.title}: tags=`, itemTags.map(t => `${t.key}:${t.value}`), `legacy=(Key:${item.key}, Composer:${item.composer}, Style:${item.style})`);
         
         // Check each filter
         for (const [filterKey, filterValue] of Object.entries(filters)) {
@@ -512,6 +523,7 @@ class BrowserStorage implements IBrowserStorage {
       result[key] = Array.from(valueSet).sort();
     });
     
+    console.log('Available tags result:', result);
     return result;
   }
 

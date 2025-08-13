@@ -111,6 +111,7 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
         if (key === 'filters') {
           try {
             const parsedFilters = JSON.parse(value);
+            console.log('Parsed filters from URL:', parsedFilters);
             Object.assign(params, parsedFilters);
           } catch (e) {
             console.error('Failed to parse filters:', e);
