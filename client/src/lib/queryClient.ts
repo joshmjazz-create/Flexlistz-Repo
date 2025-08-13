@@ -41,6 +41,15 @@ export async function apiRequest(
       response = await browserAPI.getTagKeys();
     } else if (url.includes('/tags/values')) {
       response = await browserAPI.getTagValues(urlParts[3]);
+    } else if (url.includes('/field-values')) {
+      const field = urlParts[2];
+      response = await browserAPI.getFieldValues(field as 'key' | 'composer' | 'style');
+    } else if (url.includes('/field-values')) {
+      const field = urlParts[2];
+      response = await browserAPI.getFieldValues(field as 'key' | 'composer' | 'style');
+    } else if (url.includes('/field-values')) {
+      const field = urlParts[2];
+      response = await browserAPI.getFieldValues(field as 'key' | 'composer' | 'style');
     }
 
     if (!response || !response.ok) {

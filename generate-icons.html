@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate FlexList Icons</title>
+</head>
+<body>
+    <h1>FlexList Icon Generator</h1>
+    <p>This will generate proper FlexList icons for iOS homescreen compatibility.</p>
+    
+    <canvas id="canvas192" width="192" height="192" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="border: 1px solid #ccc; margin: 10px;"></canvas>
+    
+    <br>
+    <button onclick="generateAndDownload()" style="padding: 10px 20px; font-size: 16px;">Generate & Download Icons</button>
+    
+    <script>
+        function createIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            
+            // Clear and set background
+            ctx.fillStyle = '#3B82F6'; // FlexList blue
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add rounded corners
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            const radius = size * 0.1;
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // White list lines (representing FlexList)
+            ctx.fillStyle = 'white';
+            const lineHeight = size * 0.08;
+            const spacing = size * 0.12;
+            const startY = size * 0.25;
+            const leftMargin = size * 0.15;
+            
+            // Line 1 - full width
+            ctx.fillRect(leftMargin, startY, size * 0.7, lineHeight);
+            
+            // Line 2 - shorter
+            ctx.fillRect(leftMargin, startY + spacing, size * 0.55, lineHeight);
+            
+            // Line 3 - medium
+            ctx.fillRect(leftMargin, startY + spacing * 2, size * 0.6, lineHeight);
+            
+            // Line 4 - shortest
+            ctx.fillRect(leftMargin, startY + spacing * 3, size * 0.45, lineHeight);
+            
+            // Add a small accent dot
+            ctx.beginPath();
+            ctx.arc(size * 0.8, size * 0.2, size * 0.04, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        function generateAndDownload() {
+            // Generate icons
+            const icon192 = createIcon(document.getElementById('canvas192'), 192);
+            const icon512 = createIcon(document.getElementById('canvas512'), 512);
+            
+            // Download 192x192
+            const link192 = document.createElement('a');
+            link192.download = 'icon-192.png';
+            link192.href = icon192;
+            document.body.appendChild(link192);
+            link192.click();
+            document.body.removeChild(link192);
+            
+            // Download 512x512 after a short delay
+            setTimeout(() => {
+                const link512 = document.createElement('a');
+                link512.download = 'icon-512.png';
+                link512.href = icon512;
+                document.body.appendChild(link512);
+                link512.click();
+                document.body.removeChild(link512);
+                
+                console.log('FlexList icons generated and downloaded!');
+                alert('Icons downloaded! Replace the icon files in your project with the downloaded ones.');
+            }, 500);
+        }
+        
+        // Auto-generate on page load
+        window.onload = function() {
+            createIcon(document.getElementById('canvas192'), 192);
+            createIcon(document.getElementById('canvas512'), 512);
+        };
+    </script>
+</body>
+</html>
