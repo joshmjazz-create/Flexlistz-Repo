@@ -123,12 +123,14 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
       const key = url.split('/').pop();
       if (key) response = await browserAPI.getTagValues(key);
     } else if (url.includes('/collections/') && url.includes('/tags')) {
-      const urlParts = url.split('/');
-      const collectionId = urlParts[2];
+      const urlParts = url.split('/').filter(Boolean);
+      const collectionId = urlParts[2]; // api/collections/{id}/tags
+      console.log('Getting available tags for collection:', collectionId);
       response = await browserAPI.getAvailableTags(collectionId);
     } else if (url.includes('/items/') && url.includes('/tags')) {
-      const urlParts = url.split('/');
-      const itemId = urlParts[2];
+      const urlParts = url.split('/').filter(Boolean);
+      const itemId = urlParts[1]; // api/items/{id}/tags
+      console.log('Getting item tags for item:', itemId);
       response = await browserAPI.getItemTags(itemId);
     }
 

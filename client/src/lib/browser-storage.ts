@@ -484,6 +484,8 @@ class BrowserStorage implements IBrowserStorage {
 
   async getAvailableTags(collectionId: string): Promise<Record<string, string[]>> {
     const items = this.db.items.filter(item => item.collectionId === collectionId);
+    console.log(`Getting available tags for collection ${collectionId}: found ${items.length} items`);
+    
     const itemIds = items.map(item => item.id);
     
     const relevantTagIds = this.db.itemTags
@@ -491,8 +493,18 @@ class BrowserStorage implements IBrowserStorage {
       .map(it => it.tagId);
       
     const relevantTags = this.db.tags.filter(tag => relevantTagIds.includes(tag.id));
+    console.log(`Found ${relevantTags.length} custom tags for collection`);
     
     const tagMap: Record<string, Set<string>> = {};
+    
+    // Check a few sample items to debug legacy field data
+    const sampleItems = items.slice(0, 5);
+    console.log('Sample items for tag generation:', sampleItems.map(item => ({
+      title: item.title,
+      key: item.key,
+      composer: item.composer,
+      style: item.style
+    })));
     
     // Add legacy fields as tags
     items.forEach(item => {
@@ -508,6 +520,12 @@ class BrowserStorage implements IBrowserStorage {
         if (!tagMap["Style"]) tagMap["Style"] = new Set();
         tagMap["Style"].add(item.style);
       }
+    });
+    
+    console.log('Legacy field counts:', {
+      Key: tagMap["Key"]?.size || 0,
+      Composer: tagMap["Composer"]?.size || 0,
+      Style: tagMap["Style"]?.size || 0
     });
     
     // Add custom tags from tag system
