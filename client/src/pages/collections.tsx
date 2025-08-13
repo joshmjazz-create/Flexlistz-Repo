@@ -139,7 +139,10 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
     return itemsToSort;
   };
 
-  const displayItems = sortItems(filteredItems.data || items);
+  // Use filtered items when filters/search are active, otherwise use all items
+  const hasActiveFiltersOrSearch = Object.keys(activeFilters).length > 0 || searchQuery.length > 0;
+  const itemsToDisplay = hasActiveFiltersOrSearch ? (filteredItems.data || []) : items;
+  const displayItems = sortItems(itemsToDisplay);
 
   // Sidebar content
   const sidebarContent = (closeSidebar: () => void) => (
