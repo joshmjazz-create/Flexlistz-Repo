@@ -37,8 +37,8 @@ export default function AutocompleteInput({
 
   // Combine all available values - for key field, always include musical keys
   const allValues = field === 'key' 
-    ? Array.from(new Set([...musicalKeys, ...fieldValues])) // Remove duplicates
-    : fieldValues;
+    ? Array.from(new Set([...musicalKeys, ...(Array.isArray(fieldValues) ? fieldValues : [])])) // Remove duplicates
+    : Array.isArray(fieldValues) ? fieldValues : [];
 
   // Filter values based on current input - for keys, always show all when empty
   const filteredValues = field === 'key'
