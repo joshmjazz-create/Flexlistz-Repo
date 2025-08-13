@@ -443,13 +443,13 @@ class BrowserStorage implements IBrowserStorage {
           const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
           console.log(`  Checking filter ${filterKey}:`, filterValues);
           
-          // Special handling for knowledge level
-          if (filterKey === "Knowledge Level") {
+          // Special handling for knowledge level (mapped as "Color" in filters)
+          if (filterKey === "Color") {
             if (!item.knowledgeLevel || !filterValues.includes(item.knowledgeLevel)) {
-              console.log(`    Failed knowledge level check: ${item.knowledgeLevel} not in`, filterValues);
+              console.log(`    Failed color (knowledgeLevel) check: ${item.knowledgeLevel} not in`, filterValues);
               return false;
             }
-            console.log(`    Passed knowledge level check`);
+            console.log(`    Passed color (knowledgeLevel) check`);
             continue;
           }
           
@@ -520,12 +520,17 @@ class BrowserStorage implements IBrowserStorage {
         if (!tagMap["Style"]) tagMap["Style"] = new Set();
         tagMap["Style"].add(item.style);
       }
+      if (item.knowledgeLevel?.trim()) {
+        if (!tagMap["Color"]) tagMap["Color"] = new Set();
+        tagMap["Color"].add(item.knowledgeLevel);
+      }
     });
     
     console.log('Legacy field counts:', {
       Key: tagMap["Key"]?.size || 0,
       Composer: tagMap["Composer"]?.size || 0,
-      Style: tagMap["Style"]?.size || 0
+      Style: tagMap["Style"]?.size || 0,
+      Color: tagMap["Color"]?.size || 0
     });
     
     // Add custom tags from tag system
