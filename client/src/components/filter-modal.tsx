@@ -162,7 +162,7 @@ export default function FilterModal({
               
               {expandedSections.has(tagKey) && (
                 <div className="space-y-2 ml-4 mb-4">
-                  {values.map((value) => (
+                  {Array.isArray(values) ? values.map((value) => (
                     <div key={value} className="flex items-center space-x-2">
                       <Checkbox
                         id={`${tagKey}-${value}`}
@@ -184,7 +184,9 @@ export default function FilterModal({
                         {value} <span className="text-gray-400">({getTagCount(tagKey, value)})</span>
                       </Label>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-sm text-gray-500">No values available</div>
+                  )}
                 </div>
               )}
             </div>

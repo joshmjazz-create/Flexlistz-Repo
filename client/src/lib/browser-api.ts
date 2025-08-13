@@ -88,6 +88,7 @@ export const browserAPI = {
   // Tags
   async getAvailableTags(collectionId: string) {
     const tags = await browserStorage.getAvailableTags(collectionId);
+    console.log('Available tags for collection:', collectionId, tags);
     return { ok: true, json: async () => tags };
   },
 
