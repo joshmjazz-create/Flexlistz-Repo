@@ -443,13 +443,14 @@ class BrowserStorage implements IBrowserStorage {
           const filterValues = Array.isArray(filterValue) ? filterValue : [filterValue];
           console.log(`  Checking filter ${filterKey}:`, filterValues);
           
-          // Special handling for knowledge level (mapped as "Color" in filters)
-          if (filterKey === "Color") {
-            if (!item.knowledgeLevel || !filterValues.includes(item.knowledgeLevel)) {
-              console.log(`    Failed color (knowledgeLevel) check: ${item.knowledgeLevel} not in`, filterValues);
+          // Special handling for knowledge level
+          if (filterKey === "knowledgeLevel") {
+            const itemKnowledgeLevel = item.knowledgeLevel || "does-not-know"; // Default to does-not-know if null
+            if (!filterValues.includes(itemKnowledgeLevel)) {
+              console.log(`    Failed knowledgeLevel check: ${itemKnowledgeLevel} not in`, filterValues);
               return false;
             }
-            console.log(`    Passed color (knowledgeLevel) check`);
+            console.log(`    Passed knowledgeLevel check`);
             continue;
           }
           

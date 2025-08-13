@@ -121,14 +121,14 @@ export default function FilterModal({
                     <Checkbox
                       id={`color-${value}`}
                       checked={
-                        activeFilters['Color'] 
-                          ? Array.isArray(activeFilters['Color']) 
-                            ? (activeFilters['Color'] as string[]).includes(value)
-                            : activeFilters['Color'] === value
+                        activeFilters['knowledgeLevel'] 
+                          ? Array.isArray(activeFilters['knowledgeLevel']) 
+                            ? (activeFilters['knowledgeLevel'] as string[]).includes(value)
+                            : activeFilters['knowledgeLevel'] === value
                           : false
                       }
                       onCheckedChange={(checked) =>
-                        handleFilterChange('Color', value, checked as boolean)
+                        handleFilterChange('knowledgeLevel', value, checked as boolean)
                       }
                     />
                     <Label 
