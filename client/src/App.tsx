@@ -23,13 +23,9 @@ if (typeof window !== 'undefined' && sessionStorage.redirect) {
 }
 
 function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Collections} />
-      <Route path="/collections/:collectionId?" component={Collections} />
-      <Route component={NotFound} />
-    </Switch>
-  );
+  // Since the issue is specifically with GitHub Pages and wouter compatibility,
+  // let's go back to the working solution: just show Collections directly
+  return <Collections />;
 }
 
 function App() {
