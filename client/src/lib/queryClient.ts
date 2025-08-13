@@ -79,9 +79,9 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
     } else if (url.includes('/collections/') && !url.includes('/items')) {
       const id = url.split('/').pop();
       if (id) response = await browserAPI.getCollection(id);
-    } else if (url.includes('/items')) {
+    } else if (url.includes('/items') && url.includes('/collections/')) {
       const urlParts = url.split('/');
-      const collectionId = urlParts[2];
+      const collectionId = urlParts[3]; // Should be api/collections/{id}/items
       response = await browserAPI.getItems(collectionId);
     } else if (url.includes('/tags/keys')) {
       response = await browserAPI.getTagKeys();
