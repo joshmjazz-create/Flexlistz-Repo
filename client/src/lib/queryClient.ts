@@ -44,6 +44,9 @@ export async function apiRequest(
     } else if (url.includes('/field-values')) {
       const field = urlParts[2];
       response = await browserAPI.getFieldValues(field as 'key' | 'composer' | 'style');
+    } else if (url.includes('/collections/') && url.includes('/tags')) {
+      const collectionId = urlParts[2];
+      response = await browserAPI.getAvailableTags(collectionId);
     } else if (url.includes('/field-values')) {
       const field = urlParts[2];
       response = await browserAPI.getFieldValues(field as 'key' | 'composer' | 'style');
@@ -85,6 +88,10 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
     } else if (url.includes('/tags/values/')) {
       const key = url.split('/').pop();
       if (key) response = await browserAPI.getTagValues(key);
+    } else if (url.includes('/collections/') && url.includes('/tags')) {
+      const urlParts = url.split('/');
+      const collectionId = urlParts[2];
+      response = await browserAPI.getAvailableTags(collectionId);
     }
 
     if (!response || !response.ok) {

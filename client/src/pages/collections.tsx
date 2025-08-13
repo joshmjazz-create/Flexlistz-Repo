@@ -52,6 +52,9 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
     enabled: !!collectionId,
   });
 
+  // Debug logging
+  console.log(`Loaded ${items.length} items for collection ${collectionId}:`, items.map(i => i.title));
+
   const filteredItems = useQuery<Item[]>({
     queryKey: ["/api/collections", collectionId, "items", "filtered", { filters: activeFilters, search: searchQuery }],
     queryFn: async () => {
@@ -143,6 +146,9 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
   const hasActiveFiltersOrSearch = Object.keys(activeFilters).length > 0 || searchQuery.length > 0;
   const itemsToDisplay = hasActiveFiltersOrSearch ? (filteredItems.data || []) : items;
   const displayItems = sortItems(itemsToDisplay);
+  
+  // Debug what we're showing
+  console.log(`Display items (${displayItems.length}):`, displayItems.map(i => i.title));
 
   // Sidebar content
   const sidebarContent = (closeSidebar: () => void) => (
