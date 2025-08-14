@@ -41,8 +41,11 @@ export function BrowserFileUploader({
     setIsUploading(true);
     
     try {
+      console.log('Starting file upload for:', file.name, 'Size:', file.size);
       const fileId = await browserStorage.storeFile(file);
+      console.log('File uploaded successfully, fileId:', fileId);
       onComplete?.(fileId);
+      console.log('Upload complete callback executed');
     } catch (error) {
       console.error('Failed to upload file:', error);
       alert('Failed to upload file. Please try again.');

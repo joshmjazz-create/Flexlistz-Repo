@@ -52,8 +52,10 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
 
   // Handle lead sheet upload with browser storage
   const handleUploadComplete = (fileId: string) => {
+    console.log('ItemForm: handleUploadComplete called with fileId:', fileId);
     const newFormData = { ...formData, leadSheetUrl: fileId };
     setFormData(newFormData);
+    console.log('ItemForm: Updated form data with leadSheetUrl:', newFormData.leadSheetUrl);
     onChange?.(newFormData);
   };
 
