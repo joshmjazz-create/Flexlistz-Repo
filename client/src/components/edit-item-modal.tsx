@@ -43,14 +43,20 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate collections (to update item counts)
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/collections/${item.collectionId}/items`] });
-      // Invalidate item tags query so custom tags show immediately
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
+      
+      // Invalidate all items queries for this collection (including with filters)
+      queryClient.invalidateQueries({ queryKey: ["/api/collections", item.collectionId] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections", item.collectionId] });
+      
+      // Invalidate item tags query
       queryClient.invalidateQueries({ queryKey: ["/api/items", item.id, "tags"] });
-      // Invalidate field-values queries so autocomplete gets updated immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/key"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/composer"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/style"] });
+      
+      // Invalidate field-values queries for autocomplete
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values"] });
+      
       onClose();
       toast({
         title: "Success",
@@ -143,9 +149,9 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   };
 
   // Prepare initial form data
-  const customTags = existingTags?.filter((tag: any) => 
+  const customTags = (existingTags && Array.isArray(existingTags)) ? existingTags.filter((tag: any) => 
     !["Key", "Composer", "Style"].includes(tag.key)
-  ) || [];
+  ) : [];
   
   const initialData = {
     title: item.title,

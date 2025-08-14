@@ -44,7 +44,9 @@ export default function AddCollectionModal({ isOpen, onClose }: AddCollectionMod
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all collection-related queries
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
       toast({
         title: "Success",
         description: "List created successfully",

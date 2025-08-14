@@ -32,7 +32,10 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
       await apiRequest("DELETE", `/api/collections/${id}`);
     },
     onSuccess: () => {
+      // Invalidate collections list
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
+      
       toast({
         title: "Success",
         description: "List deleted successfully",

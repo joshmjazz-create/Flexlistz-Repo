@@ -82,7 +82,14 @@ export default function BulkImportModal({ open, onOpenChange, collectionId }: Bu
       return Promise.all(promises);
     },
     onSuccess: (data) => {
+      // Invalidate collections (to update item counts)
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
+      
+      // Invalidate all items queries for this collection
+      queryClient.invalidateQueries({ queryKey: ["/api/collections", collectionId] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections", collectionId] });
+      
       toast({
         title: "Success",
         description: `Successfully imported ${data.length} items`,

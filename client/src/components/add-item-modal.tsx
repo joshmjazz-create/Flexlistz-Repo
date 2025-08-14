@@ -35,12 +35,17 @@ export default function AddItemModal({ isOpen, onClose, collectionId }: AddItemM
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate collections (to update item counts)
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/collections/${collectionId}/items`] });
-      // Invalidate field-values queries so autocomplete gets updated immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/key"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/composer"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/field-values/style"] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
+      
+      // Invalidate all items queries for this collection (including with filters)
+      queryClient.invalidateQueries({ queryKey: ["/api/collections", collectionId] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections", collectionId] });
+      
+      // Invalidate field-values queries for autocomplete
+      queryClient.invalidateQueries({ queryKey: ["/api/field-values"] });
+      
       onClose();
       toast({
         title: "Success",

@@ -59,9 +59,9 @@ function ItemTags({ item }: { item: Item }) {
   ];
 
   // Get all custom tags from the tag system (excluding the legacy ones)
-  const customTags = itemTags?.filter((tag: any) => 
+  const customTags = (itemTags && Array.isArray(itemTags)) ? itemTags.filter((tag: any) => 
     !["Key", "Composer", "Style"].includes(tag.key)
-  ) || [];
+  ) : [];
 
   const getColorClassForTag = (tagKey: string, index: number) => {
     // Fixed colors for standard tags
@@ -178,8 +178,18 @@ export default function ItemList({
     mutationFn: async (id: string) => {
       await apiRequest("DELETE", `/api/items/${id}`);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      // Invalidate collections (to update item counts)
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
+      queryClient.refetchQueries({ queryKey: ["/api/collections"] });
+      
+      // Find which collection this item belonged to and invalidate its items
+      const item = items.find(item => item.id === variables);
+      if (item) {
+        queryClient.invalidateQueries({ queryKey: ["/api/collections", item.collectionId] });
+        queryClient.refetchQueries({ queryKey: ["/api/collections", item.collectionId] });
+      }
+      
       toast({
         title: "Success",
         description: "Item deleted successfully",
