@@ -206,8 +206,11 @@ export function setupBrowserAPI() {
         } else if (url.startsWith('/api/field-values/')) {
           const field = url.split('/')[3] as 'key' | 'composer' | 'style';
           result = await browserAPI.getFieldValues(field);
-        } else if (url === '/api/import-items' && method === 'POST') {
-          result = await browserAPI.importItems(body.targetCollectionId, body.itemIds);
+        } else if (url.includes('/import') && method === 'POST') {
+          // Handle /api/collections/:id/import
+          const targetCollectionId = url.split('/')[3];
+          console.log('Browser API handling import request for collection:', targetCollectionId, 'with itemIds:', body.itemIds);
+          result = await browserAPI.importItems(targetCollectionId, body.itemIds);
         } else if (url === '/api/objects/upload' && method === 'POST') {
           // Mock upload URL response
           result = { 
