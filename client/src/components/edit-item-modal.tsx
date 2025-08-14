@@ -25,6 +25,12 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<any>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+  
+  // Load existing custom tags for this item
+  const { data: existingTags = [] } = useQuery({
+    queryKey: ["/api/items", item.id, "tags"],
+    enabled: !!item?.id && isOpen,
+  });
 
   const updateItemMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -39,6 +45,8 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/collections"] });
       queryClient.invalidateQueries({ queryKey: [`/api/collections/${item.collectionId}/items`] });
+      // Invalidate item tags query so custom tags show immediately
+      queryClient.invalidateQueries({ queryKey: ["/api/items", item.id, "tags"] });
       // Invalidate field-values queries so autocomplete gets updated immediately
       queryClient.invalidateQueries({ queryKey: ["/api/field-values/key"] });
       queryClient.invalidateQueries({ queryKey: ["/api/field-values/composer"] });
@@ -135,6 +143,10 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   };
 
   // Prepare initial form data
+  const customTags = existingTags?.filter((tag: any) => 
+    !["Key", "Composer", "Style"].includes(tag.key)
+  ) || [];
+  
   const initialData = {
     title: item.title,
     key: item.key || "",
@@ -144,7 +156,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
     leadSheetUrl: item.leadSheetUrl || "",
     mediaUrl: getCurrentMediaUrl(),
     knowledgeLevel: item.knowledgeLevel || "does-not-know",
-    extraTags: [], // TODO: Load existing extra tags when this feature is fully implemented
+    extraTags: customTags.map((tag: any) => ({ key: tag.key, value: tag.value }))
   };
 
   return (
