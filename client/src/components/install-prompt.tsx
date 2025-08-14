@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { X, Download, Share, Plus, ArrowUp } from 'lucide-react';
 import { Button } from './ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -122,40 +130,90 @@ export default function InstallPrompt() {
             </Button>
           )}
           
-          <Button
-            onClick={() => {
-              if (isIOS) {
-                // Show detailed iOS instructions
-                alert(
-                  "📱 How to Install FlexList to Your Home Screen:\n\n" +
-                  "1. Tap the Share button (⬆️) at the bottom of Safari\n" +
-                  "2. Scroll down in the share menu\n" +
-                  "3. Tap 'Add to Home Screen' 🏠\n" +
-                  "4. Tap 'Add' in the top right corner\n\n" +
-                  "✨ FlexList will then appear on your home screen like a native app!\n" +
-                  "It will work offline and load instantly."
-                );
-              } else {
-                // Show desktop instructions
-                alert(
-                  "💻 How to Install FlexList:\n\n" +
-                  "Chrome/Edge:\n" +
-                  "• Look for the install icon (⬇️) in your address bar\n" +
-                  "• Or click the 'Install Now' button if available\n\n" +
-                  "Firefox:\n" +
-                  "• Look for the install prompt that may appear\n\n" +
-                  "Safari:\n" +
-                  "• Use 'Add to Dock' from the File menu\n\n" +
-                  "✨ Once installed, FlexList will work offline and load instantly!"
-                );
-              }
-            }}
-            size="sm"
-            variant="secondary"
-            className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
-          >
-            Show Steps
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="secondary"
+                className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
+              >
+                Show Steps
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Download className="w-5 h-5" />
+                  How to Install FlexList
+                </DialogTitle>
+                <DialogDescription>
+                  Follow these steps to install FlexList as an app on your device
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                {isIOS ? (
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">📱 iOS Safari Instructions:</div>
+                    <ol className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex gap-2">
+                        <span className="font-medium text-primary">1.</span>
+                        <span>Tap the Share button (⬆️) at the bottom of Safari</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="font-medium text-primary">2.</span>
+                        <span>Scroll down in the share menu</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="font-medium text-primary">3.</span>
+                        <span>Tap "Add to Home Screen" 🏠</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="font-medium text-primary">4.</span>
+                        <span>Tap "Add" in the top right corner</span>
+                      </li>
+                    </ol>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100">✨ Result:</div>
+                      <div className="text-sm text-blue-800 dark:text-blue-200">
+                        FlexList will appear on your home screen like a native app and work offline!
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="text-sm font-medium">💻 Desktop Instructions:</div>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-sm font-medium text-primary mb-1">Chrome/Edge:</div>
+                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
+                          <li>• Look for the install icon (⬇️) in your address bar</li>
+                          <li>• Or click the "Install Now" button above</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-primary mb-1">Firefox:</div>
+                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
+                          <li>• Look for the install prompt that may appear</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-primary mb-1">Safari:</div>
+                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
+                          <li>• Use "Add to Dock" from the File menu</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100">✨ Result:</div>
+                      <div className="text-sm text-blue-800 dark:text-blue-200">
+                        Once installed, FlexList will work offline and load instantly!
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
           
           <Button
             onClick={handleDismiss}
