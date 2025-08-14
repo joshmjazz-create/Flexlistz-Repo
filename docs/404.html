@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlexList - Smart Collection Manager</title>
+    <script>
+      // GitHub Pages SPA redirect
+      // This script takes the current path and redirects to the main page with a hash
+      // so that the frontend router can handle it
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+      
+      // For direct deep links, redirect to hash-based routing
+      var path = window.location.pathname;
+      if (path && path !== '/') {
+        var newUrl = window.location.origin + '/#' + path;
+        window.location.replace(newUrl);
+      } else {
+        // Redirect to main page
+        window.location.replace('./');
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>

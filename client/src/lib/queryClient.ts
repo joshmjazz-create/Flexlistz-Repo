@@ -92,7 +92,7 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
     return await response.json();
   } catch (error) {
     console.error('Browser query error:', error);
-    return { error: error.message };
+    return { error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
