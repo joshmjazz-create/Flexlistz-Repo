@@ -63,7 +63,7 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
   });
 
   // Debug logging
-  console.log(`Loaded ${items.length} items for collection ${collectionId}:`, items.map(i => i.title));
+  console.log(`Loaded ${items?.length || 0} items for collection ${collectionId}:`, items?.map?.(i => i.title) || []);
 
   // Sort items based on selected order
   const sortItems = (itemsToSort: Item[]) => {
@@ -132,10 +132,10 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
   };
 
   // Use items directly since filtering is now handled in the query
-  const displayItems = sortItems(items);
+  const displayItems = sortItems(items || []);
   
   // Debug what we're showing
-  console.log(`Display items (${displayItems.length}):`, displayItems.map(i => i.title));
+  console.log(`Display items (${displayItems?.length || 0}):`, displayItems?.map?.(i => i.title) || []);
 
   // Sidebar content
   const sidebarContent = (closeSidebar: () => void) => (

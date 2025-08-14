@@ -6,10 +6,12 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
   const url = queryKey.join("/") as string;
   console.log(`Browser Query: ${url}`);
   
-  // Parse URL parts
+  // Parse URL parts (strip query string first)
   const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
-  const parts = cleanUrl.split('/').filter(p => p);
+  const [pathOnly, queryString] = cleanUrl.split('?');
+  const parts = pathOnly.split('/').filter(p => p);
   console.log('URL parts:', parts);
+  console.log('Query string:', queryString);
   
   try {
     let response;
