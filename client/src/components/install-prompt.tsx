@@ -25,6 +25,11 @@ export default function InstallPrompt() {
     setIsStandalone(isStandaloneMode);
     setIsIOS(isIOSDevice);
     
+    // Only show on iOS devices
+    if (!isIOSDevice) {
+      return;
+    }
+    
     // Don't show prompt if already in standalone mode
     if (isStandaloneMode) {
       return;
