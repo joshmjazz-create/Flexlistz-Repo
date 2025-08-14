@@ -18,8 +18,15 @@ export const browserAPI = {
   },
 
   async createCollection(data: InsertCollection) {
-    const collection = await browserStorage.createCollection(data);
-    return { ok: true, json: async () => collection };
+    try {
+      console.log('BrowserAPI.createCollection called with:', data);
+      const collection = await browserStorage.createCollection(data);
+      console.log('BrowserAPI.createCollection result:', collection);
+      return { ok: true, json: async () => collection };
+    } catch (error) {
+      console.error('BrowserAPI.createCollection error:', error);
+      return { ok: false, status: 500, json: async () => ({ error: 'Failed to create collection' }) };
+    }
   },
 
   async updateCollection(id: string, data: Partial<InsertCollection>) {

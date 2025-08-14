@@ -82,9 +82,14 @@ class BrowserStorage implements IBrowserStorage {
 
   private saveData(): void {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+      console.log('BrowserStorage.saveData: Saving data to localStorage...');
+      const dataToSave = JSON.stringify(this.db);
+      console.log('BrowserStorage.saveData: Data size:', dataToSave.length, 'characters');
+      localStorage.setItem(STORAGE_KEY, dataToSave);
+      console.log('BrowserStorage.saveData: Data saved successfully');
     } catch (error) {
-      console.error('Failed to save data to localStorage:', error);
+      console.error('BrowserStorage.saveData: Failed to save data:', error);
+      throw error;
     }
   }
 
@@ -245,14 +250,26 @@ class BrowserStorage implements IBrowserStorage {
   }
 
   async createCollection(collection: InsertCollection): Promise<Collection> {
-    const newCollection: Collection = {
-      id: nanoid(),
-      name: collection.name,
-      description: collection.description ?? null
-    };
-    this.db.collections.push(newCollection);
-    this.saveData();
-    return newCollection;
+    try {
+      console.log('BrowserStorage.createCollection called with:', collection);
+      const newCollection: Collection = {
+        id: nanoid(),
+        name: collection.name,
+        description: collection.description ?? null
+      };
+      console.log('Created new collection object:', newCollection);
+      
+      this.db.collections.push(newCollection);
+      console.log('Added to collections array. Total collections:', this.db.collections.length);
+      
+      this.saveData();
+      console.log('Data saved successfully');
+      
+      return newCollection;
+    } catch (error) {
+      console.error('BrowserStorage.createCollection error:', error);
+      throw error;
+    }
   }
 
   async updateCollection(id: string, collection: Partial<InsertCollection>): Promise<Collection | undefined> {

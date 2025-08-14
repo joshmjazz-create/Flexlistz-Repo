@@ -52,10 +52,11 @@ export default function AddCollectionModal({ isOpen, onClose }: AddCollectionMod
       onClose();
       form.reset();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Create collection mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to create list",
+        description: "Failed to create list. Check console for details.",
         variant: "destructive",
       });
     },

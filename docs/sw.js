@@ -1,8 +1,8 @@
-const CACHE_NAME = 'flexlist-v3';
+const CACHE_NAME = 'flexlist-v4';
 const urlsToCache = [
   './',
   './index.html',
-  './assets/index-BxcOZVi2.js',
+  './assets/index-DGtpJIPf.js',
   './assets/index-N_b_mgf1.css',
   './icon-192.png',
   './icon-512.png',
