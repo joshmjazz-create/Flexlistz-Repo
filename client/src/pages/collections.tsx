@@ -254,7 +254,7 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
           <ItemList
             items={displayItems}
             onEditItem={setEditingItem}
-            isLoading={filteredItems.isLoading}
+            isLoading={false}
             sortOrder={sortOrder}
             onSortOrderChange={setSortOrder}
             hasActiveFilters={Object.keys(activeFilters).length > 0}
