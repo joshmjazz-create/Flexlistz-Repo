@@ -205,12 +205,7 @@ export default function InstallPrompt() {
                         <span>Tap "Add" in the top right corner</span>
                       </li>
                     </ol>
-                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100">✨ Result:</div>
-                      <div className="text-sm text-blue-800 dark:text-blue-200">
-                        FlexList will appear on your home screen like a native app and work offline!
-                      </div>
-                    </div>
+
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -282,12 +277,7 @@ export default function InstallPrompt() {
                         </div>
                       )}
                     </div>
-                    <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                      <div className="text-sm font-medium text-blue-900 dark:text-blue-100">✨ Result:</div>
-                      <div className="text-sm text-blue-800 dark:text-blue-200">
-                        Once installed, FlexList will work offline and load instantly!
-                      </div>
-                    </div>
+
                   </div>
                 )}
               </div>
