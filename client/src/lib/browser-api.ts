@@ -155,6 +155,7 @@ export function setupBrowserAPI() {
       const body = init?.body ? JSON.parse(init.body as string) : null;
       
       try {
+        console.log('Browser API Request - Method:', method, 'URL:', url, 'Body:', body);
         let result: any;
         
         if (url === '/api/collections' && method === 'GET') {
@@ -186,20 +187,36 @@ export function setupBrowserAPI() {
           const id = url.split('/')[3];
           result = await browserAPI.updateCollection(id, body);
         } else if (url.startsWith('/api/collections/') && method === 'DELETE') {
-          const id = url.split('/')[3];
-          console.log('Browser API handling delete collection:', id);
+          const urlParts = url.split('/');
+          console.log('URL parts for collection delete:', urlParts);
+          const id = urlParts[3];
+          console.log('Browser API handling delete collection with ID:', id);
+          if (!id || id.includes('items') || id.includes('available-tags')) {
+            throw new Error('Invalid collection ID for deletion: ' + id);
+          }
           result = await browserAPI.deleteCollection(id);
         } else if (url === '/api/items' && method === 'POST') {
           result = await browserAPI.createItem(body);
         } else if (url.startsWith('/api/items/') && method === 'GET') {
-          const id = url.split('/')[3];
-          result = await browserAPI.getItem(id);
+          const urlParts = url.split('/');
+          const id = urlParts[3];
+          if (url.includes('/tags')) {
+            console.log('Getting item tags for item:', id);
+            result = await browserAPI.getItemTags(id);
+          } else {
+            result = await browserAPI.getItem(id);
+          }
         } else if (url.startsWith('/api/items/') && method === 'PUT') {
           const id = url.split('/')[3];
           result = await browserAPI.updateItem(id, body);
         } else if (url.startsWith('/api/items/') && method === 'DELETE') {
-          const id = url.split('/')[3];
-          console.log('Browser API handling delete item:', id);
+          const urlParts = url.split('/');
+          console.log('URL parts for item delete:', urlParts);
+          const id = urlParts[3];
+          console.log('Browser API handling delete item with ID:', id);
+          if (!id || id.includes('tags')) {
+            throw new Error('Invalid item ID for deletion: ' + id);
+          }
           result = await browserAPI.deleteItem(id);
         } else if (url.startsWith('/api/collections/') && url.includes('/available-tags')) {
           const id = url.split('/')[3];
