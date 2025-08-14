@@ -586,11 +586,17 @@ class BrowserStorage implements IBrowserStorage {
 
   // Import items
   async importItems(targetCollectionId: string, itemIds: string[]): Promise<{ count: number }> {
+    console.log('BrowserStorage.importItems called with:', { targetCollectionId, itemIds });
     let importedCount = 0;
     
     for (const itemId of itemIds) {
+      console.log('Processing item ID:', itemId);
       const sourceItem = await this.getItem(itemId);
-      if (!sourceItem) continue;
+      if (!sourceItem) {
+        console.log('Source item not found for ID:', itemId);
+        continue;
+      }
+      console.log('Found source item:', sourceItem.title);
       
       // Create new item in target collection
       const { id, ...itemData } = sourceItem;
@@ -600,11 +606,14 @@ class BrowserStorage implements IBrowserStorage {
       };
       
       const newItem = await this.createItem(newItemData);
+      console.log('Created new item:', newItem.title);
       
       // Copy tags from source item to new item
       const sourceTagIds = this.db.itemTags
         .filter(it => it.itemId === itemId)
         .map(it => it.tagId);
+      
+      console.log('Found source tag IDs:', sourceTagIds);
       
       for (const tagId of sourceTagIds) {
         const tag = this.db.tags.find(t => t.id === tagId);
@@ -614,13 +623,16 @@ class BrowserStorage implements IBrowserStorage {
             itemId: newItem.id,
             tagId: newTag.id
           });
+          console.log('Copied tag:', tag.key, '=', tag.value);
         }
       }
       
       importedCount++;
+      console.log('Successfully imported item:', newItem.title);
     }
     
     this.saveData();
+    console.log('Import completed. Total imported:', importedCount);
     return { count: importedCount };
   }
 

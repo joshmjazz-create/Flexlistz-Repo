@@ -47,13 +47,16 @@ export default function ImportItemsModal({ isOpen, onClose, targetCollectionId }
 
   const importItemsMutation = useMutation({
     mutationFn: async (itemIds: string[]) => {
+      console.log('Import mutation called with itemIds:', itemIds);
       const response = await fetch(`/api/collections/${targetCollectionId}/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemIds }),
       });
       if (!response.ok) throw new Error('Failed to import items');
-      return response.json();
+      const result = await response.json();
+      console.log('Import response:', result);
+      return result;
     },
     onSuccess: (data) => {
       toast({

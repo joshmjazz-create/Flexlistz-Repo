@@ -247,17 +247,7 @@ export default function ItemList({
                 Last Modified
                 {sortOrder === 'last-modified' ? <ChevronDown className="w-4 h-4 ml-1" /> : <ChevronUp className="w-4 h-4 ml-1" />}
               </Button>
-              {hasActiveFilters && (
-                <Button
-                  variant={sortOrder === 'filter-order' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => onSortOrderChange('filter-order')}
-                  className="px-3 py-1 text-gray-900 dark:text-gray-100"
-                >
-                  <Filter className="w-4 h-4 mr-1" />
-                  Filter Order
-                </Button>
-              )}
+
             </div>
 
             <div className="text-sm text-gray-500 dark:text-gray-400">
