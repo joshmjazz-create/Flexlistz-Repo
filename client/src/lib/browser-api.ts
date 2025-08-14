@@ -234,6 +234,7 @@ export function setupBrowserAPI() {
             })
           };
         } else {
+          console.log('Browser API: Unhandled route:', method, url);
           // Fallback to original fetch for non-API requests
           return originalFetch(input, init);
         }
@@ -246,7 +247,8 @@ export function setupBrowserAPI() {
           headers: { 'Content-Type': 'application/json' }
         });
       } catch (error) {
-        return new Response(JSON.stringify({ error: 'Internal server error' }), {
+        console.error('Browser API request error:', error);
+        return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
           status: 500,
           statusText: 'Error',
           headers: { 'Content-Type': 'application/json' }
