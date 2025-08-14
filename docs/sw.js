@@ -1,9 +1,9 @@
-const CACHE_NAME = 'flexlist-v1';
+const CACHE_NAME = 'flexlist-v3';
 const urlsToCache = [
   './',
   './index.html',
-  './assets/index-sWxL5Got.js',
-  './assets/index-DzAg56Ja.css',
+  './assets/index-BxcOZVi2.js',
+  './assets/index-N_b_mgf1.css',
   './icon-192.png',
   './icon-512.png',
   './manifest.json'
@@ -35,26 +35,52 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Skip chrome-extension and other non-http requests
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {
         // Return cached version if available
         if (response) {
+          console.log('Serving from cache:', event.request.url);
           return response;
         }
         
-        // For navigation requests, always return the cached index.html for SPA routing
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+        // For navigation requests or hash URLs, always return the cached index.html
+        if (event.request.mode === 'navigate' || 
+            event.request.url.includes('#') ||
+            event.request.destination === 'document') {
+          console.log('Serving index.html for navigation:', event.request.url);
+          return caches.match('./index.html').then(indexResponse => {
+            if (indexResponse) {
+              return indexResponse;
+            }
+            // Fallback to the root cache key
+            return caches.match('./');
+          });
         }
         
-        // Try to fetch from network
-        return fetch(event.request).catch(() => {
-          // If network fails and it's a navigation request, return index.html
-          if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-        });
+        // Try to fetch from network first
+        return fetch(event.request)
+          .then(networkResponse => {
+            console.log('Fetched from network:', event.request.url);
+            return networkResponse;
+          })
+          .catch(() => {
+            console.log('Network failed for:', event.request.url);
+            // If network fails and it's a navigation request, return index.html
+            if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+              return caches.match('./index.html').then(indexResponse => {
+                if (indexResponse) {
+                  return indexResponse;
+                }
+                return caches.match('./');
+              });
+            }
+          });
       })
   );
 });

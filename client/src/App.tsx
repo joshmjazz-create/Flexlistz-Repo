@@ -11,7 +11,12 @@ import Collections from "@/pages/collections";
 import NotFound from "@/pages/not-found";
 
 // Initialize browser-based API on startup
-setupBrowserAPI();
+try {
+  setupBrowserAPI();
+  console.log('Browser API setup completed');
+} catch (error) {
+  console.error('Browser API setup failed:', error);
+}
 
 // Handle GitHub Pages SPA routing
 if (typeof window !== 'undefined' && sessionStorage.redirect) {

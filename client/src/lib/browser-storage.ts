@@ -62,11 +62,15 @@ class BrowserStorage implements IBrowserStorage {
 
   private loadData(): void {
     try {
+      console.log('BrowserStorage: Loading data from localStorage...');
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
+        console.log('BrowserStorage: Found existing data in localStorage');
         const parsedData = JSON.parse(stored);
         this.db = { ...this.db, ...parsedData };
+        console.log('BrowserStorage: Loaded', this.db.collections.length, 'collections and', this.db.items.length, 'items');
       } else {
+        console.log('BrowserStorage: No existing data found, initializing default data');
         // Initialize with default sample data if none exists
         this.initializeDefaultData();
       }
@@ -300,7 +304,7 @@ class BrowserStorage implements IBrowserStorage {
       composer: item.composer, 
       style: item.style,
       knowledgeLevel: item.knowledgeLevel,
-      tags: item.tags
+      // tags: item.tags // Note: tags are stored separately in itemTags table
     })));
     
     return items;
