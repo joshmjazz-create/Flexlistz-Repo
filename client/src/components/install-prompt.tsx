@@ -25,11 +25,6 @@ export default function InstallPrompt() {
     setIsStandalone(isStandaloneMode);
     setIsIOS(isIOSDevice);
     
-    // Only show on iOS devices
-    if (!isIOSDevice) {
-      return;
-    }
-    
     // Don't show prompt if already in standalone mode
     if (isStandaloneMode) {
       return;
@@ -94,24 +89,54 @@ export default function InstallPrompt() {
               Install FlexList App
             </div>
             <div className="text-xs text-blue-100">
-              Tap <ArrowUp className="w-3 h-3 inline mx-1" /> Share, then scroll down and tap "Add to Home Screen"
+              {isIOS ? (
+                <>Tap <ArrowUp className="w-3 h-3 inline mx-1" /> Share, then scroll down and tap "Add to Home Screen"</>
+              ) : (
+                "Click the install button in your browser's address bar, or use the button below"
+              )}
             </div>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
+          {!isIOS && deferredPrompt && (
+            <Button
+              onClick={handleInstall}
+              size="sm"
+              variant="secondary"
+              className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
+            >
+              Install Now
+            </Button>
+          )}
+          
           <Button
             onClick={() => {
-              // Show detailed iOS instructions
-              alert(
-                "📱 How to Install FlexList to Your Home Screen:\n\n" +
-                "1. Tap the Share button (⬆️) at the bottom of Safari\n" +
-                "2. Scroll down in the share menu\n" +
-                "3. Tap 'Add to Home Screen' 🏠\n" +
-                "4. Tap 'Add' in the top right corner\n\n" +
-                "✨ FlexList will then appear on your home screen like a native app!\n" +
-                "It will work offline and load instantly."
-              );
+              if (isIOS) {
+                // Show detailed iOS instructions
+                alert(
+                  "📱 How to Install FlexList to Your Home Screen:\n\n" +
+                  "1. Tap the Share button (⬆️) at the bottom of Safari\n" +
+                  "2. Scroll down in the share menu\n" +
+                  "3. Tap 'Add to Home Screen' 🏠\n" +
+                  "4. Tap 'Add' in the top right corner\n\n" +
+                  "✨ FlexList will then appear on your home screen like a native app!\n" +
+                  "It will work offline and load instantly."
+                );
+              } else {
+                // Show desktop instructions
+                alert(
+                  "💻 How to Install FlexList:\n\n" +
+                  "Chrome/Edge:\n" +
+                  "• Look for the install icon (⬇️) in your address bar\n" +
+                  "• Or click the 'Install Now' button if available\n\n" +
+                  "Firefox:\n" +
+                  "• Look for the install prompt that may appear\n\n" +
+                  "Safari:\n" +
+                  "• Use 'Add to Dock' from the File menu\n\n" +
+                  "✨ Once installed, FlexList will work offline and load instantly!"
+                );
+              }
             }}
             size="sm"
             variant="secondary"
