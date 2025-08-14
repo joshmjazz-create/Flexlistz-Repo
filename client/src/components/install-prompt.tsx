@@ -21,6 +21,7 @@ export default function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [browserType, setBrowserType] = useState<'chrome' | 'firefox' | 'safari' | 'edge' | 'other'>('other');
+  const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'mac' | 'windows' | 'linux' | 'other'>('other');
 
   useEffect(() => {
     // Check if running in standalone mode (already installed)
@@ -31,10 +32,12 @@ export default function InstallPrompt() {
     // Check if iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
-    // Detect browser type
+    // Detect browser and device type
     const userAgent = navigator.userAgent.toLowerCase();
     let browser: 'chrome' | 'firefox' | 'safari' | 'edge' | 'other' = 'other';
+    let device: 'ios' | 'android' | 'mac' | 'windows' | 'linux' | 'other' = 'other';
     
+    // Detect browser
     if (userAgent.includes('edg/')) {
       browser = 'edge';
     } else if (userAgent.includes('chrome') && !userAgent.includes('edg/')) {
@@ -45,9 +48,23 @@ export default function InstallPrompt() {
       browser = 'safari';
     }
     
+    // Detect device/OS
+    if (isIOSDevice) {
+      device = 'ios';
+    } else if (userAgent.includes('android')) {
+      device = 'android';
+    } else if (userAgent.includes('mac')) {
+      device = 'mac';
+    } else if (userAgent.includes('windows')) {
+      device = 'windows';
+    } else if (userAgent.includes('linux')) {
+      device = 'linux';
+    }
+    
     setIsStandalone(isStandaloneMode);
     setIsIOS(isIOSDevice);
     setBrowserType(browser);
+    setDeviceType(device);
     
     // Don't show prompt if already in standalone mode
     if (isStandaloneMode) {
@@ -198,11 +215,12 @@ export default function InstallPrompt() {
                 ) : (
                   <div className="space-y-3">
                     <div className="text-sm font-medium">
-                      💻 {browserType === 'chrome' && 'Chrome Instructions:'}
-                      {browserType === 'edge' && 'Edge Instructions:'}
-                      {browserType === 'firefox' && 'Firefox Instructions:'}
-                      {browserType === 'safari' && 'Safari Instructions:'}
-                      {browserType === 'other' && 'Browser Instructions:'}
+                      {browserType === 'chrome' && `💻 Chrome${deviceType === 'mac' ? ' (macOS)' : deviceType === 'windows' ? ' (Windows)' : deviceType === 'linux' ? ' (Linux)' : ''} Instructions:`}
+                      {browserType === 'edge' && `💻 Edge${deviceType === 'mac' ? ' (macOS)' : deviceType === 'windows' ? ' (Windows)' : deviceType === 'linux' ? ' (Linux)' : ''} Instructions:`}
+                      {browserType === 'firefox' && `🦊 Firefox${deviceType === 'mac' ? ' (macOS)' : deviceType === 'windows' ? ' (Windows)' : deviceType === 'linux' ? ' (Linux)' : ''} Instructions:`}
+                      {browserType === 'safari' && deviceType === 'mac' && '🍎 Safari (macOS) Instructions:'}
+                      {browserType === 'safari' && deviceType !== 'mac' && '🌐 Safari Instructions:'}
+                      {browserType === 'other' && '💻 Browser Instructions:'}
                     </div>
                     <div>
                       {(browserType === 'chrome' || browserType === 'edge') && (
@@ -235,7 +253,7 @@ export default function InstallPrompt() {
                         </ol>
                       )}
                       
-                      {browserType === 'safari' && (
+                      {browserType === 'safari' && deviceType === 'mac' && (
                         <ol className="space-y-2 text-sm text-muted-foreground">
                           <li className="flex gap-2">
                             <span className="font-medium text-primary">1.</span>
@@ -250,6 +268,12 @@ export default function InstallPrompt() {
                             <span>The app will appear in your Dock for quick access</span>
                           </li>
                         </ol>
+                      )}
+                      
+                      {browserType === 'safari' && deviceType !== 'mac' && (
+                        <div className="text-sm text-muted-foreground">
+                          <p>Safari on this platform may have limited PWA installation support. Try using Chrome or Edge for the best installation experience.</p>
+                        </div>
                       )}
                       
                       {browserType === 'other' && (
