@@ -5,6 +5,7 @@ import { browserStorage } from "@/lib/browser-storage";
 interface BrowserFileUploaderProps {
   maxFileSize?: number;
   onComplete?: (fileId: string) => void;
+  onUploadStateChange?: (isUploading: boolean) => void;
   buttonClassName?: string;
   children: ReactNode;
 }
@@ -12,19 +13,27 @@ interface BrowserFileUploaderProps {
 export function BrowserFileUploader({
   maxFileSize = 10485760, // 10MB default
   onComplete,
+  onUploadStateChange,
   buttonClassName,
   children,
 }: BrowserFileUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleButtonClick = () => {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('File upload button clicked');
     fileInputRef.current?.click();
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input changed, files:', event.target.files);
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
 
     // Validate file size
     if (file.size > maxFileSize) {
@@ -39,6 +48,7 @@ export function BrowserFileUploader({
     }
 
     setIsUploading(true);
+    onUploadStateChange?.(true);
     
     try {
       console.log('Starting file upload for:', file.name, 'Size:', file.size);
@@ -51,6 +61,7 @@ export function BrowserFileUploader({
       alert('Failed to upload file. Please try again.');
     } finally {
       setIsUploading(false);
+      onUploadStateChange?.(false);
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';

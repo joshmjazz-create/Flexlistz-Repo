@@ -33,9 +33,10 @@ interface ItemFormProps {
   onCancel: () => void;
   onChange?: (data: FormData) => void;
   isSubmitting?: boolean;
+  onUploadStateChange?: (isUploading: boolean) => void;
 }
 
-export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubmitting = false }: ItemFormProps) {
+export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubmitting = false, onUploadStateChange }: ItemFormProps) {
   const [formData, setFormData] = useState<FormData>({
     title: initial?.title || "",
     key: initial?.key || "",
@@ -179,6 +180,7 @@ export default function ItemForm({ initial, onSubmit, onCancel, onChange, isSubm
               <BrowserFileUploader
                 maxFileSize={10485760}
                 onComplete={handleUploadComplete}
+                onUploadStateChange={onUploadStateChange}
                 buttonClassName="w-full"
               >
                 <div className="flex items-center gap-2">

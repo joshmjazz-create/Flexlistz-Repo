@@ -24,6 +24,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<any>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   const updateItemMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -90,6 +91,12 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
   };
 
   const handleClose = () => {
+    // Prevent closing while file is uploading
+    if (isUploadingFile) {
+      console.log('Preventing modal close during file upload');
+      return;
+    }
+    
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
     } else {
@@ -153,6 +160,7 @@ export default function EditItemModal({ isOpen, onClose, item }: EditItemModalPr
             onSubmit={handleSubmit}
             onCancel={handleClose}
             onChange={handleFormChange}
+            onUploadStateChange={setIsUploadingFile}
             isSubmitting={updateItemMutation.isPending}
           />
         </DialogContent>
