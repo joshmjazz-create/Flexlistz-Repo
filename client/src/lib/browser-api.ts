@@ -153,8 +153,10 @@ export const browserAPI = {
 const originalFetch = window.fetch;
 
 export function setupBrowserAPI() {
+  console.log('Browser API setup: Overriding window.fetch');
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    console.log('Fetch intercepted - URL:', url, 'Method:', init?.method || 'GET');
     
     // Handle API routes
     if (url.startsWith('/api/')) {
@@ -162,13 +164,15 @@ export function setupBrowserAPI() {
       const body = init?.body ? JSON.parse(init.body as string) : null;
       
       try {
-        console.log('Browser API Request - Method:', method, 'URL:', url, 'Body:', body);
+        console.log('🔥 Browser API Request - Method:', method, 'URL:', url, 'Body:', body);
         let result: any;
         
         if (url === '/api/collections' && method === 'GET') {
           result = await browserAPI.getCollections();
         } else if (url === '/api/collections' && method === 'POST') {
+          console.log('🔥 POST /api/collections detected - calling browserAPI.createCollection with:', body);
           result = await browserAPI.createCollection(body);
+          console.log('🔥 browserAPI.createCollection returned:', result);
         } else if (url.startsWith('/api/collections/') && method === 'GET') {
           const id = url.split('/')[3];
           if (url.includes('/items')) {
