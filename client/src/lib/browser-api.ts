@@ -31,7 +31,9 @@ export const browserAPI = {
   },
 
   async deleteCollection(id: string) {
+    console.log('BrowserAPI.deleteCollection called with id:', id);
     const success = await browserStorage.deleteCollection(id);
+    console.log('Delete collection result:', success);
     if (!success) {
       return { ok: false, status: 404, json: async () => ({ error: 'Collection not found' }) };
     }
@@ -80,7 +82,9 @@ export const browserAPI = {
   },
 
   async deleteItem(id: string) {
+    console.log('BrowserAPI.deleteItem called with id:', id);
     const success = await browserStorage.deleteItem(id);
+    console.log('Delete item result:', success);
     if (!success) {
       return { ok: false, status: 404, json: async () => ({ error: 'Item not found' }) };
     }

@@ -265,17 +265,25 @@ class BrowserStorage implements IBrowserStorage {
   }
 
   async deleteCollection(id: string): Promise<boolean> {
+    console.log('BrowserStorage.deleteCollection called with id:', id);
+    const initialItemsLength = this.db.items.length;
+    
     // Remove all items in the collection
     this.db.items = this.db.items.filter(item => item.collectionId !== id);
+    console.log('Removed items from collection. Items count:', initialItemsLength, '->', this.db.items.length);
     
     // Remove the collection
     const initialLength = this.db.collections.length;
+    console.log('Initial collections count:', initialLength);
     this.db.collections = this.db.collections.filter(c => c.id !== id);
+    console.log('After deletion collections count:', this.db.collections.length);
     
     if (this.db.collections.length < initialLength) {
       this.saveData();
+      console.log('Collection successfully deleted');
       return true;
     }
+    console.log('Collection not found for deletion');
     return false;
   }
 
@@ -397,16 +405,22 @@ class BrowserStorage implements IBrowserStorage {
   }
 
   async deleteItem(id: string): Promise<boolean> {
+    console.log('BrowserStorage.deleteItem called with id:', id);
     const initialLength = this.db.items.length;
+    console.log('Initial items count:', initialLength);
+    
     this.db.items = this.db.items.filter(item => item.id !== id);
+    console.log('After deletion items count:', this.db.items.length);
     
     // Remove tag relationships
     this.db.itemTags = this.db.itemTags.filter(it => it.itemId !== id);
     
     if (this.db.items.length < initialLength) {
       this.saveData();
+      console.log('Item successfully deleted');
       return true;
     }
+    console.log('Item not found for deletion');
     return false;
   }
 
