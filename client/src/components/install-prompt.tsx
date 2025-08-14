@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Download, Share, Plus } from 'lucide-react';
+import { X, Download, Share, Plus, ArrowUp } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -94,46 +94,31 @@ export default function InstallPrompt() {
               Install FlexList App
             </div>
             <div className="text-xs text-blue-100">
-              {isIOS ? (
-                <>Tap <Share className="w-3 h-3 inline mx-1" /> then "Add to Home Screen"</>
-              ) : (
-                "Get the full app experience - works offline!"
-              )}
+              Tap <ArrowUp className="w-3 h-3 inline mx-1" /> Share, then scroll down and tap "Add to Home Screen"
             </div>
           </div>
         </div>
         
         <div className="flex items-center gap-2">
-          {!isIOS && deferredPrompt && (
-            <Button
-              onClick={handleInstall}
-              size="sm"
-              variant="secondary"
-              className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
-            >
-              Install
-            </Button>
-          )}
-          
-          {isIOS && (
-            <Button
-              onClick={() => {
-                // Show detailed iOS instructions
-                alert(
-                  "To install FlexList:\n\n" +
-                  "1. Tap the Share button (⬆️) in Safari\n" +
-                  "2. Scroll down and tap 'Add to Home Screen'\n" +
-                  "3. Tap 'Add' to install the app\n\n" +
-                  "The app will then work offline and feel like a native app!"
-                );
-              }}
-              size="sm"
-              variant="secondary"
-              className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
-            >
-              How to Install
-            </Button>
-          )}
+          <Button
+            onClick={() => {
+              // Show detailed iOS instructions
+              alert(
+                "📱 How to Install FlexList to Your Home Screen:\n\n" +
+                "1. Tap the Share button (⬆️) at the bottom of Safari\n" +
+                "2. Scroll down in the share menu\n" +
+                "3. Tap 'Add to Home Screen' 🏠\n" +
+                "4. Tap 'Add' in the top right corner\n\n" +
+                "✨ FlexList will then appear on your home screen like a native app!\n" +
+                "It will work offline and load instantly."
+              );
+            }}
+            size="sm"
+            variant="secondary"
+            className="bg-white text-blue-600 hover:bg-blue-50 text-xs px-3 py-1 h-auto"
+          >
+            Show Steps
+          </Button>
           
           <Button
             onClick={handleDismiss}
