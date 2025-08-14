@@ -30,14 +30,20 @@ export default function InstallPrompt() {
       return;
     }
     
-    // Check if user has previously dismissed the prompt
+    // Check if user has previously dismissed the prompt (temporarily disabled for testing)
     const dismissed = localStorage.getItem('install-prompt-dismissed');
-    if (dismissed) {
-      return;
-    }
+    console.log('Install prompt dismissed status:', dismissed);
+    console.log('Is standalone mode:', isStandaloneMode);
+    console.log('Is iOS device:', isIOSDevice);
+    
+    // Temporarily disable this check to ensure prompt shows
+    // if (dismissed) {
+    //   return;
+    // }
     
     // Show prompt after a short delay
     const timer = setTimeout(() => {
+      console.log('Setting showPrompt to true after 2 second delay');
       setShowPrompt(true);
     }, 2000);
     
@@ -74,10 +80,16 @@ export default function InstallPrompt() {
     localStorage.setItem('install-prompt-dismissed', 'true');
   };
 
+  // Debug logging
+  console.log('Install prompt render check:', { isStandalone, showPrompt, isIOS });
+  
   // Don't show if already in standalone mode
   if (isStandalone || !showPrompt) {
+    console.log('Install prompt not showing because:', { isStandalone, showPrompt });
     return null;
   }
+  
+  console.log('Install prompt should be visible now');
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white p-4 shadow-lg">
