@@ -104,7 +104,7 @@ export default function InstallPrompt() {
               {isIOS ? (
                 <>Tap <ArrowUp className="w-3 h-3 inline mx-1" /> Share, then scroll down and tap "Add to Home Screen"</>
               ) : (
-                "Click the install button in your browser's address bar, or use the button below"
+                "Click the install button in your browser's address bar, or use this button"
               )}
             </div>
           </div>
