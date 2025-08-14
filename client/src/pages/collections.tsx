@@ -47,34 +47,23 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
 
   const activeCollection = collections.find(c => c.id === collectionId);
 
+  // Build query params for filtering
+  const queryParams = new URLSearchParams();
+  if (searchQuery?.trim()) {
+    queryParams.set('search', searchQuery);
+  }
+  if (Object.keys(activeFilters).length > 0) {
+    queryParams.set('filters', JSON.stringify(activeFilters));
+  }
+  const queryString = queryParams.toString();
+  
   const { data: items = [] } = useQuery<Item[]>({
-    queryKey: ["/api/collections", collectionId, "items"],
+    queryKey: ["/api/collections", collectionId, "items" + (queryString ? `?${queryString}` : "")],
     enabled: !!collectionId,
   });
 
   // Debug logging
   console.log(`Loaded ${items.length} items for collection ${collectionId}:`, items.map(i => i.title));
-
-  const filteredItems = useQuery<Item[]>({
-    queryKey: ["/api/collections", collectionId, "items", "filtered", { filters: activeFilters, search: searchQuery }],
-    queryFn: async () => {
-      if (!collectionId) return [];
-      
-      const params = new URLSearchParams();
-      if (Object.keys(activeFilters).length > 0) {
-        params.append('filters', JSON.stringify(activeFilters));
-      }
-      if (searchQuery.trim()) {
-        params.append('search', searchQuery);
-      }
-      
-      const url = `/api/collections/${collectionId}/items${params.toString() ? '?' + params.toString() : ''}`;
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Failed to fetch filtered items');
-      return response.json();
-    },
-    enabled: !!collectionId && (Object.keys(activeFilters).length > 0 || searchQuery.length > 0),
-  });
 
   // Sort items based on selected order
   const sortItems = (itemsToSort: Item[]) => {
@@ -142,10 +131,8 @@ export default function Collections({ collectionId }: CollectionsProps = {}) {
     return itemsToSort;
   };
 
-  // Use filtered items when filters/search are active, otherwise use all items
-  const hasActiveFiltersOrSearch = Object.keys(activeFilters).length > 0 || searchQuery.length > 0;
-  const itemsToDisplay = hasActiveFiltersOrSearch ? (filteredItems.data || []) : items;
-  const displayItems = sortItems(itemsToDisplay);
+  // Use items directly since filtering is now handled in the query
+  const displayItems = sortItems(items);
   
   // Debug what we're showing
   console.log(`Display items (${displayItems.length}):`, displayItems.map(i => i.title));

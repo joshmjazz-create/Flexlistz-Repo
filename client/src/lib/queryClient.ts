@@ -24,14 +24,17 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
       const collectionId = parts[2];
       response = await browserAPI.getCollection(collectionId);
       
-    } else if (parts.length === 4 && parts[0] === 'api' && parts[1] === 'collections' && parts[3] === 'items') {
+    } else if (parts[0] === 'api' && parts[1] === 'collections' && parts[3] === 'items') {
       // GET /api/collections/{id}/items (with optional query params)
       const collectionId = parts[2];
       
-      // Parse query params from URL
+      // Parse query params from URL (handle both with and without query params)
       const urlObj = new URL(`http://localhost${url}`);
       const params: Record<string, string | string[]> = {};
+      
+      console.log('Query params from URL:', urlObj.search);
       urlObj.searchParams.forEach((value, key) => {
+        console.log(`Query param: ${key} = ${value}`);
         if (key === 'filters') {
           try {
             const parsedFilters = JSON.parse(value);
@@ -45,6 +48,7 @@ async function browserQueryFn({ queryKey }: { queryKey: readonly unknown[] }) {
         }
       });
       
+      console.log('Final params for BrowserAPI.getItems:', params);
       response = await browserAPI.getItems(collectionId, Object.keys(params).length > 0 ? params : undefined);
       
     } else if (parts.length === 4 && parts[0] === 'api' && parts[1] === 'collections' && parts[3] === 'tags') {
