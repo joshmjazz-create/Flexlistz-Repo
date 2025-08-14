@@ -197,9 +197,10 @@ export default function InstallPrompt() {
                         </ul>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-primary mb-1">Safari:</div>
+                        <div className="text-sm font-medium text-primary mb-1">Safari (macOS):</div>
                         <ul className="space-y-1 text-sm text-muted-foreground ml-3">
-                          <li>• Use "Add to Dock" from the File menu</li>
+                          <li>• Go to File menu → "Add to Dock"</li>
+                          <li>• Or use File menu → "Add to Home Screen" (if available)</li>
                         </ul>
                       </div>
                     </div>
