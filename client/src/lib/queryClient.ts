@@ -111,13 +111,53 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Request helper function
-export async function apiRequest(url: string, options: RequestInit = {}) {
-  console.log(`Browser API Request: ${options.method || 'GET'} ${url}`, options.body);
+// Request helper function (signature compatible with mutations)
+export async function apiRequest(method: string, url: string, data?: any) {
+  console.log(`Browser API Request: ${method} ${url}`, data);
   
   try {
-    const result = await browserAPI.request(url, options.method as any, options.body ? JSON.parse(options.body as string) : undefined);
-    return result;
+    // Handle DELETE requests directly
+    if (method === 'DELETE') {
+      const urlParts = url.split('/').filter(Boolean);
+      console.log('DELETE request URL parts:', urlParts);
+      
+      if (urlParts[0] === 'api' && urlParts[1] === 'items' && urlParts.length === 3) {
+        // DELETE /api/items/{id}
+        const itemId = urlParts[2];
+        console.log('Deleting item with ID:', itemId);
+        const result = await browserAPI.deleteItem(itemId);
+        if (result.ok) {
+          return await result.json();
+        } else {
+          throw new Error(`Failed to delete item: ${result.status}`);
+        }
+      } else if (urlParts[0] === 'api' && urlParts[1] === 'collections' && urlParts.length === 3) {
+        // DELETE /api/collections/{id}
+        const collectionId = urlParts[2];
+        console.log('Deleting collection with ID:', collectionId);
+        const result = await browserAPI.deleteCollection(collectionId);
+        if (result.ok) {
+          return await result.json();
+        } else {
+          throw new Error(`Failed to delete collection: ${result.status}`);
+        }
+      } else {
+        throw new Error(`Unsupported DELETE route: ${url}`);
+      }
+    } else {
+      // For non-DELETE requests, use the fetch override
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: data ? JSON.stringify(data) : undefined,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    }
   } catch (error) {
     console.error('Browser API request error:', error);
     throw error;

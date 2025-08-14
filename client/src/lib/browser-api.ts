@@ -265,7 +265,8 @@ export function setupBrowserAPI() {
         });
       } catch (error) {
         console.error('Browser API request error:', error);
-        return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
+        console.error('Error details:', error.message, error.stack);
+        return new Response(JSON.stringify({ error: 'Internal server error', details: error.message || 'Unknown error' }), {
           status: 500,
           statusText: 'Error',
           headers: { 'Content-Type': 'application/json' }
