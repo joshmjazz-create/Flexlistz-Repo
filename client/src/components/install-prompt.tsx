@@ -20,6 +20,7 @@ export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [browserType, setBrowserType] = useState<'chrome' | 'firefox' | 'safari' | 'edge' | 'other'>('other');
 
   useEffect(() => {
     // Check if running in standalone mode (already installed)
@@ -30,8 +31,23 @@ export default function InstallPrompt() {
     // Check if iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
+    // Detect browser type
+    const userAgent = navigator.userAgent.toLowerCase();
+    let browser: 'chrome' | 'firefox' | 'safari' | 'edge' | 'other' = 'other';
+    
+    if (userAgent.includes('edg/')) {
+      browser = 'edge';
+    } else if (userAgent.includes('chrome') && !userAgent.includes('edg/')) {
+      browser = 'chrome';
+    } else if (userAgent.includes('firefox')) {
+      browser = 'firefox';
+    } else if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
+      browser = 'safari';
+    }
+    
     setIsStandalone(isStandaloneMode);
     setIsIOS(isIOSDevice);
+    setBrowserType(browser);
     
     // Don't show prompt if already in standalone mode
     if (isStandaloneMode) {
@@ -181,28 +197,66 @@ export default function InstallPrompt() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="text-sm font-medium">💻 Desktop Instructions:</div>
-                    <div className="space-y-3">
-                      <div>
-                        <div className="text-sm font-medium text-primary mb-1">Chrome/Edge:</div>
-                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
-                          <li>• Look for the install icon (⬇️) in your address bar</li>
-                          <li>• Or click the "Install Now" button above</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-primary mb-1">Firefox:</div>
-                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
-                          <li>• Look for the install prompt that may appear</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-primary mb-1">Safari (macOS):</div>
-                        <ul className="space-y-1 text-sm text-muted-foreground ml-3">
-                          <li>• Go to File menu → "Add to Dock"</li>
-                          <li>• Or use File menu → "Add to Home Screen" (if available)</li>
-                        </ul>
-                      </div>
+                    <div className="text-sm font-medium">
+                      💻 {browserType === 'chrome' && 'Chrome Instructions:'}
+                      {browserType === 'edge' && 'Edge Instructions:'}
+                      {browserType === 'firefox' && 'Firefox Instructions:'}
+                      {browserType === 'safari' && 'Safari Instructions:'}
+                      {browserType === 'other' && 'Browser Instructions:'}
+                    </div>
+                    <div>
+                      {(browserType === 'chrome' || browserType === 'edge') && (
+                        <ol className="space-y-2 text-sm text-muted-foreground">
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">1.</span>
+                            <span>Look for the install icon (⬇️) in your address bar</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">2.</span>
+                            <span>Click the install icon or use the "Install Now" button above</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">3.</span>
+                            <span>Click "Install" in the popup that appears</span>
+                          </li>
+                        </ol>
+                      )}
+                      
+                      {browserType === 'firefox' && (
+                        <ol className="space-y-2 text-sm text-muted-foreground">
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">1.</span>
+                            <span>Look for an install prompt that may appear at the top</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">2.</span>
+                            <span>If no prompt appears, Firefox may not support PWA installation for this site</span>
+                          </li>
+                        </ol>
+                      )}
+                      
+                      {browserType === 'safari' && (
+                        <ol className="space-y-2 text-sm text-muted-foreground">
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">1.</span>
+                            <span>Go to the File menu at the top of your screen</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">2.</span>
+                            <span>Click "Add to Dock" to install FlexList</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="font-medium text-primary">3.</span>
+                            <span>The app will appear in your Dock for quick access</span>
+                          </li>
+                        </ol>
+                      )}
+                      
+                      {browserType === 'other' && (
+                        <div className="text-sm text-muted-foreground">
+                          <p>Look for install options in your browser's menu or address bar. Different browsers may have varying levels of PWA support.</p>
+                        </div>
+                      )}
                     </div>
                     <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                       <div className="text-sm font-medium text-blue-900 dark:text-blue-100">✨ Result:</div>
