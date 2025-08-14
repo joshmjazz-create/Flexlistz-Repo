@@ -183,6 +183,7 @@ export function setupBrowserAPI() {
           result = await browserAPI.updateCollection(id, body);
         } else if (url.startsWith('/api/collections/') && method === 'DELETE') {
           const id = url.split('/')[3];
+          console.log('Browser API handling delete collection:', id);
           result = await browserAPI.deleteCollection(id);
         } else if (url === '/api/items' && method === 'POST') {
           result = await browserAPI.createItem(body);
@@ -194,6 +195,7 @@ export function setupBrowserAPI() {
           result = await browserAPI.updateItem(id, body);
         } else if (url.startsWith('/api/items/') && method === 'DELETE') {
           const id = url.split('/')[3];
+          console.log('Browser API handling delete item:', id);
           result = await browserAPI.deleteItem(id);
         } else if (url.startsWith('/api/collections/') && url.includes('/available-tags')) {
           const id = url.split('/')[3];

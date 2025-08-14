@@ -7,6 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { type Item } from "@shared/schema";
 import { YouTubePlayer, SpotifyEmbed } from "./media-player";
 import LeadSheetViewer from "./lead-sheet-viewer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface ItemListProps {
   items: Item[];
@@ -103,6 +115,7 @@ export default function ItemList({
   onToggleExpanded
 }: ItemListProps) {
   const { toast } = useToast();
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const getKnowledgeClasses = (knowledgeLevel: string | null | undefined) => {
     switch (knowledgeLevel) {
@@ -183,9 +196,7 @@ export default function ItemList({
 
   const handleDeleteItem = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this item?")) {
-      deleteItemMutation.mutate(id);
-    }
+    setItemToDelete(id);
   };
 
   if (isLoading) {
@@ -408,6 +419,32 @@ export default function ItemList({
           })}
         </div>
       </div>
+
+      {/* Delete Item Confirmation Dialog */}
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this item? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (itemToDelete) {
+                  deleteItemMutation.mutate(itemToDelete);
+                  setItemToDelete(null);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -4,6 +4,17 @@ import { Edit, Trash2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { type CollectionWithCount } from "@shared/schema";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface CollectionListProps {
   collections: CollectionWithCount[];
@@ -14,6 +25,7 @@ interface CollectionListProps {
 
 export default function CollectionList({ collections, activeCollectionId, onEditCollection, onCollectionSelect }: CollectionListProps) {
   const { toast } = useToast();
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
 
   const deleteCollectionMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -40,9 +52,7 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
 
   const handleDeleteCollection = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm("Are you sure you want to delete this list? All items will be removed.")) {
-      deleteCollectionMutation.mutate(id);
-    }
+    setCollectionToDelete(id);
   };
 
   return (
@@ -112,6 +122,32 @@ export default function CollectionList({ collections, activeCollectionId, onEdit
           </div>
         </div>
       ))}
+
+      {/* Delete Collection Confirmation Dialog */}
+      <AlertDialog open={!!collectionToDelete} onOpenChange={() => setCollectionToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete List</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this list? All items will be removed. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (collectionToDelete) {
+                  deleteCollectionMutation.mutate(collectionToDelete);
+                  setCollectionToDelete(null);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
